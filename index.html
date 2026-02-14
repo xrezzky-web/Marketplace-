@@ -353,7 +353,8 @@ if (data?.role === 'admin') {
 
         window.viewDetail = (id) => {
             const p = globalProducts.find(x => x.id === id);
-            document.getElementById('m-img').src = p.images?.[0] || "https://via.placeholder.com/300";
+            document.getElementById('m-img').src = 
+    p.images?.[0] || p.image || "https://via.placeholder.com/300";
             document.getElementById('m-title').innerText = p.name;
             document.getElementById('m-price').innerText = "Rp " + Number(p.price).toLocaleString();
             document.getElementById('m-desc').innerText = p.description || "Premium Quality Product.";
@@ -398,10 +399,12 @@ if (data?.role === 'admin') {
     const p = globalProducts.find(x => x.id === id);
     if (!p || p.stock <= 0) return alert("Stok habis!");
 
+    const user = auth.currentUser;
+
     const orderData = {
-        userId: auth.currentUser.uid,
+        userId: user.uid,
         username: document.getElementById('user-name-display').innerText,
-        email: auth.currentUser.email,
+        email: user.email,
         items: {
             [id]: {
                 name: p.name,
@@ -414,14 +417,13 @@ if (data?.role === 'admin') {
         createdAt: Date.now()
     };
 
-    await push(ref(db, 'orders'), orderData);
+    await push(ref(db, "orders"), orderData);
 
     const message = `
 Halo Admin, saya ingin beli:
 
 Produk: ${p.name}
 Harga: Rp ${p.price.toLocaleString()}
-Total: Rp ${p.price.toLocaleString()}
     `;
 
     window.open(`https://wa.me/6288293064112?text=${encodeURIComponent(message)}`);

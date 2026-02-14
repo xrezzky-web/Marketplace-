@@ -17,140 +17,110 @@
 </head>
 <body>
 
-    <div id="floatingOrderNotif" class="hidden fixed bottom-5 right-5 bg-slate-900 border border-blue-500 p-4 rounded-xl w-80 shadow-2xl z-[999]">
-        <h3 class="text-sm font-bold text-blue-400 mb-2">Pesanan Diproses</h3>
-        <img id="notifImage" class="w-full h-32 object-cover rounded mb-2"/>
-        <div class="text-xs space-y-1">
-            <p id="notifName"></p>
-            <p id="notifPrice"></p>
-        </div>
-        <div class="flex gap-2 mt-3">
-            <button onclick="rejectOrder()" class="bg-red-600 w-1/2 py-2 rounded text-xs">Tolak</button>
-            <button onclick="continueToWA()" class="bg-green-600 w-1/2 py-2 rounded text-xs">Lanjutkan</button>
-        </div>
-    </div>
-
-    <div id="modal-history" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80">
-        <div class="bg-slate-900 w-full max-w-lg rounded-2xl border border-slate-700 p-6 relative">
-            <button onclick="closeModal('modal-history')" class="absolute top-4 right-4 bg-white/10 p-2 rounded-full">✕</button>
-            <h2 class="text-xl font-bold mb-4 text-blue-500">Riwayat Transaksi</h2>
-            <div id="historyList" class="space-y-3 max-h-96 overflow-y-auto text-xs"></div>
-        </div>
-    </div>
-
-    <div id="profile-menu" class="hidden fixed top-16 left-4 glass p-4 rounded-xl w-64 z-50">
-        <p id="profile-join" class="text-xs text-gray-400 mb-3"></p>
-        <input type="text" id="new-username" placeholder="Ubah Username" class="w-full p-2 mb-2 rounded bg-slate-800 border border-slate-700 text-xs">
-        <button onclick="updateUsername()" class="w-full bg-blue-600 py-2 rounded text-xs mb-2">Update Username</button>
-        <button onclick="changePassword()" class="w-full bg-yellow-600 py-2 rounded text-xs mb-2">Ubah Password</button>
-        <button onclick="logoutUser()" class="w-full bg-gray-600 py-2 rounded text-xs mb-2">Logout</button>
-        <button onclick="deleteAccount()" class="w-full bg-red-600 py-2 rounded text-xs">Hapus Akun</button>
-    </div>
-
     <div id="loader" class="fixed inset-0 flex items-center justify-center bg-slate-900 z-[999]">
-        <div class="text-center">
-            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 border-opacity-50 mb-4"></div>
-            <p class="text-blue-400 font-bold tracking-widest">XREZZKY STORE</p>
-        </div>
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
     </div>
 
     <section id="page-auth" class="hidden min-h-screen flex items-center justify-center p-6">
         <div class="glass p-8 rounded-2xl w-full max-w-md shadow-2xl">
-            <h2 id="auth-title" class="text-3xl font-bold mb-2 text-center text-blue-500">Welcome</h2>
-            <p id="auth-subtitle" class="text-gray-400 text-center mb-8 text-sm">Silahkan login untuk belanja</p>
+            <h2 id="auth-title" class="text-3xl font-bold mb-6 text-center text-blue-500">XREZZKY</h2>
             <div class="space-y-4">
                 <div id="reg-fields" class="hidden space-y-4">
-                    <input type="text" id="auth-user" placeholder="Username" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="text" id="auth-user" placeholder="Username" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
                 </div>
-                <input type="email" id="auth-email" placeholder="Email Address" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:ring-2 focus:ring-blue-500 outline-none">
-                <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:ring-2 focus:ring-blue-500 outline-none">
-                <button onclick="handleAuth()" id="btn-auth" class="w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-xl font-bold transition-all transform active:scale-95 shadow-lg shadow-blue-900/20">Login</button>
-                <div class="flex flex-col gap-3 text-center text-sm mt-6">
-                    <span onclick="toggleAuthMode()" id="auth-toggle-text" class="text-blue-400 cursor-pointer hover:underline">Belum punya akun? Daftar sekarang</span>
-                    <span onclick="resetPassword()" class="text-gray-500 cursor-pointer hover:text-white">Lupa kata sandi?</span>
-                </div>
+                <input type="email" id="auth-email" placeholder="Email Address" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
+                <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
+                <button onclick="handleAuth()" id="btn-auth" class="w-full bg-blue-600 py-4 rounded-xl font-bold">Login</button>
+                <p onclick="toggleAuthMode()" id="auth-toggle-text" class="text-blue-400 text-center text-sm cursor-pointer italic">Belum punya akun? Daftar</p>
             </div>
         </div>
     </section>
 
     <section id="page-marketplace" class="hidden min-h-screen">
         <header class="p-5 glass sticky top-0 z-40 flex justify-between items-center">
-            <div class="flex items-center gap-3 cursor-pointer" onclick="toggleProfileMenu()">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="signOutUser()">
                 <img id="user-avatar" src="" class="w-10 h-10 rounded-full border-2 border-blue-500">
                 <div>
-                    <p class="text-[10px] text-gray-400 uppercase tracking-tighter">Halo, Akun Saya</p>
                     <p id="user-name-display" class="font-bold text-sm truncate w-24">Guest</p>
                     <p id="order-status" class="text-[10px] text-yellow-400"></p>
                 </div>
             </div>
-            <div class="flex-1 px-4">
-                <input type="text" onkeyup="searchProduct(this.value)" placeholder="Cari produk..." class="w-full bg-slate-800 py-2 px-4 rounded-full text-xs border border-slate-700 focus:ring-1 focus:ring-blue-500 outline-none">
+            <div class="flex gap-3">
+                <button onclick="showCart()" class="relative p-2 bg-slate-800 rounded-full">
+                    <i class="fa fa-shopping-cart"></i>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-[8px] px-1.5 rounded-full">0</span>
+                </button>
+                <input type="text" onkeyup="searchProduct(this.value)" placeholder="Cari..." class="bg-slate-800 py-2 px-4 rounded-full text-xs border border-slate-700 outline-none w-32">
             </div>
         </header>
 
-        <main class="p-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" id="product-list"></main>
+        <main class="p-4 grid grid-cols-2 md:grid-cols-4 gap-4 pb-24" id="product-list"></main>
 
-        <div class="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-8 px-8 py-4 glass rounded-full z-50 shadow-2xl">
+        <div class="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-8 px-8 py-4 glass rounded-full z-50">
             <button onclick="showPage('page-marketplace')" class="text-blue-500"><i class="fa fa-home text-xl"></i></button>
-            <button onclick="openHistoryModal()" class="bg-slate-800 px-4 py-2 rounded-full text-xs border border-slate-700">Riwayat</button>
-            <a href="#" class="bg-blue-600 p-4 rounded-full -mt-12 border-8 border-slate-900 shadow-xl"><i class="fa fa-shop text-white"></i></a>
             <button onclick="checkAdminAccess()" class="text-gray-400"><i class="fa fa-user-shield text-xl"></i></button>
         </div>
     </section>
 
-    <section id="page-admin" class="hidden min-h-screen p-6 pb-24">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-2xl font-bold text-blue-500">Admin Panel</h1>
-            <button onclick="showPage('page-marketplace')" class="bg-slate-700 px-4 py-2 rounded-lg text-xs">Keluar Admin</button>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="glass p-6 rounded-2xl">
-                <h3 class="font-bold mb-4 border-b border-slate-700 pb-2">Manajemen Produk</h3>
-                <div class="space-y-3">
-                    <input type="text" id="p-name" placeholder="Nama Produk" class="w-full p-3 rounded bg-slate-800 border border-slate-700">
-                    <input type="number" id="p-price" placeholder="Harga (Angka)" class="w-full p-3 rounded bg-slate-800 border border-slate-700">
-                    <input type="text" id="p-img" placeholder="URL Foto Produk (Pisahkan koma jika banyak)" class="w-full p-3 rounded bg-slate-800 border border-slate-700">
-                    <textarea id="p-desc" placeholder="Detail Produk" class="w-full p-3 rounded bg-slate-800 border border-slate-700 h-24"></textarea>
-                    <input type="number" id="p-stock" placeholder="Jumlah Stok" class="w-full p-3 rounded bg-slate-800 border border-slate-700">
-                    <button onclick="saveProduct()" class="w-full bg-green-600 py-3 rounded-xl font-bold mt-2">Simpan Produk</button>
-                </div>
-            </div>
-            <div class="glass p-6 rounded-2xl">
-                <h3 class="font-bold mb-4 border-b border-slate-700 pb-2">Laporan & Pesanan</h3>
-                <div class="mt-4">
-                    <h4 class="text-sm font-bold mb-2">Pesanan Masuk</h4>
-                    <div id="admin-order-list" class="space-y-2 max-h-96 overflow-y-auto"></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <div id="modal-detail" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90">
-        <div class="bg-slate-900 w-full max-w-xl rounded-3xl overflow-hidden relative border border-slate-700">
-            <button onclick="closeModal('modal-detail')" class="absolute top-4 right-4 bg-white/10 p-2 rounded-full hover:bg-red-500 transition">✕</button>
-            <img id="m-img" src="" class="w-full h-72 object-cover">
+        <div class="bg-slate-900 w-full max-w-lg rounded-3xl overflow-hidden relative border border-slate-700">
+            <button onclick="closeModal('modal-detail')" class="absolute top-4 right-4 bg-black/50 p-2 rounded-full">✕</button>
+            <img id="m-img" src="" class="w-full h-64 object-cover">
             <div class="p-6">
-                <div class="flex justify-between items-start mb-4">
-                    <h2 id="m-title" class="text-2xl font-bold"></h2>
-                    <span id="m-stock" class="bg-blue-600/20 text-blue-400 text-[10px] px-3 py-1 rounded-full border border-blue-500/30"></span>
-                </div>
-                <p id="m-price" class="text-xl font-bold text-blue-500 mb-4"></p>
-                <p id="m-desc" class="text-gray-400 text-sm mb-6 leading-relaxed"></p>
-                <div class="grid grid-cols-2 gap-3">
-                    <button id="btn-wa" class="bg-green-600 py-4 rounded-2xl font-bold flex items-center justify-center gap-2">Beli Sekarang</button>
-                    <button id="btn-cart" class="bg-slate-800 py-4 rounded-2xl font-bold border border-slate-700">Keranjang</button>
-                </div>
-                <div class="mt-8 pt-6 border-t border-slate-800">
-                    <h4 class="font-bold mb-4">⭐ Ulasan Pembeli</h4>
-                    <div id="review-list" class="space-y-4 max-h-40 overflow-y-auto text-xs text-gray-500"></div>
+                <h2 id="m-title" class="text-2xl font-bold mb-2"></h2>
+                <p id="m-price" class="text-blue-500 font-bold text-xl mb-4"></p>
+                <p id="m-desc" class="text-gray-400 text-sm mb-6"></p>
+                <div class="flex gap-3">
+                    <button id="btn-add-cart" class="flex-1 bg-blue-600 py-3 rounded-xl font-bold">Tambah Keranjang</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <div id="modal-cart" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90">
+        <div class="bg-slate-900 w-full max-w-lg rounded-3xl p-6 border border-slate-700 relative">
+            <button onclick="closeModal('modal-cart')" class="absolute top-4 right-4">✕</button>
+            <h2 class="text-xl font-bold mb-4 text-blue-500"><i class="fa fa-shopping-cart mr-2"></i>Keranjang Anda</h2>
+            <div id="cart-items" class="space-y-4 max-h-96 overflow-y-auto mb-6"></div>
+            <div class="border-t border-slate-800 pt-4">
+                <div class="flex justify-between font-bold mb-4">
+                    <span>Total Estimasi:</span>
+                    <span id="cart-total" class="text-blue-400">Rp 0</span>
+                </div>
+                <button onclick="checkoutCart()" class="w-full bg-green-600 py-3 rounded-xl font-bold">Checkout Sekarang (WA)</button>
+            </div>
+        </div>
+    </div>
+
+    <section id="page-admin" class="hidden min-h-screen p-6 pb-24">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-bold text-blue-500">Admin Panel</h1>
+            <button onclick="showPage('page-marketplace')" class="bg-slate-700 px-4 py-2 rounded-lg text-xs">Kembali</button>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="glass p-6 rounded-2xl h-fit">
+                <h3 class="font-bold mb-4 border-b border-slate-700 pb-2">Upload/Edit Produk</h3>
+                <div class="space-y-3">
+                    <input type="text" id="p-name" placeholder="Nama" class="w-full p-3 rounded bg-slate-800 border border-slate-700 text-white">
+                    <input type="number" id="p-price" placeholder="Harga" class="w-full p-3 rounded bg-slate-800 border border-slate-700 text-white">
+                    <input type="text" id="p-img" placeholder="URL Foto" class="w-full p-3 rounded bg-slate-800 border border-slate-700 text-white">
+                    <textarea id="p-desc" placeholder="Deskripsi" class="w-full p-3 rounded bg-slate-800 border border-slate-700 h-20 text-white"></textarea>
+                    <input type="number" id="p-stock" placeholder="Stok" class="w-full p-3 rounded bg-slate-800 border border-slate-700 text-white">
+                    <button onclick="saveProduct()" class="w-full bg-green-600 py-3 rounded-xl font-bold">Simpan Produk</button>
+                </div>
+            </div>
+            <div class="space-y-6">
+                <div class="glass p-6 rounded-2xl">
+                    <h3 class="font-bold mb-4 text-yellow-500 border-b border-slate-700 pb-2">Konfirmasi Pesanan</h3>
+                    <div id="admin-pending-list" class="space-y-3 max-h-96 overflow-y-auto"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, set, get, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
@@ -169,28 +139,27 @@
 
         let isLoginMode = true;
         let globalProducts = [];
-        let currentOrder = null;
+        let userCart = {};
         let editingProductId = null;
 
-        // AUTH & UI LOGIC
         window.showPage = (id) => {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
         };
 
+        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+
         window.toggleAuthMode = () => {
             isLoginMode = !isLoginMode;
             document.getElementById('reg-fields').classList.toggle('hidden', isLoginMode);
-            document.getElementById('auth-title').innerText = isLoginMode ? "Welcome Back" : "Join Us";
-            document.getElementById('btn-auth').innerText = isLoginMode ? "Login" : "Daftar Akun";
-            document.getElementById('auth-toggle-text').innerText = isLoginMode ? "Belum punya akun? Daftar sekarang" : "Sudah punya akun? Login";
+            document.getElementById('auth-title').innerText = isLoginMode ? "XREZZKY" : "Daftar Akun";
+            document.getElementById('auth-toggle-text').innerText = isLoginMode ? "Belum punya akun? Daftar" : "Sudah punya akun? Login";
         };
 
         window.handleAuth = async () => {
             const email = document.getElementById('auth-email').value;
             const pass = document.getElementById('auth-pass').value;
             const user = document.getElementById('auth-user').value;
-            if(!email || !pass) return alert("Isi semua data!");
             try {
                 if (isLoginMode) {
                     await signInWithEmailAndPassword(auth, email, pass);
@@ -199,143 +168,173 @@
                     await set(ref(db, 'users/' + res.user.uid), {
                         username: user || email.split('@')[0],
                         email: email,
-                        role: email === "xrezzkystore.id@gmail.com" ? "admin" : "user",
-                        joinDate: new Date().toLocaleDateString()
+                        role: email === "xrezzkystore.id@gmail.com" ? "admin" : "user"
                     });
                 }
             } catch (e) { alert(e.message); }
         };
 
+        window.signOutUser = () => confirm("Logout?") && signOut(auth);
+
         onAuthStateChanged(auth, (user) => {
             document.getElementById('loader').classList.add('hidden');
             if (user) {
                 showPage('page-marketplace');
-                fetchUserData(user.uid);
+                onValue(ref(db, 'users/' + user.uid), s => {
+                    const d = s.val();
+                    document.getElementById('user-name-display').innerText = d.username;
+                    document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${d.username}&background=3b82f6&color=fff`;
+                });
                 listenProducts();
-                listenOrders(user.uid);
+                listenCart(user.uid);
                 if(user.email === "xrezzkystore.id@gmail.com") listenAdminOrders();
             } else {
                 showPage('page-auth');
             }
         });
 
-        async function fetchUserData(uid) {
-            const snap = await get(ref(db, 'users/' + uid));
-            if(snap.exists()){
-                const data = snap.val();
-                document.getElementById('user-name-display').innerText = data.username;
-                document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${data.username}&background=3b82f6&color=fff`;
-            }
+        // CART LOGIC
+        function listenCart(uid) {
+            onValue(ref(db, 'carts/' + uid), (snap) => {
+                userCart = snap.val() || {};
+                const count = Object.values(userCart).reduce((a, b) => a + b.qty, 0);
+                document.getElementById('cart-count').innerText = count;
+                renderCart();
+            });
         }
 
-        // PRODUCT LOGIC
+        window.addToCart = async (id) => {
+            const p = globalProducts.find(x => x.id === id);
+            const currentQty = userCart[id]?.qty || 0;
+            if (currentQty >= p.stock) return alert("Stok tidak cukup!");
+            
+            await update(ref(db, `carts/${auth.currentUser.uid}/${id}`), {
+                name: p.name,
+                price: p.price,
+                qty: currentQty + 1,
+                img: p.images?.[0] || p.image,
+                maxStock: p.stock
+            });
+            alert("Ditambah ke keranjang!");
+        };
+
+        window.updateCartQty = async (id, change) => {
+            const item = userCart[id];
+            const newQty = item.qty + change;
+            if (newQty < 1) return;
+            if (newQty > item.maxStock) return alert("Maksimal stok tercapai");
+            
+            await update(ref(db, `carts/${auth.currentUser.uid}/${id}`), { qty: newQty });
+        };
+
+        window.removeFromCart = (id) => remove(ref(db, `carts/${auth.currentUser.uid}/${id}`));
+
+        window.showCart = () => document.getElementById('modal-cart').classList.remove('hidden');
+
+        function renderCart() {
+            const container = document.getElementById('cart-items');
+            const totalEl = document.getElementById('cart-total');
+            container.innerHTML = "";
+            let total = 0;
+
+            Object.entries(userCart).forEach(([id, item]) => {
+                total += item.price * item.qty;
+                container.innerHTML += `
+                    <div class="flex items-center gap-4 bg-slate-800/50 p-3 rounded-2xl border border-slate-700">
+                        <img src="${item.img}" class="w-16 h-16 object-cover rounded-xl">
+                        <div class="flex-1">
+                            <h4 class="text-sm font-bold truncate w-32">${item.name}</h4>
+                            <p class="text-blue-400 text-xs font-bold">Rp ${Number(item.price).toLocaleString()}</p>
+                            <div class="flex items-center gap-3 mt-2">
+                                <button onclick="updateCartQty('${id}', -1)" class="w-6 h-6 bg-slate-700 rounded-full">-</button>
+                                <span class="text-sm">${item.qty}</span>
+                                <button onclick="updateCartQty('${id}', 1)" class="w-6 h-6 bg-slate-700 rounded-full">+</button>
+                            </div>
+                        </div>
+                        <button onclick="removeFromCart('${id}')" class="text-red-500 p-2"><i class="fa fa-trash"></i></button>
+                    </div>`;
+            });
+            totalEl.innerText = "Rp " + total.toLocaleString();
+        }
+
+        window.checkoutCart = async () => {
+            if (Object.keys(userCart).length === 0) return alert("Keranjang kosong");
+            const user = auth.currentUser;
+            const orderId = push(ref(db, 'orders')).key;
+            
+            const orderData = {
+                userId: user.uid,
+                username: document.getElementById('user-name-display').innerText,
+                email: user.email,
+                items: userCart,
+                status: "Pending",
+                createdAt: Date.now()
+            };
+
+            await set(ref(db, 'orders/' + orderId), orderData);
+            await remove(ref(db, 'carts/' + user.uid));
+            
+            let msg = `Halo Admin, saya mau konfirmasi pesanan:\n`;
+            Object.values(userCart).forEach(i => msg += `- ${i.name} (${i.qty}x)\n`);
+            window.open(`https://wa.me/6288293064112?text=${encodeURIComponent(msg)}`);
+            closeModal('modal-cart');
+        };
+
+        // PRODUCT LIST & DETAIL
         function listenProducts() {
             onValue(ref(db, 'products'), (snap) => {
-                const data = snap.val();
                 const container = document.getElementById('product-list');
                 container.innerHTML = "";
                 globalProducts = [];
-                if(!data) return;
-
-                for(let id in data) {
-                    const p = data[id];
+                snap.forEach(child => {
+                    const p = child.val();
+                    const id = child.key;
                     globalProducts.push({...p, id});
-                    const isOut = p.stock <= 0;
                     container.innerHTML += `
-                        <div class="glass rounded-2xl overflow-hidden group cursor-pointer transition-all hover:scale-[1.02]" onclick="viewDetail('${id}')">
-                            <div class="relative h-40">
-                                ${auth.currentUser?.email === "xrezzkystore.id@gmail.com" ? `
-                                    <div class="absolute top-2 left-2 flex gap-1 z-10">
-                                        <button onclick="event.stopPropagation(); editProduct('${id}')" class="bg-yellow-500 text-[10px] px-2 py-1 rounded">Edit</button>
-                                        <button onclick="event.stopPropagation(); deleteProduct('${id}')" class="bg-red-600 text-[10px] px-2 py-1 rounded">Hapus</button>
-                                    </div>
-                                ` : ''}
-                                <img src="${p.images ? p.images[0] : p.image}" class="w-full h-full object-cover">
-                                ${isOut ? `<div class="absolute inset-0 bg-black/70 flex items-center justify-center text-xs font-bold text-red-500">HABIS</div>` : ''}
-                            </div>
-                            <div class="p-3">
-                                <h3 class="font-bold text-sm truncate mb-1">${p.name}</h3>
-                                <p class="text-blue-500 font-bold text-sm">Rp ${Number(p.price).toLocaleString()}</p>
-                                <p class="text-[9px] text-gray-500">Stok: ${p.stock}</p>
+                        <div class="glass rounded-2xl overflow-hidden p-2 group cursor-pointer" onclick="viewDetail('${id}')">
+                            <img src="${p.images?.[0] || p.image}" class="w-full h-40 object-cover rounded-xl mb-3">
+                            <h3 class="text-sm font-bold truncate px-1">${p.name}</h3>
+                            <div class="flex justify-between items-center p-1 mt-1">
+                                <p class="text-blue-400 font-bold text-xs">Rp ${Number(p.price).toLocaleString()}</p>
+                                <span class="text-[9px] text-gray-500 italic">Stok: ${p.stock}</span>
                             </div>
                         </div>`;
-                }
+                });
             });
         }
 
         window.viewDetail = (id) => {
             const p = globalProducts.find(x => x.id === id);
-            if(!p) return;
             document.getElementById('m-title').innerText = p.name;
             document.getElementById('m-price').innerText = "Rp " + Number(p.price).toLocaleString();
-            document.getElementById('m-desc').innerText = p.description;
-            document.getElementById('m-img').src = p.images ? p.images[0] : p.image;
-            document.getElementById('m-stock').innerText = `Stok: ${p.stock}`;
-            
-            const btnWa = document.getElementById('btn-wa');
-            btnWa.onclick = () => createOrder(p);
-            loadRatings(id);
+            document.getElementById('m-desc').innerText = p.description || "Tidak ada deskripsi.";
+            document.getElementById('m-img').src = p.images?.[0] || p.image;
+            document.getElementById('btn-add-cart').onclick = () => addToCart(id);
             document.getElementById('modal-detail').classList.remove('hidden');
         };
 
-        // ORDER & ADMIN LOGIC
-        window.createOrder = async (product) => {
-            const user = auth.currentUser;
-            if(product.stock <= 0) return alert("Stok Habis!");
-            await push(ref(db, "orders"), {
-                userId: user.uid,
-                username: document.getElementById('user-name-display').innerText,
-                email: user.email,
-                productId: product.id,
-                productName: product.name,
-                image: product.images ? product.images[0] : product.image,
-                price: product.price,
-                status: "Pending",
-                createdAt: Date.now()
-            });
-            alert("Pesanan dibuat! Silahkan hubungi admin.");
-            window.open(`https://wa.me/6288293064112?text=Halo Admin, saya mau order *${product.name}*`);
-        };
-
-        function listenOrders(uid) {
-            onValue(ref(db, "orders"), (snap) => {
-                let pending = 0;
-                snap.forEach(child => {
-                    const o = child.val();
-                    if(o.userId === uid && o.status === "Pending") pending++;
-                    if(o.userId === uid && o.status === "Diproses") {
-                        currentOrder = {...o, id: child.key};
-                        showOrderNotif(o);
-                    }
-                });
-                document.getElementById("order-status").innerText = pending > 0 ? `Pending: ${pending}` : "";
-            });
-        }
-
+        // ADMIN LOGIC
         function listenAdminOrders() {
             onValue(ref(db, 'orders'), (snap) => {
-                const list = document.getElementById('admin-order-list');
+                const list = document.getElementById('admin-pending-list');
                 list.innerHTML = "";
                 snap.forEach(child => {
                     const o = child.val();
+                    if(o.status !== "Pending") return;
+                    let itemDesc = "";
+                    Object.values(o.items || {}).forEach(i => itemDesc += `${i.name} (${i.qty}x), `);
+                    
                     list.innerHTML += `
-                        <div class="bg-slate-800 p-3 rounded border border-slate-700 text-[10px]">
-                            <p class="font-bold text-blue-400">${o.productName}</p>
-                            <p>${o.username} (${o.status})</p>
-                            <button onclick="updateOrderStatus('${child.key}', 'Diproses')" class="text-green-500 mt-2 mr-2">Proses</button>
-                            <button onclick="updateOrderStatus('${child.key}', 'Selesai')" class="text-blue-500 mt-2">Selesai</button>
+                        <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 text-[10px]">
+                            <p class="text-blue-400 font-bold mb-1">${itemDesc}</p>
+                            <p>Pembeli: ${o.username} (${o.email})</p>
+                            <div class="flex gap-2 mt-3">
+                                <button onclick="updateStatus('${child.key}', 'Selesai')" class="flex-1 bg-green-600 py-2 rounded font-bold">KONFIRMASI</button>
+                                <button onclick="deleteOrder('${child.key}')" class="bg-red-900/50 px-3 rounded text-red-400">Hapus</button>
+                            </div>
                         </div>`;
                 });
             });
-        }
-
-        window.updateOrderStatus = (id, status) => update(ref(db, 'orders/' + id), { status });
-
-        function showOrderNotif(order) {
-            document.getElementById("notifImage").src = order.image;
-            document.getElementById("notifName").innerText = order.productName;
-            document.getElementById("notifPrice").innerText = "Rp " + order.price;
-            document.getElementById("floatingOrderNotif").classList.remove("hidden");
         }
 
         window.saveProduct = async () => {
@@ -345,15 +344,13 @@
             const desc = document.getElementById('p-desc').value;
             const stock = parseInt(document.getElementById('p-stock').value);
 
-            const data = { name, price, images: img.split(','), description: desc, stock };
-            if(editingProductId) {
-                await update(ref(db, 'products/' + editingProductId), data);
-                editingProductId = null;
-            } else {
-                await push(ref(db, 'products'), data);
-            }
-            alert("Berhasil!");
-            showPage('page-marketplace');
+            const data = { name, price, images: [img], description: desc, stock };
+            if(editingProductId) await update(ref(db, 'products/' + editingProductId), data);
+            else await push(ref(db, 'products'), data);
+            
+            alert("Produk disimpan!");
+            editingProductId = null;
+            document.querySelectorAll('#page-admin input, #page-admin textarea').forEach(i => i.value = "");
         };
 
         window.editProduct = (id) => {
@@ -361,30 +358,26 @@
             editingProductId = id;
             document.getElementById('p-name').value = p.name;
             document.getElementById('p-price').value = p.price;
-            document.getElementById('p-img').value = p.images.join(',');
+            document.getElementById('p-img').value = p.images?.[0] || p.image;
             document.getElementById('p-desc').value = p.description;
             document.getElementById('p-stock').value = p.stock;
             showPage('page-admin');
         };
 
-        window.deleteProduct = (id) => confirm("Hapus produk?") && remove(ref(db, 'products/' + id));
-        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
-        window.logoutUser = () => signOut(auth);
-        window.toggleProfileMenu = () => document.getElementById('profile-menu').classList.toggle('hidden');
+        window.updateStatus = (id, status) => update(ref(db, 'orders/' + id), { status });
+        window.deleteOrder = (id) => confirm("Hapus?") && remove(ref(db, 'orders/' + id));
+        window.deleteProduct = (id) => confirm("Hapus?") && remove(ref(db, 'products/' + id));
+        window.checkAdminAccess = async () => {
+            const s = await get(ref(db, 'users/' + auth.currentUser.uid));
+            if(s.val().role === "admin") showPage('page-admin'); else alert("Akses Ditolak");
+        };
 
-        // Search Filter
         window.searchProduct = (query) => {
             const items = document.querySelectorAll('#product-list > div');
             items.forEach(item => {
                 const name = item.querySelector('h3').innerText.toLowerCase();
                 item.style.display = name.includes(query.toLowerCase()) ? "block" : "none";
             });
-        };
-
-        window.checkAdminAccess = async () => {
-            const snap = await get(ref(db, 'users/' + auth.currentUser.uid));
-            if(snap.val().role === "admin") showPage('page-admin');
-            else alert("Akses Ditolak");
         };
 
     </script>

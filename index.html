@@ -255,6 +255,7 @@
                     <img src="${p.images?.[0]}" class="w-full h-32 object-cover rounded-xl mb-2" onclick="viewDetail('${p.id}')">
                     <p class="text-[11px] font-bold truncate">${p.name}</p>
                     <p class="text-blue-400 font-bold text-xs mt-auto">Rp ${Number(p.price).toLocaleString()}</p>
+                    <p class="text-[10px] text-gray-400">Stok: ${p.stock ?? 0}</p>
                 </div>`;
         }
 
@@ -310,19 +311,75 @@
                 name: p.name, price: p.price, qty: current + 1, maxStock: p.stock, img: p.images[0], pid: id
             });
         };
+        
+        window.instantBuy = async (id) => {
+    const p = globalProducts.find(x => x.id === id);
+    if (!p || p.stock <= 0) return alert("Stok habis!");
+
+    const orderData = {
+        userId: auth.currentUser.uid,
+        username: document.getElementById('user-name-display').innerText,
+        email: auth.currentUser.email,
+        items: {
+            [id]: {
+                name: p.name,
+                price: p.price,
+                qty: 1,
+                pid: id
+            }
+        },
+        status: "Pending",
+        createdAt: Date.now()
+    };
+
+    await push(ref(db, 'orders'), orderData);
+
+    const message = `
+Halo Admin, saya ingin beli:
+
+Produk: ${p.name}
+Harga: Rp ${p.price.toLocaleString()}
+Total: Rp ${p.price.toLocaleString()}
+    `;
+
+    window.open(`https://wa.me/6288293064112?text=${encodeURIComponent(message)}`);
+};
 
         window.checkoutCart = async () => {
-            if(Object.keys(userCart).length === 0) return;
-            const orderData = {
-                userId: auth.currentUser.uid, username: document.getElementById('user-name-display').innerText,
-                email: auth.currentUser.email, items: userCart, status: "Pending", createdAt: Date.now()
-            };
-            await push(ref(db, 'orders'), orderData);
-            await remove(ref(db, `carts/${auth.currentUser.uid}`));
-            window.open(`https://wa.me/6288293064112?text=Halo Admin, saya mau konfirmasi pesanan saya.`);
-            closeModal('modal-cart');
-        };
+    if(Object.keys(userCart).length === 0) return;
 
+    const orderData = {
+        userId: auth.currentUser.uid,
+        username: document.getElementById('user-name-display').innerText,
+        email: auth.currentUser.email,
+        items: userCart,
+        status: "Pending",
+        createdAt: Date.now()
+    };
+
+    await push(ref(db, 'orders'), orderData);
+    await remove(ref(db, `carts/${auth.currentUser.uid}`));
+
+    let total = 0;
+    let textItems = "";
+
+    Object.values(userCart).forEach(i => {
+        total += i.price * i.qty;
+        textItems += `${i.name} (${i.qty}x) - Rp ${(i.price * i.qty).toLocaleString()}\n`;
+    });
+
+    const message = `
+Halo Admin, saya sudah order:
+
+${textItems}
+
+Total: Rp ${total.toLocaleString()}
+    `;
+
+    window.open(`https://wa.me/6288293064112?text=${encodeURIComponent(message)}`);
+
+    closeModal('modal-cart');
+};
         function listenCart(uid) {
             onValue(ref(db, `carts/${uid}`), (snap) => {
                 userCart = snap.val() || {};
@@ -450,22 +507,21 @@
             document.querySelectorAll('[id^="tab-"]').forEach(t => t.classList.remove('tab-active'));
             document.getElementById('tab-' + tab).classList.add('tab-active');
         };
-        window.updateStat = (id, s) => update(ref(db, `orders/${id}`), { status: s });
-        window.delOrder = (id) => confirm("Hapus pesanan?") && remove(ref(db, `orders/${id}`));
-        window.saveProduct = async () => {
-            const data = {
-                name: document.getElementById('p-name').value,
-                price: parseInt(document.getElementById('p-price').value),
-                images: [document.getElementById('p-img').value],
-                description: document.getElementById('p-desc').value,
-                stock: parseInt(document.getElementById('p-stock').value)
-            };
-            if(!data.name || !data.price || !data.images[0]) {
-    return alert("Lengkapi data dulu!");
-}
-            await push(ref(db, 'products'), data); 
-            alert("Produk Berhasil Ditambahkan!");
-        };
+        window.updateStat = async (id, s) => {
+    await update(ref(db, `orders/${id}`), { status: s });
+
+    if(s === "Selesai") {
+        const snap = await get(ref(db, `orders/${id}`));
+        const order = snap.val();
+
+        Object.values(order.items).forEach(async item => {
+            const prodSnap = await get(ref(db, `products/${item.pid}`));
+            const prod = prodSnap.val();
+            const newStock = (prod.stock || 0) - item.qty;
+            await update(ref(db, `products/${item.pid}`), { stock: newStock });
+        });
+    }
+};
 
     </script>
 </body>

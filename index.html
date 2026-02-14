@@ -613,39 +613,24 @@ window.deleteAccount = async () => {
 
     const userSnap = await get(ref(db, 'users/' + user.uid));
     const userData = userSnap.val();
+
     const orderSnap = await get(ref(db, "orders"));
-let pendingCount = 0;
+    let pendingCount = 0;
 
-orderSnap.forEach(child => {
-    const o = child.val();
-    if (
-        o.userId === user.uid &&
-        o.status === "Pending"
-    ) {
-        pendingCount++;
+    orderSnap.forEach(child => {
+        const o = child.val();
+        if (
+            o.userId === user.uid &&
+            o.status === "Pending"
+        ) {
+            pendingCount++;
+        }
+    });
+
+    if (pendingCount >= 2) {
+        alert("Tunggu konfirmasi admin sebelum beli lagi!");
+        return;
     }
-});
-
-if (pendingCount >= 2) {
-    alert("Tunggu konfirmasi admin sebelum beli lagi!");
-    return;
-}const orderSnap = await get(ref(db, "orders"));
-let pendingCount = 0;
-
-orderSnap.forEach(child => {
-    const o = child.val();
-    if (
-        o.userId === user.uid &&
-        o.status === "Pending"
-    ) {
-        pendingCount++;
-    }
-});
-
-if (pendingCount >= 2) {
-    alert("Tunggu konfirmasi admin sebelum beli lagi!");
-    return;
-}
 
     await push(ref(db, "orders"), {
         userId: user.uid,
@@ -653,7 +638,6 @@ if (pendingCount >= 2) {
         email: user.email,
         productId: product.id,
         productName: product.name,
-        quantity: 1,
         price: product.price,
         createdAt: Date.now(),
         status: "Pending"

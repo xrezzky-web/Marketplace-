@@ -16,6 +16,10 @@
     </style>
 </head>
 <body>
+  <div>
+  <span id="username-display"></span>
+  <p id="order-status" class="text-[10px] text-yellow-400"></p>
+</div>
 
     <div id="profile-menu" class="hidden fixed top-16 left-4 glass p-4 rounded-xl w-64 z-50">
     <p id="profile-join" class="text-xs text-gray-400 mb-3"></p>
@@ -149,7 +153,9 @@
                 
                 <div class="grid grid-cols-2 gap-3">
                     <button id="btn-wa" class="bg-green-600 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition hover:bg-green-700"><i class="fab fa-whatsapp text-xl"></i> Beli Sekarang</button>
-                    <button onclick="alert('Masuk ke Keranjang!')" class="bg-slate-800 py-4 rounded-2xl font-bold border border-slate-700">Keranjang</button>
+                    <button id="btn-cart"
+class="bg-slate-800 py-4 rounded-2xl font-bold border border-slate-700">
+Keranjang</button>
                 </div>
 
                 <div class="mt-8 pt-6 border-t border-slate-800">
@@ -164,7 +170,15 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { 
+getAuth, 
+signInWithEmailAndPassword, 
+createUserWithEmailAndPassword, 
+onAuthStateChanged, 
+signOut, 
+sendPasswordResetEmail,
+updatePassword
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, set, get, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         // Konfigurasi Firebase sesuai permintaan Anda
@@ -212,11 +226,11 @@
                 } else {
                     const res = await createUserWithEmailAndPassword(auth, email, pass);
                     await set(ref(db, 'users/' + res.user.uid), {
-                        username: user || email.split('@')[0],
-                        email: email,
-                        role: 'user',
-                        joinDate: new Date().toLocaleDateString()
-                    });
+    username: user || email.split('@')[0],
+    email: email,
+    role: email === "xrezzkystore.id@gmail.com" ? "admin" : "user",
+    joinDate: new Date().toLocaleDateString()
+});
                 }
             } catch (e) { alert(e.message); }
         };
@@ -224,6 +238,8 @@
         onAuthStateChanged(auth, (user) => {
             document.getElementById('loader').classList.add('hidden');
             if (user) {
+              document.getElementById("username-display").innerText = user.email;
+listenUserOrders(user.uid);
                 showPage('page-marketplace');
                 fetchUserData(user.uid);
                 listenProducts();
@@ -273,7 +289,9 @@
                                 <h3 class="font-bold text-sm truncate mb-1">${p.name}</h3>
                                 <div class="flex justify-between items-center">
                                     <p class="text-blue-500 font-bold text-sm">Rp ${Number(p.price).toLocaleString()}</p>
-                                    <p class="text-[9px] text-gray-500">Sisa ${p.stock}</p>
+                                   <p class="text-[9px] text-gray-500">
+Sisa ${p.stock} • Terjual ${p.sold || 0}
+</p>
                                 </div>
                             </div>
                         </div>
@@ -304,6 +322,9 @@
         window.viewDetail = (id) => {
             const p = globalProducts.find(x => x.id === id);
             loadRatings(id);
+            document.getElementById("btn-cart").onclick = () => 
+    addToCart(p.id, p.stock);
+
             document.getElementById('m-title').innerText = p.name;
             document.getElementById('m-price').innerText = "Rp " + Number(p.price).toLocaleString();
             document.getElementById('m-desc').innerText = p.description;
@@ -318,11 +339,12 @@
                 btnWa.innerText = "Stok Habis";
             } else {
                 btnWa.disabled = false;
-                btnWa.classList.replace('bg-slate-700', 'bg-green-600');
+                btnWa.className = "bg-green-600 py-4 rounded-2xl font-bold flex items-center justify-center gap-2";
                 btnWa.innerHTML = `<i class="fab fa-whatsapp text-xl"></i> Beli Sekarang`;
                 btnWa.onclick = () => {
                 createOrder(p);
                 window.open(`https://wa.me/6288293064112?text=Halo Admin, saya mau order *${p.name}*`);
+                
         };
             }
 
@@ -330,17 +352,19 @@
         };
 
         // 3. ADMIN LOGIC
-        window.checkAdminAccess = () => {
-            const user = auth.currentUser;
-            if(user.email === "xrezzkystore.id@gmail.com") {
-                const pass = prompt("Masukkan Password Admin:");
-                if(pass === "XREZZKY0930") {
-                    showPage('page-admin');
-                } else { alert("Password Salah!"); }
-            } else {
-                alert("Hanya Admin yang bisa mengakses fitur ini!");
-            }
-        };
+        window.checkAdminAccess = async () => {
+    const user = auth.currentUser;
+    if (!user) return alert("Login dulu!");
+
+    const snap = await get(ref(db, 'users/' + user.uid));
+    const data = snap.val();
+
+    if (data.role === "admin") {
+        showPage('page-admin');
+    } else {
+        alert("Bukan admin!");
+    }
+};
 
         window.saveProduct = async () => {
             const name = document.getElementById('p-name').value;
@@ -402,11 +426,22 @@
 
         // 4. UTILS
         window.searchProduct = (query) => {
-            const filtered = globalProducts.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));
-            const container = document.getElementById('product-list');
-            // Re-render filtered list logic here...
-        };
+    const container = document.getElementById('product-list');
+    container.innerHTML = "";
 
+    const filtered = globalProducts.filter(p =>
+        p.name.toLowerCase().includes(query.toLowerCase())
+    );
+
+    filtered.forEach(p => {
+        container.innerHTML += `
+        <div class="glass rounded-2xl p-4">
+            <h3>${p.name}</h3>
+            <p>Rp ${Number(p.price).toLocaleString()}</p>
+        </div>
+        `;
+    });
+};
         window.showPage = (id) => {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
@@ -476,7 +511,7 @@ window.changePassword = async () => {
 
     const newPass = prompt("Masukkan Password Baru:");
     if(newPass) {
-        await user.updatePassword(newPass);
+        await updatePassword(user, newPass);
         await update(ref(db, 'users/' + user.uid), {
             lastPasswordChange: now
         });
@@ -494,26 +529,22 @@ window.deleteAccount = async () => {
 };
     window.createOrder = async (product) => {
     const user = auth.currentUser;
+    if (!user) return alert("Login dulu!");
 
-    if (!user) {
-        alert("Silakan login dulu!");
-        return;
-    }
+    await push(ref(db, "orders"), {
+        userId: user.uid,
+        email: user.email,
+        items: {
+            [product.id]: {
+                quantity: 1,
+                price: product.price
+            }
+        },
+        createdAt: Date.now(),
+        status: "Pending"
+    });
 
-    try {
-        await push(ref(db, 'orders'), {
-            userId: user.uid,
-            productName: product.name,
-            price: product.price,
-            status: "Pending",
-            createdAt: Date.now()
-        });
-
-        alert("Pesanan dibuat! Menunggu konfirmasi admin.");
-    } catch (error) {
-        console.error(error);
-        alert("Terjadi kesalahan saat membuat pesanan.");
-    }
+    alert("Pesanan dibuat!");
 };
         
         
@@ -542,29 +573,32 @@ window.confirmOrder = async (id) => {
 
     const order = snap.val();
 
-    if (order.items) {
-        for (let productId in order.items) {
-            const qty = order.items[productId].quantity;
+    for (let productId in order.items) {
+        const qty = order.items[productId].quantity;
 
-            const productRef = ref(db, `products/${productId}`);
-            const productSnap = await get(productRef);
+        const productRef = ref(db, `products/${productId}`);
+        const productSnap = await get(productRef);
 
-            if (productSnap.exists()) {
-                const product = productSnap.val();
+        if (!productSnap.exists()) continue;
 
-                await update(productRef, {
-                    stock: product.stock - qty,
-                    sold: (product.sold || 0) + qty
-                });
-            }
+        const product = productSnap.val();
+
+        if (product.stock < qty) {
+            alert("Stok tidak cukup!");
+            return;
         }
+
+        await update(productRef, {
+            stock: product.stock - qty,
+            sold: (product.sold || 0) + qty
+        });
     }
 
     await update(orderRef, {
         status: "Selesai"
     });
 
-    alert("Pesanan dikonfirmasi!");
+    alert("Pesanan dikonfirmasi & stok berkurang!");
 };
         
 window.loadCart = async () => {
@@ -620,13 +654,25 @@ window.checkout = async () => {
     if (!cartSnap.exists()) return alert("Keranjang kosong!");
 
     const items = cartSnap.val();
-    const total = 0;
+    let total = 0;
 
+for (let productId in items) {
+    const productSnap = await get(ref(db, `products/${productId}`));
+    const product = productSnap.val();
+
+    if (items[productId].quantity > product.stock) {
+        return alert("Stok tidak cukup untuk " + product.name);
+    }
+
+    total += product.price * items[productId].quantity;
+}
+  
     await push(ref(db, "orders"), {
         userId: user.uid,
         email: user.email,
         name: user.displayName || "User",
         items: items,
+        totalprice: total,
         createdAt: Date.now(),
         status: "Pending"
     });
@@ -641,6 +687,26 @@ window.sendRating = async (productId, star, review) => {
 
     const snap = await get(ratingRef);
     if (snap.exists()) return alert("Kamu sudah rating!");
+   
+   const orderSnap = await get(ref(db,"orders"));
+let allowed = false;
+
+orderSnap.forEach(child=>{
+   const o = child.val();
+   if(
+      o.userId === user.uid &&
+      o.status === "Selesai" &&
+      o.items &&
+      o.items[productId]
+   ){
+       allowed = true;
+   }
+});
+
+if(!allowed){
+   alert("Rating hanya untuk produk yang sudah kamu beli & selesai!");
+   return;
+}
 
     await set(ratingRef, {
         name: user.displayName || "User",
@@ -706,8 +772,26 @@ window.loadHistory = () => {
     });
 };
 
-await remove(ref(db, `ratings/${productId}`));
+     function listenUserOrders(uid){
+    const orderRef = ref(db, "orders");
+
+    onValue(orderRef, (snap)=>{
+        let pending = 0;
+
+        snap.forEach(child=>{
+            const o = child.val();
+            if(o.userId === uid && o.status === "Pending"){
+                pending++;
+            }
+        });
+
+        const el = document.getElementById("order-status");
+        if(el){
+            el.innerText = pending > 0 ? `Order Pending: ${pending}` : "";
+        }
+    });
+}
         
     </script>
 </body>
-    </html>
+    </html> 

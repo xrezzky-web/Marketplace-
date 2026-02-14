@@ -102,14 +102,16 @@
             <button onclick="showPage('page-marketplace')" class="text-xs bg-slate-700 px-3 py-1.5 rounded-lg text-gray-400">Back</button>
         </div>
         <div class="flex border-b border-slate-800 mb-4 text-[10px] font-bold">
-            <button onclick="switchAdminTab('pending')" id="tab-pending" class="flex-1 py-3 tab-active">KONFIRMASI</button>
-            <button onclick="switchAdminTab('process')" id="tab-process" class="flex-1 py-3">PROSES</button>
-            <button onclick="switchAdminTab('done')" id="tab-done" class="flex-1 py-3">SELESAI</button>
-            <button onclick="switchAdminTab('upload')" id="tab-upload" class="flex-1 py-3">STOK</button>
-        </div>
+    <button onclick="switchAdminTab('pending')" id="tab-pending" class="flex-1 py-3 tab-active">KONFIRMASI</button>
+    <button onclick="switchAdminTab('process')" id="tab-process" class="flex-1 py-3">PROSES</button>
+    <button onclick="switchAdminTab('done')" id="tab-done" class="flex-1 py-3">SELESAI</button>
+    <button onclick="switchAdminTab('reject')" id="tab-reject" class="flex-1 py-3">DITOLAK</button>
+    <button onclick="switchAdminTab('upload')" id="tab-upload" class="flex-1 py-3">STOK</button>
+</div>
         <div id="admin-pending" class="admin-tab"></div>
         <div id="admin-process" class="admin-tab hidden"></div>
         <div id="admin-done" class="admin-tab hidden"></div>
+        <div id="admin-reject" class="admin-tab hidden"></div>
         <div id="admin-upload" class="admin-tab hidden glass p-6 rounded-2xl">
             <input type="text" id="p-name" placeholder="Nama Produk" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
             <input type="number" id="p-price" placeholder="Harga" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
@@ -198,13 +200,14 @@
                     return;
                 }
                 
+                
                 // Role Detection
-                if(data?.role === 'admin') {
-                    document.getElementById('nav-admin').classList.remove('hidden');
-                    listenAdminOrders();
-                } else {
-                    document.getElementById('nav-admin').classList.add('hidden');
-                }
+if (data?.role === 'admin') {
+    document.getElementById('nav-admin').classList.remove('hidden');
+    listenAdminOrders(); // PENTING!
+} else {
+    document.getElementById('nav-admin').classList.add('hidden');
+}
 
                 document.getElementById('user-name-display').innerText = data?.username;
                 document.getElementById('p-username').innerText = data?.username;
@@ -219,6 +222,80 @@
                 showPage('page-auth');
             }
         });
+        
+        function listenAdminOrders() {
+    onValue(ref(db, 'orders'), (snap) => {
+
+        const pendingEl = document.getElementById('admin-pending');
+        const processEl = document.getElementById('admin-process');
+        const doneEl = document.getElementById('admin-done');
+        const rejectEl = document.getElementById('admin-reject');
+
+        pendingEl.innerHTML = "";
+        processEl.innerHTML = "";
+        doneEl.innerHTML = "";
+        rejectEl.innerHTML = "";
+
+        let isProcessingExist = false;
+
+        snap.forEach(child => {
+            if (child.val().status === "Diproses") {
+                isProcessingExist = true;
+            }
+        });
+
+        snap.forEach(child => {
+            const o = child.val();
+            const id = child.key;
+
+            const items = Object.values(o.items)
+                .map(i => `${i.name} (${i.qty}x)`)
+                .join('<br>');
+
+            const card = `
+                <div class="glass p-4 rounded-2xl mb-3 text-[10px]">
+                    <p class="font-bold text-blue-400">${o.username}</p>
+                    <p class="text-gray-400 mb-2">${o.email}</p>
+                    <p class="mb-3">${items}</p>
+
+                    ${
+                        o.rejectReason 
+                        ? `<p class="text-red-400 text-[9px] mb-2">Alasan: ${o.rejectReason}</p>` 
+                        : ""
+                    }
+
+                    <div class="flex gap-2 flex-wrap">
+                        ${
+                            o.status === "Pending" && !isProcessingExist
+                            ? `<button onclick="updateStat('${id}','Diproses')" class="bg-blue-600 px-3 py-2 rounded font-bold">PROSES</button>`
+                            : ""
+                        }
+
+                        ${
+                            o.status === "Diproses"
+                            ? `<button onclick="updateStat('${id}','Selesai')" class="bg-green-600 px-3 py-2 rounded font-bold">SELESAI</button>`
+                            : ""
+                        }
+
+                        ${
+                            o.status === "Pending" || o.status === "Diproses"
+                            ? `<button onclick="rejectOrder('${id}')" class="bg-red-600 px-3 py-2 rounded font-bold">TOLAK</button>`
+                            : ""
+                        }
+
+                        <button onclick="delOrder('${id}')" class="text-red-400 ml-auto">Hapus</button>
+                    </div>
+                </div>
+            `;
+
+            if (o.status === "Pending") pendingEl.innerHTML += card;
+            else if (o.status === "Diproses") processEl.innerHTML += card;
+            else if (o.status === "Selesai") doneEl.innerHTML += card;
+            else if (o.status === "Ditolak") rejectEl.innerHTML += card;
+
+        });
+    });
+}
 
         window.handleAuth = async () => {
             const email = document.getElementById('auth-email').value;
@@ -252,7 +329,7 @@
             const list = document.getElementById('product-list');
             list.innerHTML += `
                 <div class="glass rounded-2xl overflow-hidden p-2 flex flex-col product-item" data-name="${p.name.toLowerCase()}">
-                    <img src="${p.images?.[0]}" class="w-full h-32 object-cover rounded-xl mb-2" onclick="viewDetail('${p.id}')">
+                    <img src="${p.images?.[0] || p.image || 'https://via.placeholder.com/300'}" class="w-full h-32 object-cover rounded-xl mb-2" onclick="viewDetail('${p.id}')">
                     <p class="text-[11px] font-bold truncate">${p.name}</p>
                     <p class="text-blue-400 font-bold text-xs mt-auto">Rp ${Number(p.price).toLocaleString()}</p>
                     <p class="text-[10px] text-gray-400">Stok: ${p.stock ?? 0}</p>
@@ -308,7 +385,8 @@
             const current = userCart[id]?.qty || 0;
             if (current >= p.stock) return alert("Stok habis!");
             await update(ref(db, `carts/${auth.currentUser.uid}/${id}`), {
-                name: p.name, price: p.price, qty: current + 1, maxStock: p.stock, img: p.images[0], pid: id
+                name: p.name, price: p.price, qty: current + 1
+                , maxStock: p.stock, img: p.images?.[0] || p.image || 'https://via.placeholder.com/300', pid:
             });
         };
         
@@ -466,32 +544,7 @@ Total: Rp ${total.toLocaleString()}
         };
 
         // --- ADMIN PANEL REAL-TIME ---
-        function listenAdminOrders() {
-            onValue(ref(db, 'orders'), (snap) => {
-                const p = document.getElementById('admin-pending');
-                const pr = document.getElementById('admin-process');
-                const d = document.getElementById('admin-done');
-                p.innerHTML = ""; pr.innerHTML = ""; d.innerHTML = "";
-
-                snap.forEach(child => {
-                    const o = child.val(); const id = child.key;
-                    const card = `
-                        <div class="glass p-4 rounded-2xl mb-3 text-[10px]">
-                            <p class="font-bold text-blue-400 mb-1">${o.username} (${o.email})</p>
-                            <p class="mb-3 text-white">${Object.values(o.items).map(i=>i.name + ' (' + i.qty + 'x)').join('<br>')}</p>
-                            <div class="flex gap-2">
-                                ${o.status==='Pending'?`<button onclick="updateStat('${id}', 'Diproses')" class="bg-blue-600 px-3 py-2 rounded font-bold">PROSES</button>`:''}
-                                ${o.status==='Diproses'?`<button onclick="updateStat('${id}', 'Selesai')" class="bg-green-600 px-3 py-2 rounded font-bold">SELESAI</button>`:''}
-                                <button onclick="delOrder('${id}')" class="text-red-500 ml-auto">Hapus</button>
-                            </div>
-                        </div>`;
-                    if(o.status === "Pending") p.innerHTML += card;
-                    else if(o.status === "Diproses") pr.innerHTML += card;
-                    else d.innerHTML += card;
-                });
-            });
-        }
-
+        
         // --- UTILS ---
         window.showPage = (id) => {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
@@ -507,20 +560,44 @@ Total: Rp ${total.toLocaleString()}
             document.querySelectorAll('[id^="tab-"]').forEach(t => t.classList.remove('tab-active'));
             document.getElementById('tab-' + tab).classList.add('tab-active');
         };
-        window.updateStat = async (id, s) => {
-    await update(ref(db, `orders/${id}`), { status: s });
+        window.updateStat = async (id, newStatus) => {
 
-    if(s === "Selesai") {
-        const snap = await get(ref(db, `orders/${id}`));
-        const order = snap.val();
+    const snap = await get(ref(db, `orders/${id}`));
+    const order = snap.val();
+    if (!order) return;
 
+    if (order.status === "Pending" && newStatus !== "Diproses") return;
+    if (order.status === "Diproses" && newStatus !== "Selesai") return;
+    if (order.status === "Ditolak") return;
+
+    await update(ref(db, `orders/${id}`), { status: newStatus });
+
+    if (newStatus === "Selesai") {
         Object.values(order.items).forEach(async item => {
             const prodSnap = await get(ref(db, `products/${item.pid}`));
             const prod = prodSnap.val();
             const newStock = (prod.stock || 0) - item.qty;
-            await update(ref(db, `products/${item.pid}`), { stock: newStock });
+
+            await update(ref(db, `products/${item.pid}`), { 
+                stock: newStock < 0 ? 0 : newStock 
+            });
         });
     }
+};
+window.rejectOrder = async (id) => {
+    const reason = prompt("Masukkan alasan penolakan:");
+    if (!reason) return alert("Alasan wajib diisi!");
+
+    await update(ref(db, `orders/${id}`), {
+        status: "Ditolak",
+        rejectReason: reason
+    });
+};
+window.delOrder = async (id) => {
+    const yakin = confirm("Hapus order ini?");
+    if (!yakin) return;
+
+    await remove(ref(db, `orders/${id}`));
 };
 
     </script>

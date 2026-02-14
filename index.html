@@ -385,9 +385,13 @@ if (data?.role === 'admin') {
             const current = userCart[id]?.qty || 0;
             if (current >= p.stock) return alert("Stok habis!");
             await update(ref(db, `carts/${auth.currentUser.uid}/${id}`), {
-                name: p.name, price: p.price, qty: current + 1
-                , maxStock: p.stock, img: p.images?.[0] || p.image || 'https://via.placeholder.com/300', pid:
-            });
+    name: p.name,
+    price: p.price,
+    qty: current + 1,
+    maxStock: p.stock,
+    img: p.images?.[0] || p.image || 'https://via.placeholder.com/300',
+    pid: id
+});
         };
         
         window.instantBuy = async (id) => {

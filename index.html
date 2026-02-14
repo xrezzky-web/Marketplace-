@@ -608,43 +608,63 @@ window.deleteAccount = async () => {
     }
 };
     window.createOrder = async (product) => {
-    const user = auth.currentUser;
-    if (!user) return alert("Login dulu!");
+    try {
+        const user = auth.currentUser;
 
-    const userSnap = await get(ref(db, 'users/' + user.uid));
-    const userData = userSnap.val();
+        if (!user) {
+            alert("Login dulu!");
+            return;
+        }
 
-    const orderSnap = await get(ref(db, "orders"));
-    let pendingCount = 0;
+        if (!product || !product.id || !product.name || !product.price) {
+            alert("Produk tidak valid!");
+            return;
+        }
 
-    if (orderSnap.exists()) {
-        orderSnap.forEach(child => {
-            const o = child.val();
-            if (o.userId === user.uid && o.status === "Pending") {
-                pendingCount++;
-            }
+        // Ambil data user
+        const userSnap = await get(ref(db, 'users/' + user.uid));
+        const userData = userSnap.exists() 
+            ? userSnap.val() 
+            : { username: "User" };
+
+        // Cek order pending
+        const orderSnap = await get(ref(db, "orders"));
+        let pendingCount = 0;
+
+        if (orderSnap.exists()) {
+            orderSnap.forEach(child => {
+                const o = child.val();
+                if (o.userId === user.uid && o.status === "Pending") {
+                    pendingCount++;
+                }
+            });
+        }
+
+        if (pendingCount >= 2) {
+            alert("Tunggu konfirmasi admin sebelum beli lagi!");
+            return;
+        }
+
+        // Buat order baru
+        await push(ref(db, "orders"), {
+            userId: user.uid,
+            username: userData.username || "User",
+            email: user.email || "",
+            productId: product.id,
+            productName: product.name,
+            image: product.images?.[0] || product.image || "",
+            price: product.price,
+            quantity: 1,
+            createdAt: Date.now(),
+            status: "Pending"
         });
+
+        alert("Pesanan berhasil dibuat!");
+
+    } catch (error) {
+        console.error("Error createOrder:", error);
+        alert("Terjadi kesalahan, cek console!");
     }
-
-    if (pendingCount >= 2) {
-        alert("Tunggu konfirmasi admin sebelum beli lagi!");
-        return;
-    }
-
-    await push(ref(db, "orders"), {
-        userId: user.uid,
-        username: userData.username,
-        email: user.email,
-        productId: product.id,
-        productName: product.name,
-        image: product.images ? product.images[0] : product.image,
-        price: product.price,
-        quantity: 1,
-        createdAt: Date.now(),
-        status: "Pending"
-    });
-
-    alert("Pesanan dibuat!");
 };
         
 window.loadCart = async () => {

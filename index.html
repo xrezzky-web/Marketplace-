@@ -220,748 +220,276 @@ Keranjang</button>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { 
-getAuth, 
-signInWithEmailAndPassword, 
-createUserWithEmailAndPassword, 
-onAuthStateChanged, 
-signOut, 
-sendPasswordResetEmail,
-updatePassword
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, set, get, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Konfigurasi Firebase sesuai permintaan Anda
-        const firebaseConfig = {
-            apiKey: "AIzaSyA75bdcfawOi957by8y_4-l4sJCCo6pF88",
-            authDomain: "xrezzkystore-marketplace-83bc0.firebaseapp.com",
-            databaseURL: "https://xrezzkystore-marketplace-83bc0-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "xrezzkystore-marketplace-83bc0",
-            storageBucket: "xrezzkystore-marketplace-83bc0.firebasestorage.app",
-            messagingSenderId: "604900856944",
-            appId: "1:604900856944:web:c48c973da45214c68a10b5"
-        };
+// =======================
+// 🔥 IMPORT FIREBASE
+// =======================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { 
+  getAuth,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { 
+  getDatabase,
+  ref,
+  onValue,
+  push,
+  update,
+  remove,
+  get
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-        
-        window.addEventListener("error", (e) => {
-    console.log("GLOBAL ERROR:", e.message);
-    document.getElementById('loader').classList.add('hidden');
+
+// =======================
+// 🔥 FIREBASE CONFIG
+// =======================
+const firebaseConfig = {
+  apiKey: "AIzaSyA75bdcfawOi957by8y_4-l4sJCCo6pF88",
+  authDomain: "xrezzkystore-marketplace-83bc0.firebaseapp.com",
+  databaseURL: "https://xrezzkystore-marketplace-83bc0-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "xrezzkystore-marketplace-83bc0",
+  storageBucket: "xrezzkystore-marketplace-83bc0.firebasestorage.app",
+  messagingSenderId: "604900856944",
+  appId: "1:604900856944:web:c48c973da45214c68a10b5"
+};
+
+// =======================
+// 🔥 INIT
+// =======================
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+let globalProducts = [];
+
+
+// =======================
+// 🔥 PAGE SWITCH
+// =======================
+function showPage(id){
+  document.querySelectorAll("section").forEach(sec=>{
+    sec.classList.add("hidden");
+  });
+  document.getElementById(id)?.classList.remove("hidden");
+}
+
+function hideLoader(){
+  document.getElementById("loader")?.classList.add("hidden");
+}
+
+
+// =======================
+// 🔥 AUTH CHECK
+// =======================
+onAuthStateChanged(auth, (user)=>{
+  if(!user){
+    showPage("page-auth");
+    hideLoader();
+    return;
+  }
+
+  showPage("page-marketplace");
+  listenProducts();
+  listenAdminOrders();
+  hideLoader();
 });
 
-        let isLoginMode = true;
-        let globalProducts = [];
-        let currentOrder = null;
-        let editingProductId = null;
-        // 1. AUTH LOGIC
-        window.toggleAuthMode = () => {
-            isLoginMode = !isLoginMode;
-            document.getElementById('reg-fields').classList.toggle('hidden', isLoginMode);
-            document.getElementById('auth-title').innerText = isLoginMode ? "Welcome Back" : "Join Us";
-            document.getElementById('btn-auth').innerText = isLoginMode ? "Login" : "Daftar Akun";
-            document.getElementById('auth-toggle-text').innerText = isLoginMode ? "Belum punya akun? Daftar sekarang" : "Sudah punya akun? Login";
-        };
 
-        window.handleAuth = async () => {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-pass').value;
-            const user = document.getElementById('auth-user').value;
+// =======================
+// 🔥 LOAD PRODUCTS
+// =======================
+function listenProducts(){
+  const productsRef = ref(db,"products");
 
-            if(!email || !pass) return alert("Isi semua data!");
+  onValue(productsRef,(snap)=>{
+    const container = document.getElementById("product-list");
+    container.innerHTML="";
+    globalProducts=[];
 
-            try {
-                if (isLoginMode) {
-                    await signInWithEmailAndPassword(auth, email, pass);
-                } else {
-                    const res = await createUserWithEmailAndPassword(auth, email, pass);
-                    await set(ref(db, 'users/' + res.user.uid), {
-    username: user || email.split('@')[0],
-    email: email,
-    role: email === "xrezzkystore.id@gmail.com" ? "admin" : "user",
-    joinDate: new Date().toLocaleDateString()
-});
-                }
-            } catch (e) { alert(e.message); }
-        };
+    if(!snap.exists()){
+      container.innerHTML="<p class='text-center text-gray-500 py-20'>Belum ada produk</p>";
+      return;
+    }
 
-        onAuthStateChanged(auth, (user) => {
-    const loader = document.getElementById('loader');
-    if (loader) loader.classList.add('hidden');
-            if (user) {
-              // LISTENER ORDER DIPROSES
-const orderRef = ref(db, "orders");
+    snap.forEach(child=>{
+      const id = child.key;
+      const p = child.val();
+      globalProducts.push({...p,id});
 
-onValue(orderRef, snapshot => {
-    snapshot.forEach(child => {
-        const order = child.val();
-        const id = child.key;
+      const isOut = p.stock <= 0;
+      const img = p.images?.[0] || p.image || "";
 
-        if (
-            order.userId === user.uid &&
-            order.status === "Diproses"
-        ) {
+      container.innerHTML += `
+      <div class="glass rounded-xl overflow-hidden cursor-pointer"
+        onclick="viewDetail('${id}')">
 
-            currentOrder = { ...order, id };
+        <div class="relative h-40">
 
-            document.getElementById("notifImage").src = order.image;
-            document.getElementById("notifName").innerText = order.productName;
-            document.getElementById("notifPrice").innerText =
-                "Harga: Rp " + order.price;
+          ${auth.currentUser?.email === "xrezzkystore.id@gmail.com" ? `
+            <button onclick="event.stopPropagation();editProduct('${id}')"
+            class="absolute top-2 left-2 bg-yellow-500 text-xs px-2 py-1 rounded">
+            Edit</button>` : ''}
 
-            document.getElementById("floatingOrderNotif")
-                .classList.remove("hidden");
-        }
-    });
-});
-              document.getElementById("username-display").innerText = user.email;
-listenUserOrders(user.uid);
-                showPage('page-marketplace');
-                fetchUserData(user.uid);
-                listenProducts();
-                listenStats();
-            } else {
-                showPage('page-auth');
-            }
-        });
+          ${auth.currentUser?.email === "xrezzkystore.id@gmail.com" ? `
+            <button onclick="event.stopPropagation();deleteProduct('${id}')"
+            class="absolute top-2 right-2 bg-red-600 text-xs px-2 py-1 rounded">
+            Hapus</button>` : ''}
 
-        async function fetchUserData(uid) {
-            const snap = await get(ref(db, 'users/' + uid));
-            if(snap.exists()){
-                const data = snap.val();
-                document.getElementById('user-name-display').innerText = data.username;
-                document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${data.username}&background=3b82f6&color=fff`;
-            }
-        }
+          <img src="${img}" class="w-full h-full object-cover">
 
-        // 2. PRODUCT LOGIC (USER)
-        function listenProducts() {
-            onValue(ref(db, 'products'), (snap) => {
-                const data = snap.val();
-                const container = document.getElementById('product-list');
-                container.innerHTML = "";
-                globalProducts = [];
-                
-                if(!data) {
-                    container.innerHTML = `<p class="col-span-full text-center text-gray-600 py-20">Belum ada produk tersedia.</p>`;
-                    return;
-                }
-
-                for(let id in data) {
-                    const p = data[id];
-                    globalProducts.push({...p, id});
-                    const isOut = p.stock <= 0;
-                    
-                    container.innerHTML += `
-<div class="glass rounded-2xl overflow-hidden group cursor-pointer transition-all hover:scale-[1.02]" onclick="viewDetail('${id}')">
-    
-    <div class="relative h-40">
-
-        ${auth.currentUser?.email === "xrezzkystore.id@gmail.com" ? 
-        `<button onclick="event.stopPropagation(); editProduct('${id}')" 
-        class="absolute top-2 left-2 bg-yellow-500 text-xs px-2 py-1 rounded">
-        Edit</button>` : ''}
-
-        ${auth.currentUser?.email === "xrezzkystore.id@gmail.com" ? 
-        `<button onclick="event.stopPropagation(); deleteProduct('${id}')" 
-        class="absolute top-2 right-2 bg-red-600 text-xs px-2 py-1 rounded">
-        Hapus</button>` : ''}
-
-        <img src="${p.images ? p.images[0] : p.image}" 
-        class="w-full h-full object-cover">
-
-        ${isOut ? 
-        `<div class="absolute inset-0 bg-black/70 flex items-center justify-center text-xs font-bold text-red-500">
-        HABIS
-        </div>` : ''}
-
-    </div>
-
-    <div class="p-3">
-        <h3 class="font-bold text-sm truncate mb-1">${p.name}</h3>
-        <div class="flex justify-between items-center">
-            <p class="text-blue-500 font-bold text-sm">
-            Rp ${Number(p.price).toLocaleString()}
-            </p>
-            <p class="text-[9px] text-gray-500">
-            Sisa ${p.stock} • Terjual ${p.sold || 0}
-            </p>
+          ${isOut ? `
+          <div class="absolute inset-0 bg-black/70 flex items-center justify-center text-red-500 text-xs font-bold">
+          HABIS
+          </div>` : ""}
         </div>
-    </div>
-</div>
-`;
 
-        onValue(ref(db, 'orders'), (snap) => {
-    const list = document.getElementById('admin-order-list');
-    if (!list) return;
-
-    list.innerHTML = "";
-
-    snap.forEach(child => {
-        const o = child.val();
-
-        list.innerHTML += `
-            <div class="bg-slate-800 p-3 rounded border border-slate-700">
-                <p class="text-xs font-bold text-blue-400">${o.productName || "-"}</p>
-                <p class="text-[10px] text-gray-400">${o.username || "-"}</p>
-                <p class="text-[10px] text-gray-500">${o.email || "-"}</p>
-                <p class="text-[10px] ${
-                    o.status === "Pending"
-                        ? "text-yellow-400"
-                        : "text-green-400"
-                }">
-                    ${o.status || "-"}
-                </p>
-                <button onclick="confirmOrder('${child.key}')" 
-                class="text-green-500 text-xs mt-1">
-                    Konfirmasi
-                </button>
-            </div>
-        `;
-    });
-
-});
-
-        window.viewDetail = (id) => {
-            const p = globalProducts.find(x => x.id === id);
-            loadRatings(id);
-            document.getElementById("btn-cart").onclick = () => 
-    addToCart(p.id, p.stock);
-
-            document.getElementById('m-title').innerText = p.name;
-            document.getElementById('m-price').innerText = "Rp " + Number(p.price).toLocaleString();
-            document.getElementById('m-desc').innerText = p.description;
-            let firstImg = p.images ? p.images[0] : p.image;
-            document.getElementById('m-img').src = firstImg;
-            document.getElementById('m-stock').innerText = p.stock > 0 ? `Stok: ${p.stock}` : "Stok Habis";
-            
-            const btnWa = document.getElementById('btn-wa');
-            if(p.stock <= 0) {
-                btnWa.disabled = true;
-                btnWa.classList.replace('bg-green-600', 'bg-slate-700');
-                btnWa.innerText = "Stok Habis";
-            } else {
-                btnWa.disabled = false;
-                btnWa.className = "bg-green-600 py-4 rounded-2xl font-bold flex items-center justify-center gap-2";
-                btnWa.innerHTML = `<i class="fab fa-whatsapp text-xl"></i> Beli Sekarang`;
-                btnWa.onclick = () => {
-                createOrder(p);
-                window.open(`https://wa.me/6288293064112?text=Halo Admin, saya mau order *${p.name}*`);
-                
-        };
-            }
-
-            document.getElementById('modal-detail').classList.remove('hidden');
-        };
-
-        // 3. ADMIN LOGIC
-        window.checkAdminAccess = async () => {
-    const user = auth.currentUser;
-    if (!user) return alert("Login dulu!");
-
-    const snap = await get(ref(db, 'users/' + user.uid));
-    const data = snap.val();
-
-    if (data.role === "admin") {
-        showPage('page-admin');
-    } else {
-        alert("Bukan admin!");
-    }
-};
-
-        window.saveProduct = async () => {
-    const name = document.getElementById('p-name').value;
-    const price = document.getElementById('p-price').value;
-    const img = document.getElementById('p-img').value;
-    const desc = document.getElementById('p-desc').value;
-    const stock = document.getElementById('p-stock').value;
-
-    if (!name || !price || !img) 
-        return alert("Minimal nama, harga, dan foto diisi!");
-
-    const productData = {
-        name,
-        price: parseInt(price),
-        images: img.split(','),
-        description: desc,
-        stock: parseInt(stock),
-        updatedAt: Date.now()
-    };
-
-    if (editingProductId) {
-        await update(ref(db, 'products/' + editingProductId), productData);
-        alert("Produk berhasil diupdate!");
-        editingProductId = null;
-    } else {
-        await push(ref(db, 'products'), {
-            ...productData,
-            createdAt: Date.now()
-        });
-        alert("Produk berhasil ditambahkan!");
-    }
-
-    document.querySelectorAll('#page-admin input, #page-admin textarea')
-        .forEach(i => i.value = "");
-};
-
-        // 4. UTILS
-        window.searchProduct = (query) => {
-    const container = document.getElementById('product-list');
-    container.innerHTML = "";
-
-    const filtered = globalProducts.filter(p =>
-        p.name.toLowerCase().includes(query.toLowerCase())
-    );
-
-    filtered.forEach(p => {
-        const isOut = p.stock <= 0;
-
-        container.innerHTML += `
-        <div class="glass rounded-2xl overflow-hidden group cursor-pointer transition-all hover:scale-[1.02]" 
-        onclick="viewDetail('${p.id}')">
-
-            <div class="relative h-40">
-
-                ${auth.currentUser?.email === "xrezzkystore.id@gmail.com" ? 
-                `<button onclick="event.stopPropagation(); editProduct('${p.id}')" 
-                class="absolute top-2 left-2 bg-yellow-500 text-xs px-2 py-1 rounded">
-                Edit</button>` : ''}
-
-                <img src="${p.images ? p.images[0] : p.image}" 
-                class="w-full h-full object-cover">
-
-                ${isOut ? `
-                <div class="absolute inset-0 bg-black/70 flex items-center justify-center text-xs font-bold text-red-500">
-                HABIS
-                </div>` : ""}
-            </div>
-
-            <div class="p-3">
-                <h3 class="font-bold text-sm truncate mb-1">${p.name}</h3>
-                <div class="flex justify-between items-center">
-                    <p class="text-blue-500 font-bold text-sm">
-                    Rp ${Number(p.price).toLocaleString()}
-                    </p>
-                    <p class="text-[9px] text-gray-500">
-                    Sisa ${p.stock} • Terjual ${p.sold || 0}
-                    </p>
-                </div>
-            </div>
+        <div class="p-3">
+          <h3 class="font-bold text-sm truncate">${p.name}</h3>
+          <p class="text-blue-500 font-bold text-sm">
+          Rp ${Number(p.price).toLocaleString()}
+          </p>
+          <p class="text-xs text-gray-400">
+          Stok ${p.stock} • Terjual ${p.sold||0}
+          </p>
         </div>
-        `;
+      </div>`;
     });
-};
-        window.showPage = (id) => {
-            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-        };
-
-        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
-
-        window.resetPassword = () => {
-            const email = prompt("Masukkan Email Akun:");
-            if(email) {
-                sendPasswordResetEmail(auth, email).then(() => alert("Link reset terkirim ke email!")).catch(e => alert(e.message));
-            }
-        };
-
-        window.deleteUser = async (uid) => {
-            if(confirm("Hapus akun ini dari database?")) {
-                await remove(ref(db, 'users/' + uid));
-                alert("User terhapus!");
-            }
-        }
-        
-        window.deleteProduct = async (id) => {
-    if(confirm("Hapus produk ini?")) {
-
-        // Hapus Produk
-        await remove(ref(db, 'products/' + id));
-
-        // Hapus Semua Rating Produk Itu
-        await remove(ref(db, `ratings/${id}`));
-
-        alert("Produk dan semua rating berhasil dihapus!");
-    }
-};
-
-        window.toggleProfileMenu = () => {
-    document.getElementById('profile-menu').classList.toggle('hidden');
-};
-
-window.logoutUser = async () => {
-    await signOut(auth);
-};
-
-window.updateUsername = async () => {
-    const newName = document.getElementById('new-username').value;
-    const user = auth.currentUser;
-
-    if(newName) {
-        await update(ref(db, 'users/' + user.uid), {
-            username: newName
-        });
-        alert("Username diperbarui!");
-    }
-};
-
-window.changePassword = async () => {
-    const user = auth.currentUser;
-    const snap = await get(ref(db, 'users/' + user.uid));
-    const data = snap.val();
-
-    const now = Date.now();
-    const last = data.lastPasswordChange || 0;
-
-    if(now - last < 10800000) {
-        alert("Password hanya bisa diganti 3 jam sekali!");
-        return;
-    }
-
-    const newPass = prompt("Masukkan Password Baru:");
-    if(newPass) {
-        await updatePassword(user, newPass);
-        await update(ref(db, 'users/' + user.uid), {
-            lastPasswordChange: now
-        });
-        alert("Password berhasil diganti!");
-    }
-};
-
-window.deleteAccount = async () => {
-    const user = auth.currentUser;
-    if(confirm("Yakin hapus akun permanen?")) {
-        await remove(ref(db, 'users/' + user.uid));
-        await user.delete();
-        alert("Akun dihapus!");
-    }
-};
-    window.createOrder = async (product) => {
-    const user = auth.currentUser;
-    if (!user) return alert("Login dulu!");
-
-    const userSnap = await get(ref(db, 'users/' + user.uid));
-    const userData = userSnap.val();
-
-    const orderSnap = await get(ref(db, "orders"));
-    let pendingCount = 0;
-
-    if (orderSnap.exists()) {
-        orderSnap.forEach(child => {
-            const o = child.val();
-            if (o.userId === user.uid && o.status === "Pending") {
-                pendingCount++;
-            }
-        });
-    }
-
-    if (pendingCount >= 2) {
-        alert("Tunggu konfirmasi admin sebelum beli lagi!");
-        return;
-    }
-
-    await push(ref(db, "orders"), {
-        userId: user.uid,
-        username: userData.username,
-        email: user.email,
-        productId: product.id,
-        productName: product.name,
-        image: product.images ? product.images[0] : product.image,
-        price: product.price,
-        quantity: 1,
-        createdAt: Date.now(),
-        status: "Pending"
-    });
-
-    alert("Pesanan dibuat!");
-};
-        
-window.loadCart = async () => {
-    const user = auth.currentUser;
-    const cartRef = ref(db, `carts/${user.uid}`);
-
-    onValue(cartRef, async (snapshot) => {
-        const container = document.getElementById("cartList");
-        container.innerHTML = "";
-
-        snapshot.forEach(async (child) => {
-            const productId = child.key;
-            const qty = child.val().quantity;
-
-            const productSnap = await get(ref(db, `products/${productId}`));
-            const product = productSnap.val();
-
-            container.innerHTML += `
-                <div>
-                    ${product.name} 
-                    <button onclick="changeQty('${productId}', -1, ${product.stock})">-</button>
-                    ${qty}
-                    <button onclick="changeQty('${productId}', 1, ${product.stock})">+</button>
-                    <button onclick="removeCart('${productId}')">Hapus</button>
-                </div>
-            `;
-        });
-    });
-};
-        
-window.changeQty = async (productId, change, stock) => {
-    const user = auth.currentUser;
-    const cartRef = ref(db, `carts/${user.uid}/${productId}`);
-    const snapshot = await get(cartRef);
-
-    let qty = snapshot.val().quantity + change;
-
-    if (qty < 1) return alert("Minimal beli 1!");
-    if (qty > stock) return alert("Melebihi stok!");
-
-    await update(cartRef, { quantity: qty });
-};
-
-window.removeCart = async (productId) => {
-    const user = auth.currentUser;
-    await remove(ref(db, `carts/${user.uid}/${productId}`));
-};
-        
-window.checkout = async () => {
-    const user = auth.currentUser;
-    const cartSnap = await get(ref(db, `carts/${user.uid}`));
-    const userSnap = await get(ref(db, 'users/' + user.uid));
-    const userData = userSnap.val();
-    if (!cartSnap.exists()) return alert("Keranjang kosong!");
-
-    const items = cartSnap.val();
-    let total = 0;
-
-for (let productId in items) {
-    const productSnap = await get(ref(db, `products/${productId}`));
-    const product = productSnap.val();
-
-    if (items[productId].quantity > product.stock) {
-        return alert("Stok tidak cukup untuk " + product.name);
-    }
-
-    total += product.price * items[productId].quantity;
-}
-  
-    await push(ref(db, "orders"), {
-      username: userData.username,
-        userId: user.uid,
-        email: user.email,
-        name: user.displayName || "User",
-        items: items,
-        totalprice: total,
-        createdAt: Date.now(),
-        status: "Pending"
-    });
-
-    await remove(ref(db, `carts/${user.uid}`));
-    alert("Pesanan dikirim!");
-};
-        
-window.sendRating = async (productId, star, review) => {
-    const user = auth.currentUser;
-    const ratingRef = ref(db, `ratings/${productId}/${user.uid}`);
-
-    const snap = await get(ratingRef);
-    if (snap.exists()) return alert("Kamu sudah rating!");
-   
-   const orderSnap = await get(ref(db,"orders"));
-let allowed = false;
-
-orderSnap.forEach(child=>{
-   const o = child.val();
-   if(
-      o.userId === user.uid &&
-      o.status === "Selesai" &&
-      o.items &&
-      o.items[productId]
-   ){
-       allowed = true;
-   }
-});
-
-if(!allowed){
-   alert("Rating hanya untuk produk yang sudah kamu beli & selesai!");
-   return;
+  });
 }
 
-    await set(ratingRef, {
-        name: user.displayName || "User",
-        email: user.email,
-        star: star,
-        review: review,
-        createdAt: Date.now()
-    });
 
-    alert("Rating dikirim!");
-};
-        
-window.loadRatings = (productId) => {
-    const ratingRef = ref(db, `ratings/${productId}`);
+// =======================
+// 🔥 DETAIL PRODUK
+// =======================
+window.viewDetail = function(id){
+  const p = globalProducts.find(x=>x.id===id);
+  if(!p) return alert("Produk tidak ditemukan");
 
-    onValue(ratingRef, (snapshot) => {
-        const container = document.getElementById("review-list");
-        container.innerHTML = "";
+  if(p.stock<=0) return alert("Stok habis");
 
-        if (!snapshot.exists()) {
-            container.innerHTML = `<p class="italic text-center text-gray-500">Belum ada ulasan untuk produk ini.</p>`;
-            return;
-        }
-
-        snapshot.forEach(child => {
-            const r = child.val();
-            const date = new Date(r.createdAt).toLocaleString();
-
-            container.innerHTML += `
-                <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
-                    <p class="text-yellow-400 font-bold">⭐ ${r.star}/5</p>
-                    <p class="text-xs">${r.name} (${r.email})</p>
-                    <p class="text-xs text-gray-400 mt-1">${r.review}</p>
-                    <p class="text-[10px] text-gray-500 mt-2">${date}</p>
-                </div>
-            `;
-        });
-    });
-};
-        
-window.openHistoryModal = () => {
-    const user = auth.currentUser;
-    if (!user) return alert("Login dulu!");
-
-    const orderRef = ref(db, "orders");
-
-    onValue(orderRef, (snapshot) => {
-        const container = document.getElementById("historyList");
-        container.innerHTML = "";
-
-        let found = false;
-
-        snapshot.forEach(child => {
-            const order = child.val();
-
-            if (order.userId === user.uid) {
-                found = true;
-                const date = new Date(order.createdAt).toLocaleString();
-
-                container.innerHTML += `
-                    <div class="bg-slate-800 p-3 rounded border border-slate-700">
-                        <p class="font-bold text-blue-400">
-                            ${order.productName || "Produk"}
-                        </p>
-                        <p class="text-[10px] text-gray-400">
-                            ${date}
-                        </p>
-                        <p class="text-[10px] ${
-                            order.status === "Pending" 
-                            ? "text-yellow-400" 
-                            : "text-green-400"
-                        }">
-                            ${order.status}
-                        </p>
-                    </div>
-                `;
-            }
-        });
-
-        if (!found) {
-            container.innerHTML = `
-                <p class="text-center text-gray-500">
-                    Belum ada transaksi
-                </p>
-            `;
-        }
-    });
-
-    document.getElementById("modal-history")
-        .classList.remove("hidden");
-};
-
-     function listenUserOrders(uid){
-    const orderRef = ref(db, "orders");
-
-    onValue(orderRef, (snap)=>{
-        let pending = 0;
-
-        snap.forEach(child=>{
-            const o = child.val();
-            if(o.userId === uid && o.status === "Pending"){
-                pending++;
-            }
-        });
-
-        const el = document.getElementById("order-status");
-        if(el){
-            el.innerText = pending > 0 ? `Order Pending: ${pending}` : "";
-        }
-    });
+  createOrder(p);
 }
 
-window.rejectOrder = async () => {
-    const reason = prompt("Alasan menolak transaksi?");
-    if (!reason) return;
 
-    await update(ref(db, "orders/" + currentOrder.id), {
-        status: "Ditolak",
-        rejectReason: reason
+// =======================
+// 🔥 CREATE ORDER
+// =======================
+async function createOrder(product){
+  const user = auth.currentUser;
+  if(!user) return alert("Login dulu!");
+
+  const orderSnap = await get(ref(db,"orders"));
+  let pendingCount=0;
+
+  if(orderSnap.exists()){
+    orderSnap.forEach(child=>{
+      const o = child.val();
+      if(o.userId===user.uid && o.status==="Pending"){
+        pendingCount++;
+      }
     });
+  }
 
-    alert("Transaksi ditolak");
-    document.getElementById("floatingOrderNotif")
-        .classList.add("hidden");
-};
-window.continueToWA = async () => {
+  if(pendingCount>=2){
+    alert("Tunggu konfirmasi admin dulu!");
+    return;
+  }
 
-    const message = `
-Halo Admin, saya ingin lanjut transaksi:
+  await push(ref(db,"orders"),{
+    userId:user.uid,
+    email:user.email,
+    productId:product.id,
+    productName:product.name,
+    price:product.price,
+    createdAt:Date.now(),
+    status:"Pending"
+  });
 
-Produk: ${currentOrder.productName}
-Harga: Rp ${currentOrder.price}
-Order ID: ${currentOrder.id}
-    `;
-
-    const phone = "628xxxxxxxxxx"; // ganti nomor lu
-
-    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-
-    window.open(url, "_blank");
-
-    await update(ref(db, "orders/" + currentOrder.id), {
-        status: "Selesai"
-    });
-
-    document.getElementById("floatingOrderNotif")
-        .classList.add("hidden");
-};
-
-window.editProduct = async (id) => {
-    const snap = await get(ref(db, 'products/' + id));
-    if (!snap.exists()) return;
-
-    const p = snap.val();
-
-    editingProductId = id;
-
-    document.getElementById('p-name').value = p.name;
-    document.getElementById('p-price').value = p.price;
-    document.getElementById('p-img').value = p.images ? p.images.join(',') : p.image;
-    document.getElementById('p-desc').value = p.description;
-    document.getElementById('p-stock').value = p.stock;
-
-    showPage('page-admin');
-};
-
-
-
-function deletePhoto(id) {
-    update(ref(db, "products/" + id), {
-        foto: ""
-    });
-
-    alert("Foto dihapus!");
+  alert("Pesanan dibuat!");
 }
+
+
+// =======================
+// 🔥 ADMIN LIST ORDER
+// =======================
+function listenAdminOrders(){
+  if(!auth.currentUser) return;
+  if(auth.currentUser.email!=="xrezzkystore.id@gmail.com") return;
+
+  const list = document.getElementById("admin-order-list");
+  const ordersRef = ref(db,"orders");
+
+  onValue(ordersRef,(snap)=>{
+    list.innerHTML="";
+
+    if(!snap.exists()){
+      list.innerHTML="<p class='text-xs text-gray-500'>Belum ada order</p>";
+      return;
+    }
+
+    snap.forEach(child=>{
+      const o = child.val();
+
+      list.innerHTML+=`
+      <div class="bg-slate-800 p-2 rounded text-xs">
+        <p class="font-bold text-blue-400">${o.productName}</p>
+        <p>${o.email}</p>
+        <p class="${o.status==="Pending"?"text-yellow-400":"text-green-400"}">
+        ${o.status}
+        </p>
+        <button onclick="confirmOrder('${child.key}')"
+        class="text-green-500 mt-1">Konfirmasi</button>
+      </div>`;
+    });
+  });
+}
+
+
+// =======================
+// 🔥 KONFIRMASI ORDER
+// =======================
+window.confirmOrder = async function(id){
+  await update(ref(db,"orders/"+id),{
+    status:"Selesai"
+  });
+}
+
+
+// =======================
+// 🔥 DELETE PRODUK
+// =======================
+window.deleteProduct = async function(id){
+  if(!confirm("Hapus produk ini?")) return;
+  await remove(ref(db,"products/"+id));
+}
+
+
+// =======================
+// 🔥 EDIT PRODUK (basic)
+// =======================
+window.editProduct = function(id){
+  const p = globalProducts.find(x=>x.id===id);
+  if(!p) return;
+
+  const newName = prompt("Nama baru:",p.name);
+  if(!newName) return;
+
+  update(ref(db,"products/"+id),{
+    name:newName
+  });
+}
+
+
+// =======================
+// 🔥 LOGOUT
+// =======================
+window.logout = function(){
+  signOut(auth);
+};
+
+</script>
+
         
-    </script>
 </body>
     </html> 

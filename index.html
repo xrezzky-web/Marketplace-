@@ -400,11 +400,64 @@ if (data?.role === 'admin') {
 });
         };
         
-        window.instantBuy = async (id) => {
-    const p = globalProducts.find(x => x.id === id);
-    if (!p || p.stock <= 0) return alert("Stok habis!");
+        async function checkOrderLimit(uid) {
+    const snap = await get(ref(db, `users/${uid}`));
+    const user = snap.val();
 
+    const now = Date.now();
+
+    if (!user.orderLimit) {
+        await update(ref(db, `users/${uid}`), {
+            orderLimit: 5,
+            lastOrderTime: now
+        });
+        return true;
+    }
+
+    const diff = now - (user.lastOrderTime || 0);
+    const twelveHours = 12 * 60 * 60 * 1000;
+
+    if (diff > twelveHours) {
+        await update(ref(db, `users/${uid}`), {
+            orderLimit: 5,
+            lastOrderTime: now
+        });
+        return true;
+    }
+
+    if (user.orderLimit <= 0) {
+        alert("Limit order habis. Tunggu 12 jam.");
+        return false;
+    }
+
+    await update(ref(db, `users/${uid}`), {
+        orderLimit: user.orderLimit - 1,
+        lastOrderTime: now
+    });
+
+    return true;
+}
+        
+        window.instantBuy = async (id) => {
     const user = auth.currentUser;
+    if (!user) return alert("Login dulu!");
+
+    const p = globalProducts.find(x => x.id === id);
+
+    if (!p || p.stock <= 0) {
+        await push(ref(db, "orders"), {
+            userId: user.uid,
+            username: document.getElementById('user-name-display').innerText,
+            email: user.email,
+            items: {},
+            status: "Ditolak",
+            rejectReason: "Stok habis otomatis",
+            createdAt: Date.now()
+        });
+        return alert("Stok habis, order otomatis ditolak.");
+    }
+
+    if (!(await checkOrderLimit(user.uid))) return;
 
     const orderData = {
         userId: user.uid,
@@ -436,6 +489,7 @@ Harga: Rp ${p.price.toLocaleString()}
 
         window.checkoutCart = async () => {
     if(Object.keys(userCart).length === 0) return;
+    if (!(await checkOrderLimit(auth.currentUser.uid))) return;
 
     const orderData = {
         userId: auth.currentUser.uid,
@@ -505,29 +559,57 @@ Total: Rp ${total.toLocaleString()}
         };
 
         // --- RATING & REVIEW SYSTEM ---
-        function listenUserHistory(uid) {
-            onValue(ref(db, 'orders'), (snap) => {
-                const cont = document.getElementById('user-history');
-                cont.innerHTML = "";
-                snap.forEach(child => {
-                    const o = child.val();
-                    if(o.userId === uid) {
-                        const items = Object.values(o.items);
-                        cont.innerHTML += `
-                            <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 text-[10px]">
-                                <div class="flex justify-between mb-2">
-                                    <span class="text-gray-500">${new Date(o.createdAt).toLocaleDateString()}</span>
-                                    <span class="font-bold ${o.status==='Selesai'?'text-green-500':'text-yellow-500'}">${o.status.toUpperCase()}</span>
-                                </div>
-                                <p class="font-bold text-sm mb-3">${items.map(i=>i.name).join(', ')}</p>
-                                ${o.status === 'Selesai' && !o.isRated ? 
-                                `<button onclick="openReviewModal('${child.key}', '${items[0].pid}', '${items[0].name}')" class="w-full bg-blue-600/20 text-blue-400 py-2 rounded-lg font-bold">BERI NILAI</button>` : 
-                                o.isRated ? `<p class="text-center text-gray-600">Terima kasih atas ulasannya!</p>` : ''}
-                            </div>`;
-                    }
-                });
-            });
-        }
+       function listenUserHistory(uid) {
+    onValue(ref(db, 'orders'), (snap) => {
+        const cont = document.getElementById('user-history');
+        cont.innerHTML = "";
+
+        snap.forEach(child => {
+            const o = child.val();
+            if (o.userId === uid) {
+
+                const items = Object.values(o.items);
+                const waktu = new Date(o.createdAt);
+                const tanggal = waktu.toLocaleDateString();
+                const jam = waktu.toLocaleTimeString();
+
+                let warna = "text-yellow-500";
+                if (o.status === "Selesai") warna = "text-green-500";
+                if (o.status === "Ditolak") warna = "text-red-500";
+
+                const buktiText = `
+Order ID: ${child.key}
+Tanggal: ${tanggal}
+Jam: ${jam}
+Status: ${o.status}
+Produk: ${items.map(i=>i.name + " ("+i.qty+"x)").join(", ")}
+                `;
+
+                cont.innerHTML += `
+                    <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 text-[10px]">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-400">${tanggal} • ${jam}</span>
+                            <span class="font-bold ${warna}">
+                                ${o.status.toUpperCase()}
+                            </span>
+                        </div>
+
+                        <p class="font-bold text-sm mb-3">
+                            ${items.map(i=>i.name).join(', ')}
+                        </p>
+
+                        <button onclick="navigator.clipboard.writeText(\`${buktiText}\`);alert('Bukti disalin!')" 
+                        class="w-full bg-blue-600/20 text-blue-400 py-2 rounded-lg font-bold mb-2">
+                            COPY BUKTI
+                        </button>
+
+                        ${o.status === 'Selesai' && !o.isRated ? 
+                        `<button onclick="openReviewModal('${child.key}', '${items[0].pid}', '${items[0].name}')" class="w-full bg-green-600/20 text-green-400 py-2 rounded-lg font-bold">BERI NILAI</button>` : ''}
+                    </div>`;
+            }
+        });
+    });
+}
 
         window.openReviewModal = (oid, pid, pname) => {
             document.getElementById('review-product-name').innerText = pname;
@@ -584,15 +666,22 @@ Total: Rp ${total.toLocaleString()}
     await update(ref(db, `orders/${id}`), { status: newStatus });
 
     if (newStatus === "Selesai") {
-        Object.values(order.items).forEach(async item => {
+
+        // RESET LIMIT USER
+        await update(ref(db, `users/${order.userId}`), {
+            orderLimit: 5
+        });
+
+        // KURANGI STOK PRODUK
+        for (const item of Object.values(order.items)) {
             const prodSnap = await get(ref(db, `products/${item.pid}`));
             const prod = prodSnap.val();
             const newStock = (prod.stock || 0) - item.qty;
 
-            await update(ref(db, `products/${item.pid}`), { 
-                stock: newStock < 0 ? 0 : newStock 
+            await update(ref(db, `products/${item.pid}`), {
+                stock: newStock < 0 ? 0 : newStock
             });
-        });
+        }
     }
 };
 window.rejectOrder = async (id) => {

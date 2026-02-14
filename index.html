@@ -166,7 +166,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, set, get, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.app.js";
+        import { getDatabase, ref, set, get, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA75bdcfawOi957by8y_4-l4sJCCo6pF88",
@@ -275,7 +275,7 @@
 
         window.viewDetail = (id) => {
             const p = globalProducts.find(x => x.id === id);
-            document.getElementById('m-img').src = p.images[0];
+            document.getElementById('m-img').src = p.images?.[0] || "https://via.placeholder.com/300";
             document.getElementById('m-title').innerText = p.name;
             document.getElementById('m-price').innerText = "Rp " + Number(p.price).toLocaleString();
             document.getElementById('m-desc').innerText = p.description || "Premium Quality Product.";
@@ -353,7 +353,7 @@
         window.updateCartQty = async (id, change) => {
             const item = userCart[id];
             const newQty = item.qty + change;
-            if (newQty < 0) return banUser("Manipulasi stok.");
+            if (newQty < 0) return alert("Error stok.");
             if (newQty === 0) return remove(ref(db, `carts/${auth.currentUser.uid}/${id}`));
             await update(ref(db, `carts/${auth.currentUser.uid}/${id}`), { qty: newQty });
         };
@@ -460,6 +460,9 @@
                 description: document.getElementById('p-desc').value,
                 stock: parseInt(document.getElementById('p-stock').value)
             };
+            if(!data.name || !data.price || !data.images[0]) {
+    return alert("Lengkapi data dulu!");
+}
             await push(ref(db, 'products'), data); 
             alert("Produk Berhasil Ditambahkan!");
         };

@@ -255,6 +255,7 @@ updatePassword
         let isLoginMode = true;
         let globalProducts = [];
         let currentOrder = null;
+        let editingProductId = null;
         // 1. AUTH LOGIC
         window.toggleAuthMode = () => {
             isLoginMode = !isLoginMode;
@@ -354,28 +355,43 @@ listenUserOrders(user.uid);
                     const isOut = p.stock <= 0;
                     
                     container.innerHTML += `
-                        <div class="glass rounded-2xl overflow-hidden group cursor-pointer transition-all hover:scale-[1.02]" onclick="viewDetail('${id}')">
-                            <div class="relative h-40">
-                            ${auth.currentUser?.email === "xrezzkystore.id@gmail.com" ? 
-                           `<button onclick="deleteProduct('${id}')" 
-                              class="absolute top-2 right-2 bg-red-600 text-xs px-2 py-1 rounded">Hapus</button>` : ''}
-                                <img src="${p.images ? p.images[0] : p.image}" class="w-full h-full object-cover">
-                                ${isOut ? '<div class="absolute inset-0 bg-black/70 flex items-center justify-center text-xs font-bold text-red-500">HABIS</div>' : ''}
-                            </div>
-                            <div class="p-3">
-                                <h3 class="font-bold text-sm truncate mb-1">${p.name}</h3>
-                                <div class="flex justify-between items-center">
-                                    <p class="text-blue-500 font-bold text-sm">Rp ${Number(p.price).toLocaleString()}</p>
-                                   <p class="text-[9px] text-gray-500">
-Sisa ${p.stock} • Terjual ${p.sold || 0}
-</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-            });
-        }
+<div class="glass rounded-2xl overflow-hidden group cursor-pointer transition-all hover:scale-[1.02]" onclick="viewDetail('${id}')">
+    
+    <div class="relative h-40">
+
+        ${auth.currentUser?.email === "xrezzkystore.id@gmail.com" ? 
+        `<button onclick="event.stopPropagation(); editProduct('${id}')" 
+        class="absolute top-2 left-2 bg-yellow-500 text-xs px-2 py-1 rounded">
+        Edit</button>` : ''}
+
+        ${auth.currentUser?.email === "xrezzkystore.id@gmail.com" ? 
+        `<button onclick="event.stopPropagation(); deleteProduct('${id}')" 
+        class="absolute top-2 right-2 bg-red-600 text-xs px-2 py-1 rounded">
+        Hapus</button>` : ''}
+
+        <img src="${p.images ? p.images[0] : p.image}" 
+        class="w-full h-full object-cover">
+
+        ${isOut ? 
+        `<div class="absolute inset-0 bg-black/70 flex items-center justify-center text-xs font-bold text-red-500">
+        HABIS
+        </div>` : ''}
+
+    </div>
+
+    <div class="p-3">
+        <h3 class="font-bold text-sm truncate mb-1">${p.name}</h3>
+        <div class="flex justify-between items-center">
+            <p class="text-blue-500 font-bold text-sm">
+            Rp ${Number(p.price).toLocaleString()}
+            </p>
+            <p class="text-[9px] text-gray-500">
+            Sisa ${p.stock} • Terjual ${p.sold || 0}
+            </p>
+        </div>
+    </div>
+</div>
+`;
 
         onValue(ref(db, 'orders'), (snap) => {
     const list = document.getElementById('admin-order-list');
@@ -456,62 +472,39 @@ Sisa ${p.stock} • Terjual ${p.sold || 0}
 };
 
         window.saveProduct = async () => {
-            const name = document.getElementById('p-name').value;
-            const price = document.getElementById('p-price').value;
-            const img = document.getElementById('p-img').value;
-            const desc = document.getElementById('p-desc').value;
-            const stock = document.getElementById('p-stock').value;
+    const name = document.getElementById('p-name').value;
+    const price = document.getElementById('p-price').value;
+    const img = document.getElementById('p-img').value;
+    const desc = document.getElementById('p-desc').value;
+    const stock = document.getElementById('p-stock').value;
 
-            if(!name || !price || !img) return alert("Minimal nama, harga, dan foto diisi!");
+    if (!name || !price || !img) 
+        return alert("Minimal nama, harga, dan foto diisi!");
 
-            await push(ref(db, 'products'), {
-            name,
-            price,
-            images: img.split(','), // pisahkan pakai koma
-            description: desc,
-            stock: parseInt(stock),
-            createdAt: new Date().getTime()
-                
-    });
+    const productData = {
+        name,
+        price: parseInt(price),
+        images: img.split(','),
+        description: desc,
+        stock: parseInt(stock),
+        updatedAt: Date.now()
+    };
 
-            alert("Produk Berhasil Ditambahkan!");
-            // Reset Form
-            document.querySelectorAll('#page-admin input, #page-admin textarea').forEach(i => i.value = "");
-        };
-
-        function listenStats() {
-    onValue(ref(db, 'users'), (snap) => {
-        const data = snap.val();
-        document.getElementById('stat-users').innerText =
-            data ? Object.keys(data).length : 0;
-    });
-
-    onValue(ref(db, 'products'), (snap) => {
-        const data = snap.val();
-        document.getElementById('stat-prods').innerText =
-            data ? Object.keys(data).length : 0;
-    });
-
-    onValue(ref(db, 'users'), (snap) => {
-        const list = document.getElementById('admin-user-list');
-        list.innerHTML = "";
-
-        snap.forEach(child => {
-            const u = child.val();
-            list.innerHTML += `
-                <div class="flex justify-between items-center bg-slate-800 p-3 rounded-lg border border-slate-700">
-                    <div>
-                        <p class="font-bold text-xs">${u.username}</p>
-                        <p class="text-[10px] text-gray-500">${u.email}</p>
-                    </div>
-                    <button onclick="deleteUser('${child.key}')" class="text-red-500 hover:text-red-400 text-xs">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                </div>
-            `;
+    if (editingProductId) {
+        await update(ref(db, 'products/' + editingProductId), productData);
+        alert("Produk berhasil diupdate!");
+        editingProductId = null;
+    } else {
+        await push(ref(db, 'products'), {
+            ...productData,
+            createdAt: Date.now()
         });
-    });
-        }
+        alert("Produk berhasil ditambahkan!");
+    }
+
+    document.querySelectorAll('#page-admin input, #page-admin textarea')
+        .forEach(i => i.value = "");
+};
 
         // 4. UTILS
         window.searchProduct = (query) => {
@@ -523,14 +516,27 @@ Sisa ${p.stock} • Terjual ${p.sold || 0}
     );
 
     filtered.forEach(p => {
+        const isOut = p.stock <= 0;
+
         container.innerHTML += `
-        <div class="glass rounded-2xl p-4">
-            <h3>${p.name}</h3>
-            <p>Rp ${Number(p.price).toLocaleString()}</p>
-        </div>
-        `;
-    });
-};
+            <div class="glass rounded-2xl overflow-hidden group cursor-pointer transition-all hover:scale-[1.02]" 
+            onclick="viewDetail('${p.id}')">
+
+                <div class="relative h-40">
+
+${auth.currentUser?.email === "xrezzkystore.id@gmail.com" ? 
+`<button onclick="event.stopPropagation(); editProduct('${p.id}')" 
+class="absolute top-2 left-2 bg-yellow-500 text-xs px-2 py-1 rounded">
+Edit</button>` : ''}
+
+<img src="${p.images ? p.images[0] : p.image}" 
+class="w-full h-full object-cover">
+
+${isOut ? `
+<div class="absolute inset-0 bg-black/70 flex items-center justify-center text-xs font-bold text-red-500">
+HABIS
+</div>` : ""}
+</div>
         window.showPage = (id) => {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
@@ -912,6 +918,33 @@ Order ID: ${currentOrder.id}
     document.getElementById("floatingOrderNotif")
         .classList.add("hidden");
 };
+
+window.editProduct = async (id) => {
+    const snap = await get(ref(db, 'products/' + id));
+    if (!snap.exists()) return;
+
+    const p = snap.val();
+
+    editingProductId = id;
+
+    document.getElementById('p-name').value = p.name;
+    document.getElementById('p-price').value = p.price;
+    document.getElementById('p-img').value = p.images ? p.images.join(',') : p.image;
+    document.getElementById('p-desc').value = p.description;
+    document.getElementById('p-stock').value = p.stock;
+
+    showPage('page-admin');
+};
+
+
+
+function deletePhoto(id) {
+    update(ref(db, "products/" + id), {
+        foto: ""
+    });
+
+    alert("Foto dihapus!");
+}
         
     </script>
 </body>

@@ -12,11 +12,12 @@
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         .hidden { display: none; }
         .tab-active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
+        input[type="range"] { accent-color: #3b82f6; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
     </style>
 </head>
-<body class="pb-20">
+<body class="pb-24">
 
     <div id="loader" class="fixed inset-0 flex items-center justify-center bg-slate-900 z-[999]">
         <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-blue-500"></div>
@@ -24,10 +25,9 @@
 
     <div id="page-banned" class="hidden fixed inset-0 bg-red-950 flex items-center justify-center z-[1000] p-8 text-center">
         <div>
-            <i class="fa fa-ban text-6xl text-red-500 mb-4"></i>
-            <h1 class="text-3xl font-bold mb-2">ACCESS DENIED</h1>
-            <p id="ban-reason" class="text-red-300 mb-6"></p>
-            <p class="text-xs text-red-500/50">Device & UID Anda telah diblokir secara permanen.</p>
+            <i class="fa fa-hand-paper text-6xl text-red-500 mb-4"></i>
+            <h1 class="text-3xl font-bold mb-2">AKUN DIBLOKIR</h1>
+            <p id="ban-reason" class="text-red-300 mb-6 text-sm"></p>
         </div>
     </div>
 
@@ -39,26 +39,28 @@
                 <input type="email" id="auth-email" placeholder="Email" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
                 <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
                 <button onclick="handleAuth()" class="w-full bg-blue-600 py-4 rounded-xl font-bold hover:bg-blue-700 transition">Continue</button>
-                <p onclick="toggleAuthMode()" id="auth-toggle-text" class="text-center text-sm text-blue-400 cursor-pointer italic">Belum punya akun? Daftar</p>
+                <p onclick="toggleAuthMode()" id="auth-toggle-text" class="text-center text-xs text-blue-400 cursor-pointer italic">Belum punya akun? Daftar</p>
             </div>
         </div>
     </section>
 
     <section id="page-marketplace" class="hidden min-h-screen p-4">
-        <header class="flex justify-between items-center mb-6 sticky top-0 bg-[#0f172a] py-4 z-40">
+        <header class="flex justify-between items-center mb-6 py-4">
             <div onclick="showPage('page-profile')" class="flex items-center gap-3 cursor-pointer">
                 <img id="user-avatar" src="" class="w-10 h-10 rounded-full border-2 border-blue-500">
-                <p id="user-name-display" class="font-bold text-sm truncate w-24"></p>
+                <p id="user-name-display" class="font-bold text-sm truncate w-24">Guest</p>
             </div>
-            <div class="flex gap-2">
-                <button onclick="showCart()" class="relative p-3 bg-slate-800 rounded-full">
-                    <i class="fa fa-shopping-basket"></i>
-                    <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-[8px] px-1.5 rounded-full">0</span>
-                </button>
-            </div>
+            <button onclick="showCart()" class="relative p-3 bg-slate-800 rounded-full">
+                <i class="fa fa-shopping-basket"></i>
+                <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-[8px] px-1.5 rounded-full font-bold">0</span>
+            </button>
         </header>
         <div class="mb-6">
-            <input type="text" onkeyup="searchProduct(this.value)" placeholder="Cari produk impianmu..." class="w-full p-4 rounded-2xl bg-slate-800 border border-slate-700 outline-none text-sm">
+            <input type="text" id="search-input" onkeyup="searchProduct(this.value)" placeholder="Cari produk impianmu..." class="w-full p-4 rounded-2xl bg-slate-800 border border-slate-700 outline-none text-sm">
+        </div>
+        <div id="search-empty" class="hidden text-center py-10 opacity-50">
+            <i class="fa fa-search text-4xl mb-3"></i>
+            <p>Yah, yang kamu cari tidak ada</p>
         </div>
         <main id="product-list" class="grid grid-cols-2 md:grid-cols-4 gap-4"></main>
     </section>
@@ -71,90 +73,101 @@
         <div class="glass p-6 rounded-3xl text-center mb-6">
             <img id="p-avatar" src="" class="w-20 h-20 rounded-full mx-auto border-4 border-blue-500 mb-3">
             <h2 id="p-username" class="text-xl font-bold">---</h2>
-            <p id="p-email" class="text-gray-500 text-xs">---</p>
-            <button onclick="signOutUser()" class="mt-4 text-red-500 text-xs font-bold"><i class="fa fa-sign-out-alt"></i> Logout</button>
+            <button onclick="signOutUser()" class="mt-2 text-red-500 text-xs font-bold">Logout</button>
         </div>
-        <div class="glass p-6 rounded-3xl mb-6 space-y-4">
-            <p class="text-xs font-bold text-blue-400 italic">Pengaturan Akun</p>
-            <input type="text" id="new-username" placeholder="Username Baru" class="w-full p-3 bg-slate-800 rounded-xl border border-slate-700 text-sm">
-            <button onclick="updateUsername()" class="bg-blue-600 px-4 py-2 rounded-lg text-xs font-bold w-full">Update Username (24j)</button>
-            <hr class="border-slate-800 my-2">
-            <input type="password" id="new-password" placeholder="Password Baru" class="w-full p-3 bg-slate-800 rounded-xl border border-slate-700 text-sm">
-            <button onclick="updatePassword()" class="bg-red-900/50 text-red-400 px-4 py-2 rounded-lg text-xs font-bold w-full">Update Password (12j)</button>
-        </div>
+        
         <div class="glass p-6 rounded-3xl">
-            <h3 class="font-bold mb-4 flex justify-between">Riwayat Pesanan <i class="fa fa-history"></i></h3>
-            <div id="user-history" class="space-y-3"></div>
+            <h3 class="font-bold mb-4">Pesanan Saya</h3>
+            <div id="user-history" class="space-y-4"></div>
         </div>
     </section>
 
+    <div id="modal-review" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/90">
+        <div class="glass p-6 rounded-3xl w-full max-w-sm border border-blue-500/30 text-center">
+            <h3 class="text-lg font-bold mb-4">Beri Penilaian</h3>
+            <p id="review-product-name" class="text-blue-400 text-sm mb-4 font-bold"></p>
+            <div class="mb-4">
+                <p id="star-value" class="text-yellow-400 font-bold text-xl mb-1">5 ★</p>
+                <input type="range" id="star-range" min="1" max="5" value="5" class="w-full" oninput="document.getElementById('star-value').innerText = this.value + ' ★'">
+            </div>
+            <textarea id="review-text" placeholder="Tulis ulasan singkat..." class="w-full p-4 bg-slate-800 rounded-xl mb-4 text-sm outline-none border border-slate-700 h-24"></textarea>
+            <button id="btn-submit-review" class="w-full bg-blue-600 py-3 rounded-xl font-bold">Kirim Ulasan</button>
+            <button onclick="closeModal('modal-review')" class="mt-3 text-gray-500 text-xs">Batal</button>
+        </div>
+    </div>
+
     <section id="page-admin" class="hidden min-h-screen p-6">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-blue-500">Admin Control</h1>
-            <button onclick="showPage('page-marketplace')" class="bg-slate-700 px-4 py-2 rounded-lg text-xs">Home</button>
+            <h1 class="text-2xl font-bold text-blue-500">Admin</h1>
+            <button onclick="showPage('page-marketplace')" class="text-xs bg-slate-700 px-3 py-1.5 rounded-lg text-gray-400">Back</button>
         </div>
-        
-        <div class="flex border-b border-slate-800 mb-6 text-sm">
-            <button onclick="switchAdminTab('pending')" id="tab-pending" class="flex-1 py-3 tab-active">Konfirmasi</button>
-            <button onclick="switchAdminTab('process')" id="tab-process" class="flex-1 py-3">Proses</button>
-            <button onclick="switchAdminTab('done')" id="tab-done" class="flex-1 py-3">Selesai</button>
-            <button onclick="switchAdminTab('upload')" id="tab-upload" class="flex-1 py-3">Upload</button>
+        <div class="flex border-b border-slate-800 mb-4 text-[10px] font-bold">
+            <button onclick="switchAdminTab('pending')" id="tab-pending" class="flex-1 py-3 tab-active">KONFIRMASI</button>
+            <button onclick="switchAdminTab('process')" id="tab-process" class="flex-1 py-3">PROSES</button>
+            <button onclick="switchAdminTab('done')" id="tab-done" class="flex-1 py-3">SELESAI</button>
+            <button onclick="switchAdminTab('upload')" id="tab-upload" class="flex-1 py-3">STOK</button>
         </div>
-
         <div id="admin-pending" class="admin-tab"></div>
         <div id="admin-process" class="admin-tab hidden"></div>
         <div id="admin-done" class="admin-tab hidden"></div>
         <div id="admin-upload" class="admin-tab hidden glass p-6 rounded-2xl">
-            <input type="text" id="p-name" placeholder="Nama Produk" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700">
-            <input type="number" id="p-price" placeholder="Harga" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700">
-            <input type="text" id="p-img" placeholder="URL Foto" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700">
-            <textarea id="p-desc" placeholder="Deskripsi" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700"></textarea>
-            <input type="number" id="p-stock" placeholder="Stok" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700">
-            <button onclick="saveProduct()" class="w-full bg-green-600 py-3 rounded-xl font-bold">Simpan Produk</button>
+            <input type="text" id="p-name" placeholder="Nama Produk" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
+            <input type="number" id="p-price" placeholder="Harga" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
+            <input type="text" id="p-img" placeholder="URL Foto" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
+            <textarea id="p-desc" placeholder="Deskripsi" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm"></textarea>
+            <input type="number" id="p-stock" placeholder="Stok" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
+            <button onclick="saveProduct()" class="w-full bg-green-600 py-3 rounded-xl font-bold">Upload Produk</button>
         </div>
     </section>
 
-    <div id="modal-detail" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90">
-        <div class="bg-slate-900 w-full max-w-lg rounded-3xl overflow-hidden relative border border-slate-700">
+    <div id="modal-detail" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95">
+        <div class="bg-slate-900 w-full max-w-lg rounded-3xl overflow-hidden relative border border-slate-800 max-h-[90vh] overflow-y-auto">
             <img id="m-img" src="" class="w-full h-64 object-cover">
             <div class="p-6">
-                <h2 id="m-title" class="text-2xl font-bold mb-1"></h2>
-                <p id="m-price" class="text-blue-500 font-bold mb-4"></p>
-                <p id="m-desc" class="text-gray-400 text-sm mb-6 max-h-32 overflow-y-auto"></p>
-                <div class="grid grid-cols-2 gap-3">
-                    <button id="btn-buy-now" class="bg-green-600 py-4 rounded-2xl font-bold text-xs">BELI 1 SEKARANG</button>
+                <div class="flex justify-between items-start mb-2">
+                    <h2 id="m-title" class="text-xl font-bold"></h2>
+                    <p id="m-price" class="text-blue-500 font-bold text-lg"></p>
+                </div>
+                <p id="m-desc" class="text-gray-400 text-xs mb-6"></p>
+                
+                <div class="mb-6">
+                    <h4 class="text-xs font-bold mb-3 text-blue-400 uppercase tracking-widest">Ulasan Pembeli</h4>
+                    <div id="m-reviews" class="space-y-3"></div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 sticky bottom-0 bg-slate-900 py-2">
+                    <button id="btn-buy-now" class="bg-green-600 py-4 rounded-2xl font-bold text-xs">BELI SEKARANG</button>
                     <button id="btn-add-cart" class="bg-blue-600 py-4 rounded-2xl font-bold text-xs">+ KERANJANG</button>
                 </div>
-                <button onclick="closeModal('modal-detail')" class="w-full mt-4 text-gray-500 text-xs">Tutup</button>
+                <button onclick="closeModal('modal-detail')" class="w-full mt-4 text-gray-500 text-[10px]">TUTUP</button>
             </div>
         </div>
     </div>
 
     <div id="modal-cart" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95">
         <div class="bg-slate-900 w-full max-w-md rounded-3xl p-6 border border-slate-700">
-            <h2 class="text-xl font-bold mb-4 text-blue-500">Keranjang Kamu</h2>
-            <div id="cart-items" class="space-y-4 max-h-96 overflow-y-auto mb-6"></div>
-            <div class="flex justify-between items-center mb-6 border-t border-slate-800 pt-4">
-                <p class="text-sm">Total Belanja:</p>
+            <h2 class="text-xl font-bold mb-4 text-blue-500">Keranjang</h2>
+            <div id="cart-items" class="space-y-4 max-h-80 overflow-y-auto mb-6"></div>
+            <div class="flex justify-between items-center mb-6 pt-4 border-t border-slate-800">
+                <p class="text-sm">Total:</p>
                 <p id="cart-total" class="font-bold text-blue-400"></p>
             </div>
-            <button onclick="checkoutCart()" class="w-full bg-green-600 py-4 rounded-2xl font-bold">CHECKOUT VIA WA</button>
-            <button onclick="closeModal('modal-cart')" class="w-full mt-2 text-gray-500 text-xs">Nanti saja</button>
+            <button onclick="checkoutCart()" class="w-full bg-green-600 py-4 rounded-2xl font-bold">CHECKOUT (WA)</button>
+            <button onclick="closeModal('modal-cart')" class="w-full mt-2 text-gray-500 text-xs">Kembali</button>
         </div>
     </div>
 
     <nav class="fixed bottom-0 left-0 right-0 glass h-16 flex justify-around items-center z-50 border-t border-slate-800">
-        <button onclick="showPage('page-marketplace')" class="text-gray-400 hover:text-blue-500"><i class="fa fa-home text-xl"></i></button>
-        <button onclick="showPage('page-profile')" class="text-gray-400 hover:text-blue-500"><i class="fa fa-user text-xl"></i></button>
-        <button onclick="checkAdminAccess()" class="text-gray-400 hover:text-blue-500"><i class="fa fa-shield-alt text-xl"></i></button>
+        <button onclick="showPage('page-marketplace')" class="text-gray-400"><i class="fa fa-home text-xl"></i></button>
+        <button onclick="showPage('page-profile')" class="text-gray-400"><i class="fa fa-receipt text-xl"></i></button>
+        <button id="nav-admin" onclick="showPage('page-admin')" class="hidden text-gray-400"><i class="fa fa-shield-alt text-xl"></i></button>
     </nav>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword as authUpdatePass } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, set, get, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, set, get, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.app.js";
 
-        // CONFIG (Ganti dengan data asli Anda)
         const firebaseConfig = {
             apiKey: "AIzaSyA75bdcfawOi957by8y_4-l4sJCCo6pF88",
             authDomain: "xrezzkystore-marketplace-83bc0.firebaseapp.com",
@@ -173,7 +186,40 @@
         let userCart = {};
         let isLoginMode = true;
 
-        // --- AUTH LOGIC ---
+        // --- AUTH & ROLE ---
+        onAuthStateChanged(auth, async (user) => {
+            document.getElementById('loader').classList.add('hidden');
+            if (user) {
+                const s = await get(ref(db, `users/${user.uid}`));
+                const data = s.val();
+                if (data?.banned) {
+                    document.getElementById('page-banned').classList.remove('hidden');
+                    document.getElementById('ban-reason').innerText = data.banReason;
+                    return;
+                }
+                
+                // Role Detection
+                if(data?.role === 'admin') {
+                    document.getElementById('nav-admin').classList.remove('hidden');
+                    listenAdminOrders();
+                } else {
+                    document.getElementById('nav-admin').classList.add('hidden');
+                }
+
+                document.getElementById('user-name-display').innerText = data?.username;
+                document.getElementById('p-username').innerText = data?.username;
+                document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${data?.username}&background=3b82f6&color=fff`;
+                document.getElementById('p-avatar').src = `https://ui-avatars.com/api/?name=${data?.username}&background=3b82f6&color=fff`;
+                
+                showPage('page-marketplace');
+                listenProducts();
+                listenCart(user.uid);
+                listenUserHistory(user.uid);
+            } else {
+                showPage('page-auth');
+            }
+        });
+
         window.handleAuth = async () => {
             const email = document.getElementById('auth-email').value;
             const pass = document.getElementById('auth-pass').value;
@@ -183,38 +229,13 @@
                     const res = await createUserWithEmailAndPassword(auth, email, pass);
                     await set(ref(db, `users/${res.user.uid}`), {
                         username: document.getElementById('auth-user').value || email.split('@')[0],
-                        email: email, role: "user", banned: false
+                        email: email, role: email === 'xrezzkystore.id@gmail.com' ? "admin" : "user", banned: false
                     });
                 }
             } catch (e) { alert(e.message); }
         };
 
-        onAuthStateChanged(auth, async (user) => {
-            document.getElementById('loader').classList.add('hidden');
-            if (user) {
-                const s = await get(ref(db, `users/${user.uid}`));
-                const data = s.val();
-                if (data?.banned) {
-                    document.getElementById('page-banned').classList.remove('hidden');
-                    document.getElementById('ban-reason').innerText = "Alasan: " + data.banReason;
-                    return;
-                }
-                document.getElementById('user-name-display').innerText = data?.username;
-                document.getElementById('p-username').innerText = data?.username;
-                document.getElementById('p-email').innerText = data?.email;
-                document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${data?.username}&background=3b82f6&color=fff`;
-                document.getElementById('p-avatar').src = `https://ui-avatars.com/api/?name=${data?.username}&background=3b82f6&color=fff`;
-                showPage('page-marketplace');
-                listenProducts();
-                listenCart(user.uid);
-                listenUserHistory(user.uid);
-                if (data?.role === "admin") listenAdminOrders();
-            } else {
-                showPage('page-auth');
-            }
-        });
-
-        // --- PRODUCT & CART LOGIC ---
+        // --- MARKETPLACE & SEARCH ---
         function listenProducts() {
             onValue(ref(db, 'products'), (snap) => {
                 const list = document.getElementById('product-list');
@@ -222,49 +243,84 @@
                 snap.forEach(child => {
                     const p = child.val(); p.id = child.key;
                     globalProducts.push(p);
-                    list.innerHTML += `
-                        <div class="glass rounded-2xl overflow-hidden p-2" onclick="viewDetail('${p.id}')">
-                            <img src="${p.images?.[0]}" class="w-full h-32 object-cover rounded-xl mb-2">
-                            <p class="text-[11px] font-bold truncate">${p.name}</p>
-                            <p class="text-blue-400 font-bold text-xs">Rp ${Number(p.price).toLocaleString()}</p>
-                            <p class="text-[9px] text-gray-500 mt-1 italic">Stok: ${p.stock}</p>
-                        </div>`;
+                    renderProductCard(p);
                 });
             });
         }
+
+        function renderProductCard(p) {
+            const list = document.getElementById('product-list');
+            list.innerHTML += `
+                <div class="glass rounded-2xl overflow-hidden p-2 flex flex-col product-item" data-name="${p.name.toLowerCase()}">
+                    <img src="${p.images?.[0]}" class="w-full h-32 object-cover rounded-xl mb-2" onclick="viewDetail('${p.id}')">
+                    <p class="text-[11px] font-bold truncate">${p.name}</p>
+                    <p class="text-blue-400 font-bold text-xs mt-auto">Rp ${Number(p.price).toLocaleString()}</p>
+                </div>`;
+        }
+
+        window.searchProduct = (val) => {
+            const items = document.querySelectorAll('.product-item');
+            const query = val.toLowerCase();
+            let found = false;
+            items.forEach(item => {
+                if (item.getAttribute('data-name').includes(query)) {
+                    item.classList.remove('hidden');
+                    found = true;
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+            document.getElementById('search-empty').classList.toggle('hidden', found);
+        };
 
         window.viewDetail = (id) => {
             const p = globalProducts.find(x => x.id === id);
             document.getElementById('m-img').src = p.images[0];
             document.getElementById('m-title').innerText = p.name;
             document.getElementById('m-price').innerText = "Rp " + Number(p.price).toLocaleString();
-            document.getElementById('m-desc').innerText = p.description || "Tidak ada deskripsi.";
+            document.getElementById('m-desc').innerText = p.description || "Premium Quality Product.";
+            
+            // Render Reviews
+            const revCont = document.getElementById('m-reviews');
+            revCont.innerHTML = p.reviews ? "" : "<p class='text-[10px] text-gray-600'>Belum ada ulasan.</p>";
+            if(p.reviews) {
+                Object.values(p.reviews).forEach(r => {
+                    revCont.innerHTML += `
+                        <div class="bg-slate-800/50 p-3 rounded-xl">
+                            <div class="flex justify-between mb-1">
+                                <span class="text-[10px] font-bold text-blue-400">${r.user}</span>
+                                <span class="text-[10px] text-yellow-500">${r.stars} ★</span>
+                            </div>
+                            <p class="text-[10px] text-gray-300 italic">"${r.text}"</p>
+                        </div>`;
+                });
+            }
+
             document.getElementById('btn-buy-now').onclick = () => instantBuy(id);
             document.getElementById('btn-add-cart').onclick = () => addToCart(id);
             document.getElementById('modal-detail').classList.remove('hidden');
         };
 
+        // --- CART & ORDER LOGIC ---
         window.addToCart = async (id) => {
             const p = globalProducts.find(x => x.id === id);
             const current = userCart[id]?.qty || 0;
             if (current >= p.stock) return alert("Stok habis!");
             await update(ref(db, `carts/${auth.currentUser.uid}/${id}`), {
-                name: p.name, price: p.price, qty: current + 1, maxStock: p.stock, img: p.images[0]
+                name: p.name, price: p.price, qty: current + 1, maxStock: p.stock, img: p.images[0], pid: id
             });
-            alert("Berhasil masuk keranjang!");
         };
 
-        window.instantBuy = async (id) => {
-            const p = globalProducts.find(x => x.id === id);
-            if(p.stock < 1) return alert("Habis!");
+        window.checkoutCart = async () => {
+            if(Object.keys(userCart).length === 0) return;
             const orderData = {
                 userId: auth.currentUser.uid, username: document.getElementById('user-name-display').innerText,
-                email: auth.currentUser.email, items: {[id]: {name: p.name, price: p.price, qty: 1}},
-                status: "Pending", createdAt: Date.now()
+                email: auth.currentUser.email, items: userCart, status: "Pending", createdAt: Date.now()
             };
             await push(ref(db, 'orders'), orderData);
-            window.open(`https://wa.me/6288293064112?text=Halo Admin, saya beli langsung ${p.name} (1x)`);
-            closeModal('modal-detail');
+            await remove(ref(db, `carts/${auth.currentUser.uid}`));
+            window.open(`https://wa.me/6288293064112?text=Halo Admin, saya mau konfirmasi pesanan saya.`);
+            closeModal('modal-cart');
         };
 
         function listenCart(uid) {
@@ -281,19 +337,15 @@
             cont.innerHTML = ""; let total = 0;
             Object.entries(userCart).forEach(([id, item]) => {
                 total += item.price * item.qty;
-                cont.innerHTML += `
-                    <div class="flex items-center gap-3 bg-slate-800/50 p-3 rounded-2xl border border-slate-700">
-                        <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover">
-                        <div class="flex-1 text-[10px]">
-                            <p class="font-bold">${item.name}</p>
-                            <p class="text-blue-400">Rp ${Number(item.price).toLocaleString()}</p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="updateCartQty('${id}', -1)" class="bg-slate-700 w-6 h-6 rounded">-</button>
-                            <span class="text-xs font-bold">${item.qty}</span>
-                            <button onclick="updateCartQty('${id}', 1)" class="bg-slate-700 w-6 h-6 rounded">+</button>
-                        </div>
-                    </div>`;
+                cont.innerHTML += `<div class="flex items-center gap-3 bg-slate-800/50 p-3 rounded-2xl border border-slate-700">
+                    <img src="${item.img}" class="w-10 h-10 rounded-lg object-cover">
+                    <div class="flex-1 text-[10px]"><p class="font-bold">${item.name}</p></div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="updateCartQty('${id}', -1)" class="bg-slate-700 w-6 h-6 rounded">-</button>
+                        <span class="text-xs font-bold">${item.qty}</span>
+                        <button onclick="updateCartQty('${id}', 1)" class="bg-slate-700 w-6 h-6 rounded">+</button>
+                    </div>
+                </div>`;
             });
             document.getElementById('cart-total').innerText = "Rp " + total.toLocaleString();
         }
@@ -301,57 +353,12 @@
         window.updateCartQty = async (id, change) => {
             const item = userCart[id];
             const newQty = item.qty + change;
-            if (newQty < 0) return banUser("Manipulasi jumlah item negatif.");
-            if (newQty > item.maxStock) return alert("Melebihi stok!");
+            if (newQty < 0) return banUser("Manipulasi stok.");
             if (newQty === 0) return remove(ref(db, `carts/${auth.currentUser.uid}/${id}`));
             await update(ref(db, `carts/${auth.currentUser.uid}/${id}`), { qty: newQty });
         };
 
-        window.checkoutCart = async () => {
-            if(Object.keys(userCart).length === 0) return;
-            const orderData = {
-                userId: auth.currentUser.uid, username: document.getElementById('user-name-display').innerText,
-                email: auth.currentUser.email, items: userCart, status: "Pending", createdAt: Date.now()
-            };
-            await push(ref(db, 'orders'), orderData);
-            await remove(ref(db, `carts/${auth.currentUser.uid}`));
-            window.open(`https://wa.me/6288293064112?text=Halo Admin, saya checkout keranjang.`);
-            closeModal('modal-cart');
-        };
-
-        // --- PROFILE & SECURITY LOGIC ---
-        window.updateUsername = async () => {
-            const user = auth.currentUser;
-            const name = document.getElementById('new-username').value;
-            if(!name) return;
-            const s = await get(ref(db, `users/${user.uid}`));
-            const now = Date.now();
-            if (now - (s.val().lastUserUpdate || 0) < 24 * 3600000) return alert("Hanya bisa ganti 24 jam sekali!");
-            await update(ref(db, `users/${user.uid}`), { username: name, lastUserUpdate: now });
-            alert("Username Diperbarui!");
-        };
-
-        window.updatePassword = async () => {
-            const user = auth.currentUser;
-            const pass = document.getElementById('new-password').value;
-            if(pass.length < 6) return alert("Min 6 Karakter");
-            const s = await get(ref(db, `users/${user.uid}`));
-            const now = Date.now();
-            if (now - (s.val().lastPassUpdate || 0) < 12 * 3600000) return alert("Hanya bisa ganti 12 jam sekali!");
-            try {
-                await authUpdatePass(user, pass);
-                await update(ref(db, `users/${user.uid}`), { lastPassUpdate: now });
-                alert("Password Diperbarui!");
-            } catch (e) { alert("Login ulang dulu untuk ganti password."); }
-        };
-
-        async function banUser(reason) {
-            const user = auth.currentUser;
-            await update(ref(db, `users/${user.uid}`), { banned: true, banReason: reason });
-            location.reload();
-        }
-
-        // --- HISTORY & ADMIN REALTIME ---
+        // --- RATING & REVIEW SYSTEM ---
         function listenUserHistory(uid) {
             onValue(ref(db, 'orders'), (snap) => {
                 const cont = document.getElementById('user-history');
@@ -359,19 +366,49 @@
                 snap.forEach(child => {
                     const o = child.val();
                     if(o.userId === uid) {
+                        const items = Object.values(o.items);
                         cont.innerHTML += `
-                            <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-700 text-[10px]">
-                                <div class="flex justify-between mb-1 italic">
+                            <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 text-[10px]">
+                                <div class="flex justify-between mb-2">
                                     <span class="text-gray-500">${new Date(o.createdAt).toLocaleDateString()}</span>
-                                    <span class="${o.status==='Selesai'?'text-green-500':'text-yellow-500'} font-bold">${o.status}</span>
+                                    <span class="font-bold ${o.status==='Selesai'?'text-green-500':'text-yellow-500'}">${o.status.toUpperCase()}</span>
                                 </div>
-                                <p class="font-bold">${Object.values(o.items).map(i=>i.name).join(', ')}</p>
+                                <p class="font-bold text-sm mb-3">${items.map(i=>i.name).join(', ')}</p>
+                                ${o.status === 'Selesai' && !o.isRated ? 
+                                `<button onclick="openReviewModal('${child.key}', '${items[0].pid}', '${items[0].name}')" class="w-full bg-blue-600/20 text-blue-400 py-2 rounded-lg font-bold">BERI NILAI</button>` : 
+                                o.isRated ? `<p class="text-center text-gray-600">Terima kasih atas ulasannya!</p>` : ''}
                             </div>`;
                     }
                 });
             });
         }
 
+        window.openReviewModal = (oid, pid, pname) => {
+            document.getElementById('review-product-name').innerText = pname;
+            document.getElementById('modal-review').classList.remove('hidden');
+            document.getElementById('btn-submit-review').onclick = () => submitReview(oid, pid);
+        };
+
+        window.submitReview = async (oid, pid) => {
+            const stars = document.getElementById('star-range').value;
+            const text = document.getElementById('review-text').value;
+            if(!text) return alert("Tulis ulasan dulu!");
+
+            const reviewData = {
+                user: document.getElementById('user-name-display').innerText,
+                stars: stars,
+                text: text,
+                time: Date.now()
+            };
+
+            await push(ref(db, `products/${pid}/reviews`), reviewData);
+            await update(ref(db, `orders/${oid}`), { isRated: true });
+            
+            alert("Ulasan terkirim!");
+            closeModal('modal-review');
+        };
+
+        // --- ADMIN PANEL REAL-TIME ---
         function listenAdminOrders() {
             onValue(ref(db, 'orders'), (snap) => {
                 const p = document.getElementById('admin-pending');
@@ -383,12 +420,12 @@
                     const o = child.val(); const id = child.key;
                     const card = `
                         <div class="glass p-4 rounded-2xl mb-3 text-[10px]">
-                            <p class="font-bold text-blue-400 mb-2">${o.username} (${o.email})</p>
-                            <p class="mb-2 text-white">${Object.values(o.items).map(i=>i.name + ' (' + i.qty + 'x)').join('<br>')}</p>
+                            <p class="font-bold text-blue-400 mb-1">${o.username} (${o.email})</p>
+                            <p class="mb-3 text-white">${Object.values(o.items).map(i=>i.name + ' (' + i.qty + 'x)').join('<br>')}</p>
                             <div class="flex gap-2">
-                                ${o.status==='Pending'?`<button onclick="updateStatus('${id}', 'Diproses')" class="bg-blue-600 px-3 py-1.5 rounded font-bold">PROSES</button>`:''}
-                                ${o.status==='Diproses'?`<button onclick="updateStatus('${id}', 'Selesai')" class="bg-green-600 px-3 py-1.5 rounded font-bold">SELESAI</button>`:''}
-                                <button onclick="deleteOrder('${id}')" class="text-red-500 ml-auto">Hapus</button>
+                                ${o.status==='Pending'?`<button onclick="updateStat('${id}', 'Diproses')" class="bg-blue-600 px-3 py-2 rounded font-bold">PROSES</button>`:''}
+                                ${o.status==='Diproses'?`<button onclick="updateStat('${id}', 'Selesai')" class="bg-green-600 px-3 py-2 rounded font-bold">SELESAI</button>`:''}
+                                <button onclick="delOrder('${id}')" class="text-red-500 ml-auto">Hapus</button>
                             </div>
                         </div>`;
                     if(o.status === "Pending") p.innerHTML += card;
@@ -413,12 +450,8 @@
             document.querySelectorAll('[id^="tab-"]').forEach(t => t.classList.remove('tab-active'));
             document.getElementById('tab-' + tab).classList.add('tab-active');
         };
-        window.updateStatus = (id, stat) => update(ref(db, `orders/${id}`), { status: stat });
-        window.deleteOrder = (id) => confirm("Hapus?") && remove(ref(db, `orders/${id}`));
-        window.checkAdminAccess = async () => {
-            const s = await get(ref(db, `users/${auth.currentUser.uid}`));
-            if(s.val().role === "admin") showPage('page-admin'); else alert("Akses Admin Ditolak");
-        };
+        window.updateStat = (id, s) => update(ref(db, `orders/${id}`), { status: s });
+        window.delOrder = (id) => confirm("Hapus pesanan?") && remove(ref(db, `orders/${id}`));
         window.saveProduct = async () => {
             const data = {
                 name: document.getElementById('p-name').value,
@@ -427,8 +460,10 @@
                 description: document.getElementById('p-desc').value,
                 stock: parseInt(document.getElementById('p-stock').value)
             };
-            await push(ref(db, 'products'), data); alert("Produk Ditambah!");
+            await push(ref(db, 'products'), data); 
+            alert("Produk Berhasil Ditambahkan!");
         };
+
     </script>
 </body>
 </html>

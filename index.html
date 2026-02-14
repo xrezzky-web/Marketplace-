@@ -16,6 +16,53 @@
     </style>
 </head>
 <body>
+  
+  <div id="floatingOrderNotif"
+class="hidden fixed bottom-5 right-5 bg-slate-900 border border-blue-500 
+p-4 rounded-xl w-80 shadow-2xl z-[999]">
+
+  <h3 class="text-sm font-bold text-blue-400 mb-2">
+    Pesanan Diproses
+  </h3>
+
+  <img id="notifImage" class="w-full h-32 object-cover rounded mb-2"/>
+
+  <div class="text-xs space-y-1">
+    <p id="notifName"></p>
+    <p id="notifPrice"></p>
+  </div>
+
+  <div class="flex gap-2 mt-3">
+    <button onclick="rejectOrder()" 
+    class="bg-red-600 w-1/2 py-2 rounded text-xs">
+    Tolak
+    </button>
+
+    <button onclick="continueToWA()" 
+    class="bg-green-600 w-1/2 py-2 rounded text-xs">
+    Lanjutkan
+    </button>
+  </div>
+</div>
+
+  <div id="modal-history" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80">
+  <div class="bg-slate-900 w-full max-w-lg rounded-2xl border border-slate-700 p-6 relative">
+    
+    <button onclick="closeModal('modal-history')" 
+    class="absolute top-4 right-4 bg-white/10 p-2 rounded-full">
+    ✕
+    </button>
+
+    <h2 class="text-xl font-bold mb-4 text-blue-500">
+      Riwayat Transaksi
+    </h2>
+
+    <div id="historyList" class="space-y-3 max-h-96 overflow-y-auto text-xs">
+    </div>
+
+  </div>
+</div>
+
   <div>
   <span id="username-display"></span>
   <p id="order-status" class="text-[10px] text-yellow-400"></p>
@@ -93,6 +140,10 @@
 
         <div class="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-8 px-8 py-4 glass rounded-full z-50 shadow-2xl">
             <button onclick="showPage('page-marketplace')" class="text-blue-500"><i class="fa fa-home text-xl"></i></button>
+            <button onclick="openHistoryModal()" 
+class="bg-slate-800 px-4 py-2 rounded-full text-xs border border-slate-700">
+Riwayat
+</button>
             <a href="https://xrezzky-web.github.io/xrezzkystore/" class="bg-blue-600 p-4 rounded-full -mt-12 border-8 border-slate-900 shadow-xl"><i class="fa fa-shop text-white"></i></a>
             <button onclick="checkAdminAccess()" class="text-gray-400"><i class="fa fa-grid-2 text-xl"></i><i class="fa fa-user-shield text-xl"></i></button>
         </div>
@@ -203,7 +254,7 @@ updatePassword
 
         let isLoginMode = true;
         let globalProducts = [];
-
+        let currentOrder = null;
         // 1. AUTH LOGIC
         window.toggleAuthMode = () => {
             isLoginMode = !isLoginMode;
@@ -238,6 +289,31 @@ updatePassword
         onAuthStateChanged(auth, (user) => {
             document.getElementById('loader').classList.add('hidden');
             if (user) {
+              // LISTENER ORDER DIPROSES
+const orderRef = ref(db, "orders");
+
+onValue(orderRef, snapshot => {
+    snapshot.forEach(child => {
+        const order = child.val();
+        const id = child.key;
+
+        if (
+            order.userId === user.uid &&
+            order.status === "Diproses"
+        ) {
+
+            currentOrder = { ...order, id };
+
+            document.getElementById("notifImage").src = order.image;
+            document.getElementById("notifName").innerText = order.productName;
+            document.getElementById("notifPrice").innerText =
+                "Harga: Rp " + order.price;
+
+            document.getElementById("floatingOrderNotif")
+                .classList.remove("hidden");
+        }
+    });
+});
               document.getElementById("username-display").innerText = user.email;
 listenUserOrders(user.uid);
                 showPage('page-marketplace');
@@ -306,17 +382,21 @@ Sisa ${p.stock} • Terjual ${p.sold || 0}
     list.innerHTML = "";
 
     snap.forEach(child => {
-        const o = child.val();
-        list.innerHTML += `
-            <div class="bg-slate-800 p-3 rounded">
-                <p class="text-xs">${o.productName}</p>
-                <p class="text-[10px] text-yellow-400">${o.status}</p>
-                <button onclick="confirmOrder('${child.key}')" 
-                class="text-green-500 text-xs">
-                Konfirmasi</button>
-            </div>
-        `;
-    });
+    const o = child.val();
+
+    list.innerHTML += `
+        <div class="bg-slate-800 p-3 rounded border border-slate-700">
+            <p class="text-xs font-bold text-blue-400">${o.productName}</p>
+            <p class="text-[10px] text-gray-400">${o.username}</p>
+            <p class="text-[10px] text-gray-500">${o.email}</p>
+            <p class="text-[10px] ${o.status === "Pending" ? "text-yellow-400" : "text-green-400"}">
+                ${o.status}
+            </p>
+            <button onclick="confirmOrder('${child.key}')" 
+            class="text-green-500 text-xs mt-1">
+            Konfirmasi</button>
+        </div>
+    `;
 });
 
         window.viewDetail = (id) => {
@@ -531,15 +611,50 @@ window.deleteAccount = async () => {
     const user = auth.currentUser;
     if (!user) return alert("Login dulu!");
 
+    const userSnap = await get(ref(db, 'users/' + user.uid));
+    const userData = userSnap.val();
+    const orderSnap = await get(ref(db, "orders"));
+let pendingCount = 0;
+
+orderSnap.forEach(child => {
+    const o = child.val();
+    if (
+        o.userId === user.uid &&
+        o.status === "Pending"
+    ) {
+        pendingCount++;
+    }
+});
+
+if (pendingCount >= 2) {
+    alert("Tunggu konfirmasi admin sebelum beli lagi!");
+    return;
+}const orderSnap = await get(ref(db, "orders"));
+let pendingCount = 0;
+
+orderSnap.forEach(child => {
+    const o = child.val();
+    if (
+        o.userId === user.uid &&
+        o.status === "Pending"
+    ) {
+        pendingCount++;
+    }
+});
+
+if (pendingCount >= 2) {
+    alert("Tunggu konfirmasi admin sebelum beli lagi!");
+    return;
+}
+
     await push(ref(db, "orders"), {
         userId: user.uid,
+        username: userData.username,
         email: user.email,
-        items: {
-            [product.id]: {
-                quantity: 1,
-                price: product.price
-            }
-        },
+        productId: product.id,
+        productName: product.name,
+        quantity: 1,
+        price: product.price,
         createdAt: Date.now(),
         status: "Pending"
     });
@@ -567,38 +682,12 @@ window.addToCart = async (productId, stock) => {
         
 window.confirmOrder = async (id) => {
     const orderRef = ref(db, 'orders/' + id);
-    const snap = await get(orderRef);
-
-    if (!snap.exists()) return;
-
-    const order = snap.val();
-
-    for (let productId in order.items) {
-        const qty = order.items[productId].quantity;
-
-        const productRef = ref(db, `products/${productId}`);
-        const productSnap = await get(productRef);
-
-        if (!productSnap.exists()) continue;
-
-        const product = productSnap.val();
-
-        if (product.stock < qty) {
-            alert("Stok tidak cukup!");
-            return;
-        }
-
-        await update(productRef, {
-            stock: product.stock - qty,
-            sold: (product.sold || 0) + qty
-        });
-    }
 
     await update(orderRef, {
-        status: "Selesai"
+        status: "Diproses"
     });
 
-    alert("Pesanan dikonfirmasi & stok berkurang!");
+    alert("Pesanan diproses & notifikasi dikirim ke user!");
 };
         
 window.loadCart = async () => {
@@ -650,7 +739,8 @@ window.removeCart = async (productId) => {
 window.checkout = async () => {
     const user = auth.currentUser;
     const cartSnap = await get(ref(db, `carts/${user.uid}`));
-
+    const userSnap = await get(ref(db, 'users/' + user.uid));
+    const userData = userSnap.val();
     if (!cartSnap.exists()) return alert("Keranjang kosong!");
 
     const items = cartSnap.val();
@@ -668,6 +758,7 @@ for (let productId in items) {
 }
   
     await push(ref(db, "orders"), {
+      username: userData.username,
         userId: user.uid,
         email: user.email,
         name: user.displayName || "User",
@@ -747,29 +838,56 @@ window.loadRatings = (productId) => {
     });
 };
         
-window.loadHistory = () => {
+window.openHistoryModal = () => {
     const user = auth.currentUser;
+    if (!user) return alert("Login dulu!");
+
     const orderRef = ref(db, "orders");
 
     onValue(orderRef, (snapshot) => {
         const container = document.getElementById("historyList");
         container.innerHTML = "";
 
+        let found = false;
+
         snapshot.forEach(child => {
             const order = child.val();
 
             if (order.userId === user.uid) {
+                found = true;
                 const date = new Date(order.createdAt).toLocaleString();
 
                 container.innerHTML += `
-                    <div>
-                        Status: ${order.status} <br>
-                        Tanggal: ${date}
+                    <div class="bg-slate-800 p-3 rounded border border-slate-700">
+                        <p class="font-bold text-blue-400">
+                            ${order.productName || "Produk"}
+                        </p>
+                        <p class="text-[10px] text-gray-400">
+                            ${date}
+                        </p>
+                        <p class="text-[10px] ${
+                            order.status === "Pending" 
+                            ? "text-yellow-400" 
+                            : "text-green-400"
+                        }">
+                            ${order.status}
+                        </p>
                     </div>
                 `;
             }
         });
+
+        if (!found) {
+            container.innerHTML = `
+                <p class="text-center text-gray-500">
+                    Belum ada transaksi
+                </p>
+            `;
+        }
     });
+
+    document.getElementById("modal-history")
+        .classList.remove("hidden");
 };
 
      function listenUserOrders(uid){
@@ -791,6 +909,43 @@ window.loadHistory = () => {
         }
     });
 }
+
+window.rejectOrder = async () => {
+    const reason = prompt("Alasan menolak transaksi?");
+    if (!reason) return;
+
+    await update(ref(db, "orders/" + currentOrder.id), {
+        status: "Ditolak",
+        rejectReason: reason
+    });
+
+    alert("Transaksi ditolak");
+    document.getElementById("floatingOrderNotif")
+        .classList.add("hidden");
+};
+window.continueToWA = async () => {
+
+    const message = `
+Halo Admin, saya ingin lanjut transaksi:
+
+Produk: ${currentOrder.productName}
+Harga: Rp ${currentOrder.price}
+Order ID: ${currentOrder.id}
+    `;
+
+    const phone = "628xxxxxxxxxx"; // ganti nomor lu
+
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+    window.open(url, "_blank");
+
+    await update(ref(db, "orders/" + currentOrder.id), {
+        status: "Selesai"
+    });
+
+    document.getElementById("floatingOrderNotif")
+        .classList.add("hidden");
+};
         
     </script>
 </body>

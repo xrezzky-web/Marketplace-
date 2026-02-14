@@ -236,10 +236,13 @@ if (data?.role === 'admin') {
         doneEl.innerHTML = "";
         rejectEl.innerHTML = "";
 
+        if (!snap.exists()) return;
+
         let isProcessingExist = false;
 
         snap.forEach(child => {
-            if (child.val().status === "Diproses") {
+            const o = child.val();
+            if (o?.status === "Diproses") {
                 isProcessingExist = true;
             }
         });
@@ -248,14 +251,16 @@ if (data?.role === 'admin') {
             const o = child.val();
             const id = child.key;
 
+            if (!o || !o.items) return; // 🔥 ANTI ERROR
+
             const items = Object.values(o.items)
                 .map(i => `${i.name} (${i.qty}x)`)
                 .join('<br>');
 
             const card = `
                 <div class="glass p-4 rounded-2xl mb-3 text-[10px]">
-                    <p class="font-bold text-blue-400">${o.username}</p>
-                    <p class="text-gray-400 mb-2">${o.email}</p>
+                    <p class="font-bold text-blue-400">${o.username || '-'}</p>
+                    <p class="text-gray-400 mb-2">${o.email || '-'}</p>
                     <p class="mb-3">${items}</p>
 
                     ${
@@ -278,7 +283,7 @@ if (data?.role === 'admin') {
                         }
 
                         ${
-                            o.status === "Pending" || o.status === "Diproses"
+                            (o.status === "Pending" || o.status === "Diproses")
                             ? `<button onclick="rejectOrder('${id}')" class="bg-red-600 px-3 py-2 rounded font-bold">TOLAK</button>`
                             : ""
                         }

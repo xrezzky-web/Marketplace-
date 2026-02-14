@@ -18,6 +18,10 @@
     </style>
 </head>
 <body class="pb-24">
+  
+  <div id="profile-area">
+    <a href="login.html">Daftar / Login</a>
+</div>
 
     <div id="loader" class="fixed inset-0 flex items-center justify-center bg-slate-900 z-[999]">
         <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-blue-500"></div>
@@ -69,7 +73,10 @@
         <div class="flex items-center gap-4 mb-8">
             <button onclick="showPage('page-marketplace')"><i class="fa fa-arrow-left"></i></button>
             <h1 class="text-xl font-bold">Profil & Riwayat</h1>
+            
         </div>
+        <h2>Riwayat Transaksi</h2>
+<div id="user-orders"></div>
         <div class="glass p-6 rounded-3xl text-center mb-6">
             <img id="p-avatar" src="" class="w-20 h-20 rounded-full mx-auto border-4 border-blue-500 mb-3">
             <h2 id="p-username" class="text-xl font-bold">---</h2>
@@ -192,6 +199,8 @@
         onAuthStateChanged(auth, async (user) => {
             document.getElementById('loader').classList.add('hidden');
             if (user) {
+              loadUserOrders(user.uid);
+            
                 const s = await get(ref(db, `users/${user.uid}`));
                 const data = s.val();
                 if (data?.banned) {
@@ -379,6 +388,11 @@ if (data?.role === 'admin') {
                         </div>`;
                 });
             }
+            
+            if (!auth.currentUser) {
+    alert("Silakan login dulu untuk membeli.");
+    return;
+}
 
             document.getElementById('btn-buy-now').onclick = () => instantBuy(id);
             document.getElementById('btn-add-cart').onclick = () => addToCart(id);
@@ -443,7 +457,10 @@ if (data?.role === 'admin') {
     if (!user) return alert("Login dulu!");
 
     const p = globalProducts.find(x => x.id === id);
-
+if (!auth.currentUser) {
+    alert("Silakan login dulu untuk membeli.");
+    return;
+}
     if (!p || p.stock <= 0) {
         await push(ref(db, "orders"), {
             userId: user.uid,
@@ -699,6 +716,45 @@ window.delOrder = async (id) => {
 
     await remove(ref(db, `orders/${id}`));
 };
+function loadUserOrders(uid) {
+
+    const ordersRef = ref(db, "orders");
+
+    onValue(ordersRef, (snapshot) => {
+
+        const data = snapshot.val();
+        const container = document.getElementById("user-orders");
+        container.innerHTML = "";
+
+        if (!data) return;
+
+        Object.entries(data).forEach(([id, order]) => {
+
+            if (order.userId === uid) {
+
+                const date = new Date(order.createdAt);
+                const waktu = date.toLocaleString();
+
+                let warna = "#ccc";
+                if (order.status === "Pending") warna = "orange";
+                if (order.status === "Diproses") warna = "blue";
+                if (order.status === "Selesai") warna = "green";
+                if (order.status === "Ditolak") warna = "red";
+
+                container.innerHTML += `
+                    <div style="border:1px solid ${warna};padding:10px;margin:10px 0;">
+                        <b>Status:</b> <span style="color:${warna}">${order.status}</span><br>
+                        <b>Tanggal:</b> ${waktu}<br>
+                        <b>Email:</b> ${order.email}<br>
+                        <button onclick="navigator.clipboard.writeText(this.parentElement.innerText)">
+                            Copy Bukti
+                        </button>
+                    </div>
+                `;
+            }
+        });
+    });
+}
 
     </script>
 </body>

@@ -287,7 +287,8 @@ updatePassword
         };
 
         onAuthStateChanged(auth, (user) => {
-            document.getElementById('loader').classList.add('hidden');
+    const loader = document.getElementById('loader');
+    if (loader) loader.classList.add('hidden');
             if (user) {
               // LISTENER ORDER DIPROSES
 const orderRef = ref(db, "orders");
@@ -378,25 +379,33 @@ Sisa ${p.stock} • Terjual ${p.sold || 0}
 
         onValue(ref(db, 'orders'), (snap) => {
     const list = document.getElementById('admin-order-list');
-    if(!list) return;
+    if (!list) return;
+
     list.innerHTML = "";
 
     snap.forEach(child => {
-    const o = child.val();
+        const o = child.val();
 
-    list.innerHTML += `
-        <div class="bg-slate-800 p-3 rounded border border-slate-700">
-            <p class="text-xs font-bold text-blue-400">${o.productName}</p>
-            <p class="text-[10px] text-gray-400">${o.username}</p>
-            <p class="text-[10px] text-gray-500">${o.email}</p>
-            <p class="text-[10px] ${o.status === "Pending" ? "text-yellow-400" : "text-green-400"}">
-                ${o.status}
-            </p>
-            <button onclick="confirmOrder('${child.key}')" 
-            class="text-green-500 text-xs mt-1">
-            Konfirmasi</button>
-        </div>
-    `;
+        list.innerHTML += `
+            <div class="bg-slate-800 p-3 rounded border border-slate-700">
+                <p class="text-xs font-bold text-blue-400">${o.productName || "-"}</p>
+                <p class="text-[10px] text-gray-400">${o.username || "-"}</p>
+                <p class="text-[10px] text-gray-500">${o.email || "-"}</p>
+                <p class="text-[10px] ${
+                    o.status === "Pending"
+                        ? "text-yellow-400"
+                        : "text-green-400"
+                }">
+                    ${o.status || "-"}
+                </p>
+                <button onclick="confirmOrder('${child.key}')" 
+                class="text-green-500 text-xs mt-1">
+                    Konfirmasi
+                </button>
+            </div>
+        `;
+    });
+
 });
 
         window.viewDetail = (id) => {
@@ -608,63 +617,43 @@ window.deleteAccount = async () => {
     }
 };
     window.createOrder = async (product) => {
-    try {
-        const user = auth.currentUser;
+    const user = auth.currentUser;
+    if (!user) return alert("Login dulu!");
 
-        if (!user) {
-            alert("Login dulu!");
-            return;
-        }
+    const userSnap = await get(ref(db, 'users/' + user.uid));
+    const userData = userSnap.val();
 
-        if (!product || !product.id || !product.name || !product.price) {
-            alert("Produk tidak valid!");
-            return;
-        }
+    const orderSnap = await get(ref(db, "orders"));
+    let pendingCount = 0;
 
-        // Ambil data user
-        const userSnap = await get(ref(db, 'users/' + user.uid));
-        const userData = userSnap.exists() 
-            ? userSnap.val() 
-            : { username: "User" };
-
-        // Cek order pending
-        const orderSnap = await get(ref(db, "orders"));
-        let pendingCount = 0;
-
-        if (orderSnap.exists()) {
-            orderSnap.forEach(child => {
-                const o = child.val();
-                if (o.userId === user.uid && o.status === "Pending") {
-                    pendingCount++;
-                }
-            });
-        }
-
-        if (pendingCount >= 2) {
-            alert("Tunggu konfirmasi admin sebelum beli lagi!");
-            return;
-        }
-
-        // Buat order baru
-        await push(ref(db, "orders"), {
-            userId: user.uid,
-            username: userData.username || "User",
-            email: user.email || "",
-            productId: product.id,
-            productName: product.name,
-            image: product.images?.[0] || product.image || "",
-            price: product.price,
-            quantity: 1,
-            createdAt: Date.now(),
-            status: "Pending"
+    if (orderSnap.exists()) {
+        orderSnap.forEach(child => {
+            const o = child.val();
+            if (o.userId === user.uid && o.status === "Pending") {
+                pendingCount++;
+            }
         });
-
-        alert("Pesanan berhasil dibuat!");
-
-    } catch (error) {
-        console.error("Error createOrder:", error);
-        alert("Terjadi kesalahan, cek console!");
     }
+
+    if (pendingCount >= 2) {
+        alert("Tunggu konfirmasi admin sebelum beli lagi!");
+        return;
+    }
+
+    await push(ref(db, "orders"), {
+        userId: user.uid,
+        username: userData.username,
+        email: user.email,
+        productId: product.id,
+        productName: product.name,
+        image: product.images ? product.images[0] : product.image,
+        price: product.price,
+        quantity: 1,
+        createdAt: Date.now(),
+        status: "Pending"
+    });
+
+    alert("Pesanan dibuat!");
 };
         
 window.loadCart = async () => {

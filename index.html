@@ -75,8 +75,7 @@
             <h1 class="text-xl font-bold">Profil & Riwayat</h1>
             
         </div>
-        <h2>Riwayat Transaksi</h2>
-<div id="user-orders"></div>
+        
         <div class="glass p-6 rounded-3xl text-center mb-6">
             <img id="p-avatar" src="" class="w-20 h-20 rounded-full mx-auto border-4 border-blue-500 mb-3">
             <h2 id="p-username" class="text-xl font-bold">---</h2>
@@ -86,7 +85,7 @@
         <div class="glass p-6 rounded-3xl">
             <h3 class="font-bold mb-4">Pesanan Saya</h3>
             <div id="user-history" class="space-y-4"></div>
-        </div>
+        
     </section>
 
     <div id="modal-review" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/90">
@@ -197,40 +196,47 @@
 
         // --- AUTH & ROLE ---
         onAuthStateChanged(auth, async (user) => {
-            document.getElementById('loader').classList.add('hidden');
-            if (user) {
-              loadUserOrders(user.uid);
-            
-                const s = await get(ref(db, `users/${user.uid}`));
-                const data = s.val();
-                if (data?.banned) {
-                    document.getElementById('page-banned').classList.remove('hidden');
-                    document.getElementById('ban-reason').innerText = data.banReason;
-                    return;
-                }
-                
-                
-                // Role Detection
-if (data?.role === 'admin') {
-    document.getElementById('nav-admin').classList.remove('hidden');
-    listenAdminOrders(); // PENTING!
-} else {
-    document.getElementById('nav-admin').classList.add('hidden');
-}
+    document.getElementById('loader').classList.add('hidden');
 
-                document.getElementById('user-name-display').innerText = data?.username;
-                document.getElementById('p-username').innerText = data?.username;
-                document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${data?.username}&background=3b82f6&color=fff`;
-                document.getElementById('p-avatar').src = `https://ui-avatars.com/api/?name=${data?.username}&background=3b82f6&color=fff`;
-                
-                showPage('page-marketplace');
-                listenProducts();
-                listenCart(user.uid);
-                listenUserHistory(user.uid);
-            } else {
-                showPage('page-auth');
-            }
-        });
+    if (!user) {
+        showPage('page-auth');
+        return;
+    }
+
+    document.getElementById("profile-area").innerHTML =
+        `<span>${user.email}</span>`;
+
+    const s = await get(ref(db, `users/${user.uid}`));
+    const data = s.val();
+
+    if (data?.banned) {
+        document.getElementById('page-banned').classList.remove('hidden');
+        document.getElementById('ban-reason').innerText = data.banReason;
+        return;
+    }
+
+    // Role Detection
+    if (data?.role === 'admin') {
+        document.getElementById('nav-admin').classList.remove('hidden');
+        listenAdminOrders();
+    } else {
+        document.getElementById('nav-admin').classList.add('hidden');
+    }
+
+    document.getElementById('user-name-display').innerText = data?.username || "User";
+    document.getElementById('p-username').innerText = data?.username || "User";
+
+    document.getElementById('user-avatar').src =
+        `https://ui-avatars.com/api/?name=${data?.username}&background=3b82f6&color=fff`;
+
+    document.getElementById('p-avatar').src =
+        `https://ui-avatars.com/api/?name=${data?.username}&background=3b82f6&color=fff`;
+
+    showPage('page-marketplace');
+    listenProducts();
+    listenCart(user.uid);
+    listenUserHistory(user.uid);
+});
         
         function listenAdminOrders() {
     onValue(ref(db, 'orders'), (snap) => {
@@ -389,10 +395,6 @@ if (data?.role === 'admin') {
                 });
             }
             
-            if (!auth.currentUser) {
-    alert("Silakan login dulu untuk membeli.");
-    return;
-}
 
             document.getElementById('btn-buy-now').onclick = () => instantBuy(id);
             document.getElementById('btn-add-cart').onclick = () => addToCart(id);
@@ -404,6 +406,11 @@ if (data?.role === 'admin') {
             const p = globalProducts.find(x => x.id === id);
             const current = userCart[id]?.qty || 0;
             if (current >= p.stock) return alert("Stok habis!");
+            if (!auth.currentUser) {
+    alert("Login dulu untuk tambah keranjang!");
+    showPage('page-auth');
+    return;
+}
             await update(ref(db, `carts/${auth.currentUser.uid}/${id}`), {
     name: p.name,
     price: p.price,
@@ -453,15 +460,19 @@ if (data?.role === 'admin') {
 }
         
         window.instantBuy = async (id) => {
+
     const user = auth.currentUser;
-    if (!user) return alert("Login dulu!");
+    if (!user) {
+        alert("Login dulu untuk beli!");
+        showPage('page-auth');
+        return;
+    }
 
     const p = globalProducts.find(x => x.id === id);
-if (!auth.currentUser) {
-    alert("Silakan login dulu untuk membeli.");
-    return;
-}
-    if (!p || p.stock <= 0) {
+    if (!p) return;
+
+    // AUTO TOLAK KALAU STOK 0
+    if (p.stock <= 0) {
         await push(ref(db, "orders"), {
             userId: user.uid,
             username: document.getElementById('user-name-display').innerText,
@@ -471,9 +482,12 @@ if (!auth.currentUser) {
             rejectReason: "Stok habis otomatis",
             createdAt: Date.now()
         });
-        return alert("Stok habis, order otomatis ditolak.");
+
+        alert("Stok habis, order otomatis ditolak.");
+        return;
     }
 
+    // CEK LIMIT
     if (!(await checkOrderLimit(user.uid))) return;
 
     const orderData = {
@@ -498,7 +512,7 @@ if (!auth.currentUser) {
 Halo Admin, saya ingin beli:
 
 Produk: ${p.name}
-Harga: Rp ${p.price.toLocaleString()}
+Harga: Rp ${Number(p.price).toLocaleString()}
     `;
 
     window.open(`https://wa.me/6288293064112?text=${encodeURIComponent(message)}`);
@@ -568,12 +582,22 @@ Total: Rp ${total.toLocaleString()}
         }
 
         window.updateCartQty = async (id, change) => {
-            const item = userCart[id];
-            const newQty = item.qty + change;
-            if (newQty < 0) return alert("Error stok.");
-            if (newQty === 0) return remove(ref(db, `carts/${auth.currentUser.uid}/${id}`));
-            await update(ref(db, `carts/${auth.currentUser.uid}/${id}`), { qty: newQty });
-        };
+    const item = userCart[id];
+    const newQty = item.qty + change;
+
+    if (newQty < 0) return;
+
+    if (newQty > item.maxStock) {
+        alert("Stok tidak cukup!");
+        return;
+    }
+
+    if (newQty === 0) {
+        return remove(ref(db, `carts/${auth.currentUser.uid}/${id}`));
+    }
+
+    await update(ref(db, `carts/${auth.currentUser.uid}/${id}`), { qty: newQty });
+};
 
         // --- RATING & REVIEW SYSTEM ---
        function listenUserHistory(uid) {
@@ -716,45 +740,33 @@ window.delOrder = async (id) => {
 
     await remove(ref(db, `orders/${id}`));
 };
-function loadUserOrders(uid) {
 
-    const ordersRef = ref(db, "orders");
 
-    onValue(ordersRef, (snapshot) => {
+window.saveProduct = async () => {
 
-        const data = snapshot.val();
-        const container = document.getElementById("user-orders");
-        container.innerHTML = "";
+    const name = document.getElementById('p-name').value;
+    const price = document.getElementById('p-price').value;
+    const img = document.getElementById('p-img').value;
+    const desc = document.getElementById('p-desc').value;
+    const stock = document.getElementById('p-stock').value;
 
-        if (!data) return;
+    if (!name || !price) {
+        alert("Isi nama & harga!");
+        return;
+    }
 
-        Object.entries(data).forEach(([id, order]) => {
-
-            if (order.userId === uid) {
-
-                const date = new Date(order.createdAt);
-                const waktu = date.toLocaleString();
-
-                let warna = "#ccc";
-                if (order.status === "Pending") warna = "orange";
-                if (order.status === "Diproses") warna = "blue";
-                if (order.status === "Selesai") warna = "green";
-                if (order.status === "Ditolak") warna = "red";
-
-                container.innerHTML += `
-                    <div style="border:1px solid ${warna};padding:10px;margin:10px 0;">
-                        <b>Status:</b> <span style="color:${warna}">${order.status}</span><br>
-                        <b>Tanggal:</b> ${waktu}<br>
-                        <b>Email:</b> ${order.email}<br>
-                        <button onclick="navigator.clipboard.writeText(this.parentElement.innerText)">
-                            Copy Bukti
-                        </button>
-                    </div>
-                `;
-            }
-        });
+    await push(ref(db, 'products'), {
+        name: name,
+        price: Number(price),
+        image: img,
+        description: desc,
+        stock: Number(stock),
+        createdAt: Date.now()
     });
-}
+
+    alert("Produk berhasil diupload!");
+};
+
 
     </script>
 </body>

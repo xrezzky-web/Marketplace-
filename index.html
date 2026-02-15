@@ -85,7 +85,7 @@
         <div class="glass p-6 rounded-3xl">
             <h3 class="font-bold mb-4">Pesanan Saya</h3>
             <div id="user-history" class="space-y-4"></div>
-        
+        <</div>
     </section>
 
     <div id="modal-review" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/90">
@@ -199,9 +199,10 @@
     document.getElementById('loader').classList.add('hidden');
 
     if (!user) {
-        showPage('page-auth');
-        return;
-    }
+    showPage('page-marketplace');
+    listenProducts();
+    return;
+}
 
     document.getElementById("profile-area").innerHTML =
         `<span>${user.email}</span>`;
@@ -486,9 +487,14 @@
         alert("Stok habis, order otomatis ditolak.");
         return;
     }
+    
+    // CEK LIMIT DULU
+if (!(await checkOrderLimit(user.uid))) return;
 
-    // CEK LIMIT
-    if (!(await checkOrderLimit(user.uid))) return;
+// BARU KURANGI STOK
+await update(ref(db, `products/${id}`), {
+    stock: p.stock - 1
+});
 
     const orderData = {
         userId: user.uid,
@@ -608,7 +614,7 @@ Total: Rp ${total.toLocaleString()}
         snap.forEach(child => {
             const o = child.val();
             if (o.userId === uid) {
-
+               if (!o.items) return;
                 const items = Object.values(o.items);
                 const waktu = new Date(o.createdAt);
                 const tanggal = waktu.toLocaleDateString();
@@ -707,27 +713,28 @@ Produk: ${items.map(i=>i.name + " ("+i.qty+"x)").join(", ")}
     await update(ref(db, `orders/${id}`), { status: newStatus });
 
     if (newStatus === "Selesai") {
-
-        // RESET LIMIT USER
         await update(ref(db, `users/${order.userId}`), {
             orderLimit: 5
         });
-
-        // KURANGI STOK PRODUK
-        for (const item of Object.values(order.items)) {
-            const prodSnap = await get(ref(db, `products/${item.pid}`));
-            const prod = prodSnap.val();
-            const newStock = (prod.stock || 0) - item.qty;
-
-            await update(ref(db, `products/${item.pid}`), {
-                stock: newStock < 0 ? 0 : newStock
-            });
-        }
     }
 };
 window.rejectOrder = async (id) => {
     const reason = prompt("Masukkan alasan penolakan:");
     if (!reason) return alert("Alasan wajib diisi!");
+
+    const snap = await get(ref(db, `orders/${id}`));
+    const order = snap.val();
+    if (!order) return;
+
+    // BALIKIN STOK
+    for (const item of Object.values(order.items)) {
+        const prodSnap = await get(ref(db, `products/${item.pid}`));
+        const prod = prodSnap.val();
+
+        await update(ref(db, `products/${item.pid}`), {
+            stock: (prod.stock || 0) + item.qty
+        });
+    }
 
     await update(ref(db, `orders/${id}`), {
         status: "Ditolak",

@@ -19,9 +19,7 @@
 </head>
 <body class="pb-24">
   
-  <div id="profile-area">
-    <a href="login.html">Daftar / Login</a>
-</div>
+  <div id="profile-area"></div>
 
     <div id="loader" class="fixed inset-0 flex items-center justify-center bg-slate-900 z-[999]">
         <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-blue-500"></div>
@@ -76,16 +74,12 @@
             
         </div>
         
-        <div class="glass p-6 rounded-3xl text-center mb-6">
-            <img id="p-avatar" src="" class="w-20 h-20 rounded-full mx-auto border-4 border-blue-500 mb-3">
-            <h2 id="p-username" class="text-xl font-bold">---</h2>
-            <button onclick="signOutUser()" class="mt-2 text-red-500 text-xs font-bold">Logout</button>
-        </div>
+        <div id="profile-content"></div>
         
         <div class="glass p-6 rounded-3xl">
             <h3 class="font-bold mb-4">Pesanan Saya</h3>
             <div id="user-history" class="space-y-4"></div>
-        <</div>
+        </div>
     </section>
 
     <div id="modal-review" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/90">
@@ -167,7 +161,7 @@
 
     <nav class="fixed bottom-0 left-0 right-0 glass h-16 flex justify-around items-center z-50 border-t border-slate-800">
         <button onclick="showPage('page-marketplace')" class="text-gray-400"><i class="fa fa-home text-xl"></i></button>
-        <button onclick="showPage('page-profile')" class="text-gray-400"><i class="fa fa-receipt text-xl"></i></button>
+        <button onclick="openProfilePage()" class="text-gray-400"><i class="fa fa-receipt text-xl"></i></button>
         <button id="nav-admin" onclick="showPage('page-admin')" class="hidden text-gray-400"><i class="fa fa-shield-alt text-xl"></i></button>
     </nav>
 
@@ -175,6 +169,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, set, get, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA75bdcfawOi957by8y_4-l4sJCCo6pF88",
@@ -195,20 +190,39 @@
         let isLoginMode = true;
 
         // --- AUTH & ROLE ---
+        
+        window.addEventListener('load', () => {
+    document.getElementById('loader').classList.add('hidden');
+});
         onAuthStateChanged(auth, async (user) => {
+
     document.getElementById('loader').classList.add('hidden');
 
-    if (!user) {
-    showPage('page-marketplace');
-    listenProducts();
-    return;
-}
+    const profileBox = document.getElementById('profile-content');
 
-    document.getElementById("profile-area").innerHTML =
-        `<span>${user.email}</span>`;
+    if (!user) {
+
+        profileBox.innerHTML = `
+            <div class="glass p-6 rounded-3xl text-center">
+                <p class="mb-4 font-bold">Belum Login</p>
+                <button onclick="showPage('page-auth')" 
+                class="bg-blue-600 px-4 py-3 rounded-xl font-bold">
+                    Daftar / Login
+                </button>
+            </div>
+        `;
+
+        showPage('page-marketplace');
+        listenProducts();
+        return;
+    }
+
+    
 
     const s = await get(ref(db, `users/${user.uid}`));
     const data = s.val();
+    document.getElementById("profile-area").innerHTML =
+    `<span class="text-xs">${data?.username}</span>`;
 
     if (data?.banned) {
         document.getElementById('page-banned').classList.remove('hidden');
@@ -217,21 +231,42 @@
     }
 
     // Role Detection
-    if (data?.role === 'admin') {
-        document.getElementById('nav-admin').classList.remove('hidden');
-        listenAdminOrders();
-    } else {
-        document.getElementById('nav-admin').classList.add('hidden');
-    }
+if (data?.role === 'admin') {
+    document.getElementById('nav-admin').classList.remove('hidden');
+    listenAdminOrders();
+} else {
+    document.getElementById('nav-admin').classList.add('hidden');
+}
+
+// PROFILE BOX (UNTUK SEMUA USER LOGIN)
+profileBox.innerHTML = `
+    <div class="glass p-6 rounded-3xl text-center mb-6">
+        <img src="https://ui-avatars.com/api/?name=${data?.username}&background=3b82f6&color=fff" 
+        class="w-20 h-20 rounded-full mx-auto border-4 border-blue-500 mb-3">
+        <h2 class="text-xl font-bold">${data?.username}</h2>
+        <p class="text-xs text-gray-400 mb-4">${user.email}</p>
+
+        <button onclick="changeUsername()" 
+        class="w-full bg-blue-600/20 text-blue-400 py-2 rounded-lg font-bold mb-2">
+            Ganti Username
+        </button>
+
+        <button onclick="changePasswordCustom()" 
+        class="w-full bg-green-600/20 text-green-400 py-2 rounded-lg font-bold mb-2">
+            Ganti Password
+        </button>
+
+        <button onclick="signOutUser()" 
+        class="w-full bg-red-600/20 text-red-400 py-2 rounded-lg font-bold">
+            Logout
+        </button>
+    </div>
+`;
 
     document.getElementById('user-name-display').innerText = data?.username || "User";
-    document.getElementById('p-username').innerText = data?.username || "User";
 
     document.getElementById('user-avatar').src =
-        `https://ui-avatars.com/api/?name=${data?.username}&background=3b82f6&color=fff`;
-
-    document.getElementById('p-avatar').src =
-        `https://ui-avatars.com/api/?name=${data?.username}&background=3b82f6&color=fff`;
+    `https://ui-avatars.com/api/?name=${data?.username}&background=3b82f6&color=fff`;
 
     showPage('page-marketplace');
     listenProducts();
@@ -525,6 +560,11 @@ Harga: Rp ${Number(p.price).toLocaleString()}
 };
 
         window.checkoutCart = async () => {
+          if (!auth.currentUser) {
+    alert("Login dulu!");
+    showPage('page-auth');
+    return;
+}
     if(Object.keys(userCart).length === 0) return;
     if (!(await checkOrderLimit(auth.currentUser.uid))) return;
 
@@ -536,6 +576,20 @@ Harga: Rp ${Number(p.price).toLocaleString()}
         status: "Pending",
         createdAt: Date.now()
     };
+    
+    for (const item of Object.values(userCart)) {
+    const snap = await get(ref(db, `products/${item.pid}`));
+    const prod = snap.val();
+
+    if (!prod || prod.stock < item.qty) {
+        alert("Stok tidak cukup!");
+        return;
+    }
+
+    await update(ref(db, `products/${item.pid}`), {
+        stock: prod.stock - item.qty
+    });
+}
 
     await push(ref(db, 'orders'), orderData);
     await remove(ref(db, `carts/${auth.currentUser.uid}`));
@@ -563,7 +617,7 @@ Total: Rp ${total.toLocaleString()}
         function listenCart(uid) {
             onValue(ref(db, `carts/${uid}`), (snap) => {
                 userCart = snap.val() || {};
-                const count = Object.values(userCart).reduce((a,b) => a + b.qty, 0);
+                const count = Object.values(userCart || {}).reduce((a,b) => a + (b.qty || 0), 0);
                 document.getElementById('cart-count').innerText = count;
                 renderCartUI();
             });
@@ -773,7 +827,71 @@ window.saveProduct = async () => {
 
     alert("Produk berhasil diupload!");
 };
+window.openProfilePage = () => {
+    if (!auth.currentUser) {
+        showPage('page-auth');
+    } else {
+        showPage('page-profile');
+    }
+};
 
+window.changeUsername = async () => {
+
+    const newName = prompt("Masukkan username baru:");
+    if (!newName) return;
+
+    const uid = auth.currentUser.uid;
+    const snap = await get(ref(db, `users/${uid}`));
+    const userData = snap.val();
+
+    const now = Date.now();
+    const lastChange = userData.lastUsernameChange || 0;
+    const diff = now - lastChange;
+    const day = 24 * 60 * 60 * 1000;
+
+    if (diff < day) {
+        alert("Username hanya bisa diganti 24 jam sekali!");
+        return;
+    }
+
+    await update(ref(db, `users/${uid}`), {
+        username: newName,
+        lastUsernameChange: now
+    });
+
+    alert("Username berhasil diganti!");
+};
+window.changePasswordCustom = async () => {
+
+    const newPass = prompt("Masukkan password baru:");
+    if (!newPass) return;
+
+    const uid = auth.currentUser.uid;
+    const snap = await get(ref(db, `users/${uid}`));
+    const userData = snap.val();
+
+    const now = Date.now();
+    const lastChange = userData.lastPasswordChange || 0;
+    const diff = now - lastChange;
+    const twelveHours = 12 * 60 * 60 * 1000;
+
+    if (diff < twelveHours) {
+        alert("Password hanya bisa diganti 12 jam sekali!");
+        return;
+    }
+
+    try {
+        await updatePassword(auth.currentUser, newPass);
+
+        await update(ref(db, `users/${uid}`), {
+            lastPasswordChange: now
+        });
+
+        alert("Password berhasil diganti!");
+    } catch (e) {
+        alert("Login ulang diperlukan untuk ganti password.");
+    }
+};
 
     </script>
 </body>

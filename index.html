@@ -117,6 +117,7 @@
             <input type="number" id="p-price" placeholder="Harga" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
             <input type="text" id="p-img" placeholder="URL Foto" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
             <textarea id="p-desc" placeholder="Deskripsi" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm"></textarea>
+            <input type="text" id="p-note" placeholder="Info tambahan admin (opsional)" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
             <input type="number" id="p-stock" placeholder="Stok" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
             <button onclick="saveProduct()" class="w-full bg-green-600 py-3 rounded-xl font-bold">Upload Produk</button>
         </div>
@@ -221,8 +222,7 @@
 
     const s = await get(ref(db, `users/${user.uid}`));
     const data = s.val();
-    document.getElementById("profile-area").innerHTML =
-    `<span class="text-xs">${data?.username}</span>`;
+    document.getElementById("profile-area").innerHTML = "";
 
     if (data?.banned) {
         document.getElementById('page-banned').classList.remove('hidden');
@@ -275,6 +275,7 @@ profileBox.innerHTML = `
 });
         
         function listenAdminOrders() {
+
     onValue(ref(db, 'orders'), (snap) => {
 
         const pendingEl = document.getElementById('admin-pending');
@@ -289,58 +290,69 @@ profileBox.innerHTML = `
 
         if (!snap.exists()) return;
 
-        let isProcessingExist = false;
-
         snap.forEach(child => {
-            const o = child.val();
-            if (o?.status === "Diproses") {
-                isProcessingExist = true;
-            }
-        });
 
-        snap.forEach(child => {
             const o = child.val();
             const id = child.key;
 
-            if (!o || !o.items) return; // 🔥 ANTI ERROR
+            const items = o.items
+                ? Object.values(o.items).map(i => `
+                    <div class="mb-1">
+                        ${i.name} (${i.qty}x) - Rp ${Number(i.price).toLocaleString()}
+                    </div>
+                `).join('')
+                : "-";
 
-            const items = Object.values(o.items)
-                .map(i => `${i.name} (${i.qty}x)`)
-                .join('<br>');
+            const tanggal = o.createdAt
+                ? new Date(o.createdAt).toLocaleString('id-ID')
+                : "-";
 
             const card = `
-                <div class="glass p-4 rounded-2xl mb-3 text-[10px]">
+                <div class="glass p-4 rounded-2xl mb-3 text-[11px] border border-gray-700">
+
                     <p class="font-bold text-blue-400">${o.username || '-'}</p>
                     <p class="text-gray-400 mb-2">${o.email || '-'}</p>
-                    <p class="mb-3">${items}</p>
 
-                    ${
-                        o.rejectReason 
-                        ? `<p class="text-red-400 text-[9px] mb-2">Alasan: ${o.rejectReason}</p>` 
-                        : ""
-                    }
+                    <div class="mb-2">${items}</div>
+
+                    <p class="text-gray-500 text-[9px] mb-2">${tanggal}</p>
+
+                    ${o.rejectReason 
+                        ? `<p class="text-red-400 text-[9px] mb-2">
+                            Alasan: ${o.rejectReason}
+                           </p>` 
+                        : ""}
 
                     <div class="flex gap-2 flex-wrap">
-                        ${
-                            o.status === "Pending" && !isProcessingExist
-                            ? `<button onclick="updateStat('${id}','Diproses')" class="bg-blue-600 px-3 py-2 rounded font-bold">PROSES</button>`
-                            : ""
-                        }
 
-                        ${
-                            o.status === "Diproses"
-                            ? `<button onclick="updateStat('${id}','Selesai')" class="bg-green-600 px-3 py-2 rounded font-bold">SELESAI</button>`
-                            : ""
-                        }
+                        ${o.status === "Pending"
+                            ? `<button onclick="updateStat('${id}','Diproses')" 
+                                class="bg-blue-600 px-3 py-1 rounded font-bold">
+                                PROSES
+                               </button>`
+                            : ""}
 
-                        ${
-                            (o.status === "Pending" || o.status === "Diproses")
-                            ? `<button onclick="rejectOrder('${id}')" class="bg-red-600 px-3 py-2 rounded font-bold">TOLAK</button>`
-                            : ""
-                        }
+                        ${o.status === "Diproses"
+                            ? `<button onclick="updateStat('${id}','Selesai')" 
+                                class="bg-green-600 px-3 py-1 rounded font-bold">
+                                SELESAI
+                               </button>`
+                            : ""}
 
-                        <button onclick="delOrder('${id}')" class="text-red-400 ml-auto">Hapus</button>
+                        ${(o.status === "Pending" || o.status === "Diproses")
+                            ? `<button onclick="rejectOrder('${id}')" 
+                                class="bg-red-600 px-3 py-1 rounded font-bold">
+                                TOLAK
+                               </button>`
+                            : ""}
+
+                        <button onclick="delOrder('${id}')" 
+                            class="text-red-400 ml-auto text-[10px]">
+                            Hapus
+                        </button>
+
                     </div>
+
                 </div>
             `;
 
@@ -350,7 +362,9 @@ profileBox.innerHTML = `
             else if (o.status === "Ditolak") rejectEl.innerHTML += card;
 
         });
+
     });
+
 }
 
         window.handleAuth = async () => {
@@ -382,15 +396,31 @@ profileBox.innerHTML = `
         }
 
         function renderProductCard(p) {
-            const list = document.getElementById('product-list');
-            list.innerHTML += `
-                <div class="glass rounded-2xl overflow-hidden p-2 flex flex-col product-item" data-name="${p.name.toLowerCase()}">
-                    <img src="${p.images?.[0] || p.image || 'https://via.placeholder.com/300'}" class="w-full h-32 object-cover rounded-xl mb-2" onclick="viewDetail('${p.id}')">
-                    <p class="text-[11px] font-bold truncate">${p.name}</p>
-                    <p class="text-blue-400 font-bold text-xs mt-auto">Rp ${Number(p.price).toLocaleString()}</p>
-                    <p class="text-[10px] text-gray-400">Stok: ${p.stock ?? 0}</p>
-                </div>`;
-        }
+    const list = document.getElementById('product-list');
+
+    const isAdmin = auth.currentUser?.email === "xrezzkystore.id@gmail.com";
+
+    list.innerHTML += `
+        <div class="glass rounded-2xl overflow-hidden p-2 flex flex-col product-item relative" data-name="${p.name.toLowerCase()}">
+            
+            ${isAdmin ? `
+            <div class="absolute top-2 left-2 flex gap-1 z-10">
+                <button onclick="editProduct('${p.id}')" class="bg-yellow-600 text-[8px] px-2 py-1 rounded">Edit</button>
+                <button onclick="deleteProduct('${p.id}')" class="bg-red-600 text-[8px] px-2 py-1 rounded">Hapus</button>
+            </div>
+            ` : ""}
+
+            <img src="${p.images?.[0] || p.image || 'https://via.placeholder.com/300'}" 
+            class="w-full h-32 object-cover rounded-xl mb-2 cursor-pointer" 
+            onclick="viewDetail('${p.id}')">
+
+            <p class="text-[11px] font-bold truncate">${p.name}</p>
+            <p class="text-blue-400 font-bold text-xs mt-auto">Rp ${Number(p.price).toLocaleString()}</p>
+            <p class="text-[10px] text-gray-400">Stok: ${p.stock ?? 0}</p>
+
+            ${p.adminNote ? `<p class="text-[9px] text-green-400 mt-1 italic">${p.adminNote}</p>` : ""}
+        </div>`;
+}
 
         window.searchProduct = (val) => {
             const items = document.querySelectorAll('.product-item');
@@ -507,8 +537,12 @@ profileBox.innerHTML = `
     const p = globalProducts.find(x => x.id === id);
     if (!p) return;
 
-    // AUTO TOLAK KALAU STOK 0
-    if (p.stock <= 0) {
+    if (!(await checkOrderLimit(user.uid))) return;
+
+    const freshSnap = await get(ref(db, `products/${id}`));
+    const freshProd = freshSnap.val();
+
+    if (!freshProd || freshProd.stock <= 0) {
         await push(ref(db, "orders"), {
             userId: user.uid,
             username: document.getElementById('user-name-display').innerText,
@@ -522,14 +556,10 @@ profileBox.innerHTML = `
         alert("Stok habis, order otomatis ditolak.");
         return;
     }
-    
-    // CEK LIMIT DULU
-if (!(await checkOrderLimit(user.uid))) return;
 
-// BARU KURANGI STOK
-await update(ref(db, `products/${id}`), {
-    stock: p.stock - 1
-});
+    await update(ref(db, `products/${id}`), {
+        stock: freshProd.stock - 1
+    });
 
     const orderData = {
         userId: user.uid,
@@ -558,88 +588,6 @@ Harga: Rp ${Number(p.price).toLocaleString()}
 
     window.open(`https://wa.me/6288293064112?text=${encodeURIComponent(message)}`);
 };
-
-        window.checkoutCart = async () => {
-          if (!auth.currentUser) {
-    alert("Login dulu!");
-    showPage('page-auth');
-    return;
-}
-    if(Object.keys(userCart).length === 0) return;
-    if (!(await checkOrderLimit(auth.currentUser.uid))) return;
-
-    const orderData = {
-        userId: auth.currentUser.uid,
-        username: document.getElementById('user-name-display').innerText,
-        email: auth.currentUser.email,
-        items: userCart,
-        status: "Pending",
-        createdAt: Date.now()
-    };
-    
-    for (const item of Object.values(userCart)) {
-    const snap = await get(ref(db, `products/${item.pid}`));
-    const prod = snap.val();
-
-    if (!prod || prod.stock < item.qty) {
-        alert("Stok tidak cukup!");
-        return;
-    }
-
-    await update(ref(db, `products/${item.pid}`), {
-        stock: prod.stock - item.qty
-    });
-}
-
-    await push(ref(db, 'orders'), orderData);
-    await remove(ref(db, `carts/${auth.currentUser.uid}`));
-
-    let total = 0;
-    let textItems = "";
-
-    Object.values(userCart).forEach(i => {
-        total += i.price * i.qty;
-        textItems += `${i.name} (${i.qty}x) - Rp ${(i.price * i.qty).toLocaleString()}\n`;
-    });
-
-    const message = `
-Halo Admin, saya sudah order:
-
-${textItems}
-
-Total: Rp ${total.toLocaleString()}
-    `;
-
-    window.open(`https://wa.me/6288293064112?text=${encodeURIComponent(message)}`);
-
-    closeModal('modal-cart');
-};
-        function listenCart(uid) {
-            onValue(ref(db, `carts/${uid}`), (snap) => {
-                userCart = snap.val() || {};
-                const count = Object.values(userCart || {}).reduce((a,b) => a + (b.qty || 0), 0);
-                document.getElementById('cart-count').innerText = count;
-                renderCartUI();
-            });
-        }
-
-        function renderCartUI() {
-            const cont = document.getElementById('cart-items');
-            cont.innerHTML = ""; let total = 0;
-            Object.entries(userCart).forEach(([id, item]) => {
-                total += item.price * item.qty;
-                cont.innerHTML += `<div class="flex items-center gap-3 bg-slate-800/50 p-3 rounded-2xl border border-slate-700">
-                    <img src="${item.img}" class="w-10 h-10 rounded-lg object-cover">
-                    <div class="flex-1 text-[10px]"><p class="font-bold">${item.name}</p></div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="updateCartQty('${id}', -1)" class="bg-slate-700 w-6 h-6 rounded">-</button>
-                        <span class="text-xs font-bold">${item.qty}</span>
-                        <button onclick="updateCartQty('${id}', 1)" class="bg-slate-700 w-6 h-6 rounded">+</button>
-                    </div>
-                </div>`;
-            });
-            document.getElementById('cart-total').innerText = "Rp " + total.toLocaleString();
-        }
 
         window.updateCartQty = async (id, change) => {
     const item = userCart[id];
@@ -810,6 +758,7 @@ window.saveProduct = async () => {
     const img = document.getElementById('p-img').value;
     const desc = document.getElementById('p-desc').value;
     const stock = document.getElementById('p-stock').value;
+    const note = document.getElementById('p-note').value;
 
     if (!name || !price) {
         alert("Isi nama & harga!");
@@ -817,13 +766,14 @@ window.saveProduct = async () => {
     }
 
     await push(ref(db, 'products'), {
-        name: name,
-        price: Number(price),
-        image: img,
-        description: desc,
-        stock: Number(stock),
-        createdAt: Date.now()
-    });
+    name: name,
+    price: Number(price),
+    image: img,
+    description: desc,
+    stock: Number(stock),
+    createdAt: Date.now(),
+    adminNote: note
+});
 
     alert("Produk berhasil diupload!");
 };
@@ -892,7 +842,34 @@ window.changePasswordCustom = async () => {
         alert("Login ulang diperlukan untuk ganti password.");
     }
 };
+window.deleteProduct = async (id) => {
+    const yakin = confirm("Hapus produk ini?");
+    if (!yakin) return;
+
+    await remove(ref(db, `products/${id}`));
+    alert("Produk dihapus!");
+};
+
+window.editProduct = async (id) => {
+    const snap = await get(ref(db, `products/${id}`));
+    const p = snap.val();
+    if (!p) return;
+
+    const newName = prompt("Nama baru:", p.name);
+    const newPrice = prompt("Harga baru:", p.price);
+    const newDesc = prompt("Deskripsi baru:", p.description || "");
+    const newStock = prompt("Stok baru:", p.stock);
+
+    await update(ref(db, `products/${id}`), {
+        name: newName,
+        price: Number(newPrice),
+        description: newDesc,
+        stock: Number(newStock)
+    });
+
+    alert("Produk berhasil diupdate!");
+};
 
     </script>
 </body>
-</html>
+    </html>

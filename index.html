@@ -260,7 +260,7 @@ from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
             authDomain: "xrezzkystore-marketplace-83bc0.firebaseapp.com",
             databaseURL: "https://xrezzkystore-marketplace-83bc0-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "xrezzkystore-marketplace-83bc0",
-            storageBucket: "xrezzkystore-marketplace-83bc0.firebasestorage.app",
+            storageBucket: "xrezzkystore-marketplace-83bc0.appspot.com",
             messagingSenderId: "604900856944",
             appId: "1:604900856944:web:c48c973da45214c68a10b5"
         };
@@ -948,22 +948,30 @@ window.saveProduct = async () => {
 
     let imageUrls = [];
 
+    // UPLOAD MULTIPLE FILE
     if (files.length > 0) {
+
         for (let i = 0; i < files.length; i++) {
 
             const file = files[i];
 
-            const storageRef = sRef(storage, 
-                'products/' + Date.now() + '-' + file.name);
+            const storageRef = sRef(
+                storage,
+                `products/${Date.now()}-${file.name}`
+            );
 
             await uploadBytes(storageRef, file);
             const url = await getDownloadURL(storageRef);
+
             imageUrls.push(url);
         }
     }
 
-    // EDIT MODE
+    // === EDIT MODE ===
     if (window.currentEditId) {
+
+        const oldSnap = await get(ref(db, `products/${window.currentEditId}`));
+        const oldData = oldSnap.val();
 
         await update(ref(db, `products/${window.currentEditId}`), {
             name: name,
@@ -971,15 +979,17 @@ window.saveProduct = async () => {
             description: desc,
             stock: Number(stock),
             adminNote: note,
-            ...(imageUrls.length > 0 && { images: imageUrls })
+            images: imageUrls.length > 0 
+                ? [...(oldData.images || []), ...imageUrls] 
+                : oldData.images || []
         });
 
         alert("Produk berhasil diupdate!");
         window.currentEditId = null;
-    } 
-    // CREATE MODE
-    else {
 
+    } else {
+
+        // === CREATE MODE ===
         await push(ref(db, 'products'), {
             name: name,
             price: Number(price),
@@ -1210,4 +1220,4 @@ window.openVisiModal = () => {
 
     </script>
 </body>
-    </html>
+        </html>

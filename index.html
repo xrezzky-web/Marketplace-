@@ -948,26 +948,26 @@ window.saveProduct = async () => {
 
     let imageUrls = [];
 
-    // UPLOAD MULTIPLE FILE
-    if (files.length > 0) {
+    // 🔥 UPLOAD KE CLOUDINARY
+    for (let i = 0; i < files.length; i++) {
 
-        for (let i = 0; i < files.length; i++) {
+        const formData = new FormData();
+        formData.append("file", files[i]);
+        formData.append("upload_preset", "Marketplace");
 
-            const file = files[i];
+        const res = await fetch(
+            "https://api.cloudinary.com/v1_1/dhutfj43/image/upload",
+            {
+                method: "POST",
+                body: formData
+            }
+        );
 
-            const storageRef = sRef(
-                storage,
-                `products/${Date.now()}-${file.name}`
-            );
-
-            await uploadBytes(storageRef, file);
-            const url = await getDownloadURL(storageRef);
-
-            imageUrls.push(url);
-        }
+        const data = await res.json();
+        imageUrls.push(data.secure_url);
     }
 
-    // === EDIT MODE ===
+    // 🔥 SIMPAN KE FIREBASE DATABASE
     if (window.currentEditId) {
 
         const oldSnap = await get(ref(db, `products/${window.currentEditId}`));
@@ -989,7 +989,6 @@ window.saveProduct = async () => {
 
     } else {
 
-        // === CREATE MODE ===
         await push(ref(db, 'products'), {
             name: name,
             price: Number(price),
@@ -1003,7 +1002,6 @@ window.saveProduct = async () => {
         alert("Produk berhasil diupload!");
     }
 
-    // RESET FORM
     document.getElementById('p-name').value = "";
     document.getElementById('p-price').value = "";
     document.getElementById('p-desc').value = "";
@@ -1220,4 +1218,4 @@ window.openVisiModal = () => {
 
     </script>
 </body>
-        </html>
+</html>

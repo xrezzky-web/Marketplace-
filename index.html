@@ -219,7 +219,9 @@ class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
 
     <nav class="fixed bottom-0 left-0 right-0 glass h-16 flex justify-around items-center z-50 border-t border-slate-800">
         <button onclick="showPage('page-marketplace')" class="text-gray-400"><i class="fa fa-home text-xl"></i></button>
-        <button onclick="openProfilePage()" class="text-gray-400"><i class="fa fa-receipt text-xl"></i></button>
+        <button onclick="showPage('page-profile')" class="text-gray-400">
+    <i class="fa fa-receipt text-xl"></i>
+</button>
         <button id="nav-admin" onclick="showPage('page-admin')" class="hidden text-gray-400"><i class="fa fa-shield-alt text-xl"></i></button>
         
     </nav>
@@ -326,7 +328,9 @@ if (data?.role === 'admin') {
 
 // PROFILE BOX (UNTUK SEMUA USER LOGIN)
 profileBox.innerHTML = `
-    <div class="glass p-6 rounded-3xl text-center mb-6">
+    
+    <!-- CARD PROFIL -->
+    <div class="glass p-6 rounded-3xl text-center mb-4">
 
         <img src="https://ui-avatars.com/api/?name=${data?.username || "User"}&background=3b82f6&color=fff" 
         class="w-20 h-20 rounded-full mx-auto border-4 border-blue-500 mb-3">
@@ -344,17 +348,27 @@ profileBox.innerHTML = `
             Ganti Password
         </button>
 
-        <button onclick="openVisiModal()" 
-        class="w-full bg-purple-600/20 text-purple-400 py-2 rounded-lg font-bold mb-2">
-            Visi & Misi XREZZKY STORE
-        </button>
-
         <button onclick="signOutUser()" 
         class="w-full bg-red-600/20 text-red-400 py-2 rounded-lg font-bold">
             Logout
         </button>
 
     </div>
+
+    <!-- CARD VISI MISI TERPISAH -->
+    <div class="glass p-4 rounded-3xl text-center">
+
+        <h3 class="font-bold text-purple-400 mb-3">
+            Tentang XREZZKY STORE
+        </h3>
+
+        <button onclick="openVisiModal()" 
+        class="w-full bg-purple-600/20 text-purple-400 py-2 rounded-lg font-bold">
+            Lihat Visi & Misi
+        </button>
+
+    </div>
+
 `;
 
     document.getElementById('user-name-display').innerText = data?.username || "User";

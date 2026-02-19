@@ -964,7 +964,9 @@ window.saveProduct = async () => {
         );
 
         const data = await res.json();
+        console.log(data);
         imageUrls.push(data.secure_url);
+        
     }
 
     // 🔥 SIMPAN KE FIREBASE DATABASE

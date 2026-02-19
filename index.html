@@ -164,17 +164,20 @@ class="hidden fixed inset-0 z-[150] flex items-center justify-center bg-black/90
         <div id="admin-done" class="admin-tab hidden"></div>
         <div id="admin-reject" class="admin-tab hidden"></div>
         <div id="admin-upload" class="admin-tab hidden glass p-6 rounded-2xl">
-          <hr class="my-4 border-slate-700">
-<h3 class="font-bold mb-3">Daftar Produk</h3>
-<div id="admin-product-list" class="space-y-3 max-h-60 overflow-y-auto"></div>
-            <input type="text" id="p-name" placeholder="Nama Produk" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
-            <input type="number" id="p-price" placeholder="Harga" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
-            <input type="file" id="p-img-file" accept="image/*" multiple
-class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
-            <textarea id="p-desc" placeholder="Deskripsi" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm"></textarea>
-            <input type="text" id="p-note" placeholder="Info tambahan admin (opsional)" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
-            <input type="number" id="p-stock" placeholder="Stok" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
-            <button onclick="saveProduct()" class="w-full bg-green-600 py-3 rounded-xl font-bold">Upload Produk</button>
+    <h3 class="font-bold mb-3">Tambah Produk Baru</h3>
+    <input type="text" id="p-name" placeholder="Nama Produk" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
+    <input type="number" id="p-price" placeholder="Harga" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
+    
+    <input type="file" id="productImages" accept="image/*" multiple class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
+    
+    <input type="text" id="productImageUrl" placeholder="Atau masukkan URL gambar (opsional)" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
+    <textarea id="p-desc" placeholder="Deskripsi" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm"></textarea>
+    <input type="number" id="p-stock" placeholder="Stok" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
+    
+    <button onclick="saveProduct()" class="w-full bg-green-600 py-3 rounded-xl font-bold">Upload Produk</button>
+</div>
+
+
         </div>
         </section>
     
@@ -935,84 +938,77 @@ window.delOrder = async (id) => {
 
 
 window.saveProduct = async () => {
-
-    const name = document.getElementById('p-name').value.trim();
-    const price = document.getElementById('p-price').value;
-    const desc = document.getElementById('p-desc').value;
-    const stock = document.getElementById('p-stock').value;
-    const note = document.getElementById('p-note').value;
-    const files = document.getElementById('p-img-file').files;
+    const name = document.getElementById("p-name").value;
+    const price = document.getElementById("p-price").value;
+    const desc = document.getElementById("p-desc").value;
+    const stock = document.getElementById("p-stock").value;
+    const fileInput = document.getElementById("productImages"); // Pastikan ID ini benar
+    const manualUrl = document.getElementById("productImageUrl").value;
 
     if (!name || !price || !stock) {
-        alert("Isi nama, harga & stok!");
+        alert("Nama, Harga, dan Stok wajib diisi!");
         return;
     }
 
     let imageUrls = [];
+    const files = fileInput.files;
 
-    // 🔥 UPLOAD KE CLOUDINARY
-    for (let i = 0; i < files.length; i++) {
+    // 1. Proses Upload ke Cloudinary jika ada file
+    if (files.length > 0) {
+        for (let i = 0; i < files.length; i++) {
+            const formData = new FormData();
+            formData.append("file", files[i]);
+            formData.append("upload_preset", "Marketplace"); // Pastikan preset ini sudah dibuat di Cloudinary
 
-        const formData = new FormData();
-        formData.append("file", files[i]);
-        formData.append("upload_preset", "Marketplace");
-
-        const res = await fetch(
-            "https://api.cloudinary.com/v1_1/dhutfj43/image/upload",
-            {
-                method: "POST",
-                body: formData
+            try {
+                const res = await fetch(
+                    "https://api.cloudinary.com/v1_1/dhutfj43/image/upload",
+                    { method: "POST", body: formData }
+                );
+                const data = await res.json();
+                if (data.secure_url) {
+                    imageUrls.push(data.secure_url);
+                }
+            } catch (err) {
+                console.error("Upload failed:", err);
             }
-        );
-
-        const data = await res.json();
-        console.log(data);
-        imageUrls.push(data.secure_url);
-        
+        }
     }
 
-    // 🔥 SIMPAN KE FIREBASE DATABASE
-    if (window.currentEditId) {
+    // 2. Tambahkan URL manual jika ada
+    if (manualUrl.trim() !== "") {
+        imageUrls.push(manualUrl.trim());
+    }
 
-        const oldSnap = await get(ref(db, `products/${window.currentEditId}`));
-        const oldData = oldSnap.val();
-
-        await update(ref(db, `products/${window.currentEditId}`), {
+    // 3. Simpan ke Firebase Database
+    try {
+        const productRef = ref(database, 'products');
+        const newProductRef = push(productRef);
+        
+        await set(newProductRef, {
             name: name,
             price: Number(price),
             description: desc,
             stock: Number(stock),
-            adminNote: note,
-            images: imageUrls.length > 0 
-                ? [...(oldData.images || []), ...imageUrls] 
-                : oldData.images || []
-        });
-
-        alert("Produk berhasil diupdate!");
-        window.currentEditId = null;
-
-    } else {
-
-        await push(ref(db, 'products'), {
-            name: name,
-            price: Number(price),
-            description: desc,
-            stock: Number(stock),
-            adminNote: note,
             images: imageUrls,
             createdAt: Date.now()
         });
 
-        alert("Produk berhasil diupload!");
+        alert("Produk berhasil ditambahkan!");
+        
+        // Reset Form
+        document.getElementById("p-name").value = "";
+        document.getElementById("p-price").value = "";
+        document.getElementById("p-desc").value = "";
+        document.getElementById("p-stock").value = "";
+        fileInput.value = "";
+        document.getElementById("productImageUrl").value = "";
+        
+    } catch (error) {
+        alert("Gagal simpan ke database: " + error.message);
     }
-
-    document.getElementById('p-name').value = "";
-    document.getElementById('p-price').value = "";
-    document.getElementById('p-desc').value = "";
-    document.getElementById('p-stock').value = "";
-    document.getElementById('p-note').value = "";
-    document.getElementById('p-img-file').value = "";
 };
+
 
 window.changeUsername = async () => {
 
@@ -1222,4 +1218,4 @@ window.openVisiModal = () => {
 
     </script>
 </body>
-    </html>
+</html>

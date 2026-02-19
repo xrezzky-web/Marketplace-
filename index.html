@@ -558,30 +558,31 @@ profileBox.innerHTML = `
 
         function renderProductCard(p) {
     const list = document.getElementById('product-list');
-
     const isAdmin = document.getElementById('nav-admin')?.classList.contains('hidden') === false;
+
+    // Pastikan mengambil dari p.images[0] karena saveProduct menyimpannya sebagai array
+    const displayImg = (p.images && p.images.length > 0) ? p.images[0] : (p.image || 'https://via.placeholder.com/300');
 
     list.innerHTML += `
         <div class="glass rounded-2xl overflow-hidden p-2 flex flex-col product-item relative" data-name="${p.name.toLowerCase()}">
             
             ${isAdmin ? `
             <div class="absolute top-2 left-2 flex gap-1 z-10">
-                <button onclick="editProduct('${p.id}')" class="bg-yellow-600 text-[8px] px-2 py-1 rounded">Edit</button>
+                <button onclick="editProductFull('${p.id}')" class="bg-yellow-600 text-[8px] px-2 py-1 rounded">Edit</button>
                 <button onclick="deleteProduct('${p.id}')" class="bg-red-600 text-[8px] px-2 py-1 rounded">Hapus</button>
             </div>
             ` : ""}
 
-            <img src="${p.images?.[0] || p.image || 'https://via.placeholder.com/300'}" 
+            <img src="${displayImg}" 
             class="w-full h-32 object-cover rounded-xl mb-2 cursor-pointer" 
             onclick="viewDetail('${p.id}')">
 
             <p class="text-[11px] font-bold truncate">${p.name}</p>
             <p class="text-blue-400 font-bold text-xs mt-auto">Rp ${Number(p.price).toLocaleString()}</p>
             <p class="text-[10px] text-gray-400">Stok: ${p.stock ?? 0}</p>
-
-            ${p.adminNote ? `<p class="text-[9px] text-green-400 mt-1 italic">${p.adminNote}</p>` : ""}
         </div>`;
 }
+
 
         window.searchProduct = (val) => {
             const items = document.querySelectorAll('.product-item');
@@ -599,20 +600,16 @@ profileBox.innerHTML = `
         };
 
         window.viewDetail = (id) => {
-
     const p = globalProducts.find(x => x.id === id);
     if (!p) return;
 
-    const images = p.images?.length ? p.images : 
+    // Mengambil array images atau fallback ke p.image tunggal
+    const images = (p.images && p.images.length > 0) ? p.images : 
         (p.image ? [p.image] : ["https://via.placeholder.com/300"]);
 
-    // SET FOTO UTAMA
     document.getElementById('m-img').src = images[0];
+    // ... sisa kode lainnya
 
-    // Klik foto → fullscreen viewer
-    document.getElementById('m-img').onclick = () => {
-        openImageViewer(images, 0);
-    };
 
     document.getElementById('m-title').innerText = p.name;
     document.getElementById('m-price').innerText = 
@@ -1218,4 +1215,4 @@ window.openVisiModal = () => {
 
     </script>
 </body>
-</html>
+    </html>

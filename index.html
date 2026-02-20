@@ -163,18 +163,30 @@ class="hidden fixed inset-0 z-[150] flex items-center justify-center bg-black/90
         <div id="admin-process" class="admin-tab hidden"></div>
         <div id="admin-done" class="admin-tab hidden"></div>
         <div id="admin-reject" class="admin-tab hidden"></div>
+        <div id="edit-indicator" 
+class="hidden bg-yellow-600/20 text-yellow-400 p-3 rounded-xl text-xs font-bold mb-3 text-center">
+    ✏️ SEDANG EDIT PRODUK
+</div>
         <div id="admin-upload" class="admin-tab hidden glass p-6 rounded-2xl">
     <h3 class="font-bold mb-3">Tambah Produk Baru</h3>
     <input type="text" id="p-name" placeholder="Nama Produk" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
     <input type="number" id="p-price" placeholder="Harga" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
     
-    <input type="file" id="productImages" accept="image/*" multiple class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
+    <img id="image-preview" 
+class="hidden w-full h-40 object-cover rounded-xl mb-3 border border-slate-700">
     
-    <input type="text" id="productImageUrl" placeholder="Atau masukkan URL gambar (opsional)" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
+    <input type="text" id="productImageUrl"
+placeholder="URL Gambar (WAJIB)"
+class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
     <textarea id="p-desc" placeholder="Deskripsi" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm"></textarea>
     <input type="number" id="p-stock" placeholder="Stok" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
     
     <button onclick="saveProduct()" class="w-full bg-green-600 py-3 rounded-xl font-bold">Upload Produk</button>
+    <button id="cancel-edit-btn"
+onclick="cancelEdit()"
+class="hidden w-full bg-gray-600 py-3 rounded-xl font-bold mt-2">
+    BATAL EDIT
+</button>
 </div>
 
 
@@ -254,8 +266,7 @@ class="hidden fixed inset-0 z-[150] flex items-center justify-center bg-black/90
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, set, get, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         import { updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getStorage, ref as sRef, uploadBytes, getDownloadURL } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+        
 
 
         const firebaseConfig = {
@@ -271,7 +282,6 @@ from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
-        const storage = getStorage(app);
         const database = getDatabase(app);
         
         let currentImages = [];
@@ -567,11 +577,22 @@ profileBox.innerHTML = `
         <div class="glass rounded-2xl overflow-hidden p-2 flex flex-col product-item relative" data-name="${p.name.toLowerCase()}">
             
             ${isAdmin ? `
-            <div class="absolute top-2 left-2 flex gap-1 z-10">
-                <button onclick="editProductFull('${p.id}')" class="bg-yellow-600 text-[8px] px-2 py-1 rounded">Edit</button>
-                <button onclick="deleteProduct('${p.id}')" class="bg-red-600 text-[8px] px-2 py-1 rounded">Hapus</button>
-            </div>
-            ` : ""}
+<div class="absolute top-2 left-2 flex gap-1 z-10">
+    <button onclick="viewDetail('${p.id}')" 
+    class="bg-blue-600 text-[8px] px-2 py-1 rounded">
+        Detail
+    </button>
+    <button onclick="editProductFull('${p.id}')" 
+    class="bg-yellow-600 text-[8px] px-2 py-1 rounded">
+        Edit
+    </button>
+    <button onclick="deleteProduct('${p.id}')" 
+    class="bg-red-600 text-[8px] px-2 py-1 rounded">
+        Hapus
+    </button>
+</div>
+` : ""}
+            
 
             <img src="${displayImg}" 
             class="w-full h-32 object-cover rounded-xl mb-2 cursor-pointer" 
@@ -935,74 +956,51 @@ window.delOrder = async (id) => {
 
 
 window.saveProduct = async () => {
+
     const name = document.getElementById("p-name").value;
     const price = document.getElementById("p-price").value;
     const desc = document.getElementById("p-desc").value;
     const stock = document.getElementById("p-stock").value;
-    const fileInput = document.getElementById("productImages"); // Pastikan ID ini benar
-    const manualUrl = document.getElementById("productImageUrl").value;
+    const imageUrl = document.getElementById("productImageUrl").value;
 
-    if (!name || !price || !stock) {
-        alert("Nama, Harga, dan Stok wajib diisi!");
+    if (!name || !price || !stock || !imageUrl) {
+        alert("Semua field wajib diisi!");
         return;
     }
 
-    let imageUrls = [];
-    const files = fileInput.files;
+    const productData = {
+        name: name,
+        price: Number(price),
+        description: desc,
+        stock: Number(stock),
+        images: [imageUrl],
+        updatedAt: Date.now()
+    };
 
-    // 1. Proses Upload ke Cloudinary jika ada file
-    if (files.length > 0) {
-        for (let i = 0; i < files.length; i++) {
-            const formData = new FormData();
-            formData.append("file", files[i]);
-            formData.append("upload_preset", "Marketplace"); // Pastikan preset ini sudah dibuat di Cloudinary
-
-            try {
-                const res = await fetch(
-                    "https://api.cloudinary.com/v1_1/dhutfj43/image/upload",
-                    { method: "POST", body: formData }
-                );
-                const data = await res.json();
-                if (data.secure_url) {
-                    imageUrls.push(data.secure_url);
-                }
-            } catch (err) {
-                console.error("Upload failed:", err);
-            }
-        }
-    }
-
-    // 2. Tambahkan URL manual jika ada
-    if (manualUrl.trim() !== "") {
-        imageUrls.push(manualUrl.trim());
-    }
-
-    // 3. Simpan ke Firebase Database
     try {
-        const productRef = ref(database, 'products');
-        const newProductRef = push(productRef);
-        
-        await set(newProductRef, {
-            name: name,
-            price: Number(price),
-            description: desc,
-            stock: Number(stock),
-            images: imageUrls,
-            createdAt: Date.now()
-        });
 
-        alert("Produk berhasil ditambahkan!");
-        
-        // Reset Form
-        document.getElementById("p-name").value = "";
-        document.getElementById("p-price").value = "";
-        document.getElementById("p-desc").value = "";
-        document.getElementById("p-stock").value = "";
-        fileInput.value = "";
-        document.getElementById("productImageUrl").value = "";
-        
+        if (window.currentEditId) {
+
+            await update(ref(db, `products/${window.currentEditId}`), productData);
+
+            alert("Produk berhasil diupdate!");
+
+        } else {
+
+            const newRef = push(ref(db, "products"));
+            await set(newRef, {
+                ...productData,
+                createdAt: Date.now()
+            });
+
+            alert("Produk berhasil ditambahkan!");
+        }
+
+        cancelEdit();
+
     } catch (error) {
-        alert("Gagal simpan ke database: " + error.message);
+        alert("Gagal simpan produk!");
+        console.error(error);
     }
 };
 
@@ -1094,76 +1092,18 @@ window.editProductFull = async (id) => {
     document.getElementById('p-price').value = p.price;
     document.getElementById('p-desc').value = p.description || "";
     document.getElementById('p-stock').value = p.stock || 0;
-    document.getElementById('p-note').value = p.adminNote || "";
+    document.getElementById('productImageUrl').value = p.images?.[0] || "";
+
+    document.getElementById('edit-indicator').classList.remove('hidden');
+    document.getElementById('cancel-edit-btn').classList.remove('hidden');
+    document.querySelector('#admin-upload button').innerText = "UPDATE PRODUK";
 
     window.currentEditId = id;
+
+    showImagePreview(p.images?.[0]);
+
+    switchAdminTab('upload');
 };
-function listenAdminProducts() {
-
-    const container = document.getElementById('admin-product-list');
-
-    onValue(ref(db, 'products'), snapshot => {
-
-        container.innerHTML = "";
-
-        snapshot.forEach(child => {
-
-            const p = child.val();
-            const id = child.key;
-
-            const img = p.images?.[0] || p.image || 
-                "https://via.placeholder.com/80";
-
-            container.innerHTML += `
-                <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700">
-
-                    <div class="flex gap-4">
-
-                        <img src="${img}" 
-                        class="w-16 h-16 object-cover rounded-lg border border-slate-600">
-
-                        <div class="flex-1">
-
-                            <h4 class="font-bold text-sm">
-                                ${p.name}
-                            </h4>
-
-                            <p class="text-xs text-green-400">
-                                Rp ${Number(p.price).toLocaleString()}
-                            </p>
-
-                            <p class="text-xs text-gray-400">
-                                Stok: ${p.stock}
-                            </p>
-
-                            <p class="text-[10px] text-gray-500 mt-1 line-clamp-2">
-                                ${p.description || '-'}
-                            </p>
-
-                            <div class="flex gap-2 mt-3">
-
-                                <button onclick="editProductFull('${id}')"
-                                class="bg-yellow-500 text-black text-xs px-3 py-1 rounded-lg">
-                                    Edit
-                                </button>
-
-                                <button onclick="deleteProduct('${id}')"
-                                class="bg-red-600 text-white text-xs px-3 py-1 rounded-lg">
-                                    Hapus
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-            `;
-        });
-
-    });
-}
 window.openImageViewer = (images, index = 0) => {
     currentImages = images;
     currentIndex = index;
@@ -1212,6 +1152,40 @@ window.openVisiModal = () => {
             `fadeUp 0.6s ease forwards ${index * 0.3}s`;
     });
 };
+
+window.cancelEdit = () => {
+
+    window.currentEditId = null;
+
+    document.getElementById("p-name").value = "";
+    document.getElementById("p-price").value = "";
+    document.getElementById("p-desc").value = "";
+    document.getElementById("p-stock").value = "";
+    document.getElementById("productImageUrl").value = "";
+
+    document.getElementById('edit-indicator').classList.add('hidden');
+    document.getElementById('cancel-edit-btn').classList.add('hidden');
+    document.querySelector('#admin-upload button').innerText = "Upload Produk";
+
+    document.getElementById('image-preview').classList.add('hidden');
+};
+
+document.getElementById("productImageUrl").addEventListener("input", function () {
+    showImagePreview(this.value);
+});
+
+function showImagePreview(url) {
+
+    const preview = document.getElementById("image-preview");
+
+    if (!url) {
+        preview.classList.add("hidden");
+        return;
+    }
+
+    preview.src = url;
+    preview.classList.remove("hidden");
+}
 
     </script>
 </body>

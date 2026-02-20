@@ -110,6 +110,14 @@ class="hidden fixed inset-0 z-[150] flex items-center justify-center bg-black/90
         </header>
         <div class="mb-6">
             <input type="text" id="search-input" onkeyup="searchProduct(this.value)" placeholder="Cari produk impianmu..." class="w-full p-4 rounded-2xl bg-slate-800 border border-slate-700 outline-none text-sm">
+            <div class="mb-6 glass p-4 rounded-2xl text-center">
+    <h2 class="font-bold text-lg text-blue-400">
+        Selamat Datang di XREZZKY STORE
+    </h2>
+    <p class="text-xs text-gray-400 mt-1">
+        Marketplace premium cepat & terpercaya
+    </p>
+</div>
         </div>
         <div id="search-empty" class="hidden text-center py-10 opacity-50">
             <i class="fa fa-search text-4xl mb-3"></i>
@@ -127,7 +135,7 @@ class="hidden fixed inset-0 z-[150] flex items-center justify-center bg-black/90
         
         <div id="profile-content"></div>
         
-        <div class="glass p-6 rounded-3xl">
+        <div class="glass p-6 rounded-3xl mt-6">
             <h3 class="font-bold mb-4">Pesanan Saya</h3>
             <div id="user-history" class="space-y-4"></div>
         </div>
@@ -172,8 +180,8 @@ class="hidden bg-yellow-600/20 text-yellow-400 p-3 rounded-xl text-xs font-bold 
     <input type="text" id="p-name" placeholder="Nama Produk" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
     <input type="number" id="p-price" placeholder="Harga" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
     
-    <img id="image-preview" 
-class="hidden w-full h-40 object-cover rounded-xl mb-3 border border-slate-700">
+    <img id="image-preview"
+class="hidden w-full max-h-40 object-contain bg-slate-900 p-2 rounded-xl mb-3 border border-slate-700">
     
     <input type="text" id="productImageUrl"
 placeholder="URL Gambar (WAJIB)"
@@ -197,7 +205,8 @@ class="hidden w-full bg-gray-600 py-3 rounded-xl font-bold mt-2">
 
     <div id="modal-detail" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95">
         <div class="bg-slate-900 w-full max-w-lg rounded-3xl overflow-hidden relative border border-slate-800 max-h-[90vh] overflow-y-auto">
-            <img id="m-img" src="" class="w-full h-64 object-cover">
+            <img id="m-img" src="" 
+class="w-full max-h-64 object-contain bg-slate-900 p-2">
             <div class="p-6">
                 <div class="flex justify-between items-start mb-2">
                     <h2 id="m-title" class="text-xl font-bold"></h2>
@@ -335,7 +344,7 @@ class="hidden w-full bg-gray-600 py-3 rounded-xl font-bold mt-2">
     // Role Detection
 if (data?.role === 'admin') {
     document.getElementById('nav-admin').classList.remove('hidden');
-    listenAdminProducts();
+    listenProducts(); // cukup ini
     listenAdminOrders();
 } else {
     document.getElementById('nav-admin').classList.add('hidden');
@@ -595,7 +604,7 @@ profileBox.innerHTML = `
             
 
             <img src="${displayImg}" 
-            class="w-full h-32 object-cover rounded-xl mb-2 cursor-pointer" 
+class="w-full h-32 object-contain bg-slate-900 rounded-xl mb-2 cursor-pointer p-1"
             onclick="viewDetail('${p.id}')">
 
             <p class="text-[11px] font-bold truncate">${p.name}</p>

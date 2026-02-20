@@ -974,67 +974,60 @@ Status: ${o.status}
 
 const loader = document.getElementById("initial-loading");
 const bar = document.getElementById("loading-bar");
-const loadingText = document.getElementById("loading-text");
+const textLoading = document.getElementById("loading-text");
 
 let progress = 0;
-let firebaseLoaded = false;
-let minTimePassed = false;
+let firebaseReady = false;
+let minimumTimePassed = false;
 
 const loadingMessages = [
     "Menyiapkan Marketplace...",
-    "Mengambil produk...",
-    "Menyambungkan ke server...",
-    "Memuat gambar...",
-    "Hampir selesai..."
+    "Menghubungkan Server...",
+    "Mengambil Produk...",
+    "Menampilkan Data...",
+    "Hampir Selesai..."
 ];
 
 let msgIndex = 0;
 
 const interval = setInterval(() => {
-
-    progress += Math.random() * 8;
-    if (progress > 95) progress = 95;
+    progress += Math.random() * 7;
+    if (progress > 90) progress = 90;
 
     bar.style.width = progress + "%";
 
     msgIndex = (msgIndex + 1) % loadingMessages.length;
-    loadingText.innerText = loadingMessages[msgIndex];
+    textLoading.innerText = loadingMessages[msgIndex];
 
 }, 400);
 
-// minimal tampil 2 detik biar smooth
+// Minimal loading 2.5 detik
 setTimeout(() => {
-    minTimePassed = true;
-    checkFinish();
-}, 2000);
+    minimumTimePassed = true;
+    tryFinishLoading();
+}, 2500);
 
-// cek products sekali saja
+// Tunggu produk pertama load
 onValue(ref(db, "products"), () => {
-    firebaseLoaded = true;
-    checkFinish();
+    firebaseReady = true;
+    tryFinishLoading();
 }, { onlyOnce: true });
 
-function checkFinish() {
-    if (firebaseLoaded && minTimePassed) {
-
+function tryFinishLoading() {
+    if (firebaseReady && minimumTimePassed) {
         clearInterval(interval);
-
         bar.style.width = "100%";
-        loadingText.innerText = "Marketplace Siap 🚀";
+        textLoading.innerText = "Marketplace Siap 🚀";
 
         setTimeout(() => {
-
             loader.style.opacity = "0";
-
             setTimeout(() => {
                 loader.remove();
                 document.getElementById("page-marketplace").classList.remove("hidden");
             }, 600);
-
         }, 500);
     }
 }
-
     </script>
 </body>
                 </html>

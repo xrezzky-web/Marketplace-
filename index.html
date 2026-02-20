@@ -1,298 +1,246 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XREZZKY PREMIUM STORE</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #f8fafc; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Produk</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen pb-10">
+<body class="bg-slate-900 text-white min-h-screen p-6">
 
-    <nav class="sticky top-0 z-40 glass border-b border-slate-800 px-6 py-4 flex justify-between items-center">
-        <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">XREZZKY ADMIN</h1>
-        <div id="nav-actions" class="hidden">
-            <button onclick="window.backToList()" class="text-sm font-semibold text-slate-400 hover:text-white transition">
-                <i class="fa fa-arrow-left mr-2"></i>Kembali
-            </button>
+<h1 class="text-2xl font-bold mb-6">Admin Produk</h1>
+
+<!-- ================= FORM ================= -->
+<div class="bg-slate-800 p-6 rounded-xl mb-8">
+    <div class="grid gap-4">
+        <input id="nama" type="text" placeholder="Nama Produk"
+            class="p-2 bg-slate-900 border border-slate-700 rounded">
+
+        <input id="harga" type="number" placeholder="Harga"
+            class="p-2 bg-slate-900 border border-slate-700 rounded">
+
+        <textarea id="deskripsi" placeholder="Deskripsi"
+            class="p-2 bg-slate-900 border border-slate-700 rounded"></textarea>
+
+        <textarea id="note" placeholder="Note Admin"
+            class="p-2 bg-slate-900 border border-slate-700 rounded"></textarea>
+
+        <div>
+            <p class="mb-2 text-sm text-slate-400">URL Foto (Max 20)</p>
+            <div id="image-input-container" class="space-y-2"></div>
         </div>
-    </nav>
 
-    <main class="max-w-6xl mx-auto p-6">
-        
-        <section id="page-list" class="space-y-10">
-            <div class="glass rounded-3xl p-8 shadow-2xl border border-slate-800">
-                <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
-                    <i class="fa fa-plus-circle text-blue-500"></i>Tambah Produk Baru
-                </h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Nama Produk</label>
-                            <input type="text" id="p-name" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 outline-none focus:border-blue-500 transition">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Harga (Rp)</label>
-                            <input type="number" id="p-price" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 outline-none focus:border-blue-500 transition">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Deskripsi</label>
-                            <textarea id="p-desc" rows="3" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 outline-none focus:border-blue-500 transition"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2 text-yellow-500">Note Admin (Internal)</label>
-                            <textarea id="p-note" rows="2" class="w-full bg-slate-900 border border-yellow-900/30 rounded-xl p-3 outline-none text-yellow-100/80 focus:border-yellow-600 transition"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="space-y-4">
-                        <label class="block text-xs font-bold text-slate-500 uppercase">URL Foto Produk (Auto-detect)</label>
-                        <div id="url-container" class="space-y-3 max-h-[400px] overflow-y-auto pr-2 hide-scroll">
-                            </div>
-                        <p class="text-[10px] text-slate-500 italic">* Masukkan URL gambar yang valid untuk menambah kolom baru (Maks 20)</p>
-                    </div>
-                </div>
-
-                <button onclick="window.saveProduct()" class="w-full mt-8 bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-900/20 transition-all transform active:scale-[0.98]">
-                    SIMPAN PRODUK
-                </button>
-            </div>
-
-            <div>
-                <h2 class="text-xl font-bold mb-6">Katalog Produk</h2>
-                <div id="product-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    </div>
-            </div>
-        </section>
-
-        <section id="page-detail" class="hidden">
-            <div class="glass rounded-3xl overflow-hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2">
-                    <div class="p-8 bg-slate-950 flex flex-col items-center justify-center">
-                        <img id="detail-main-img" src="" class="max-h-[400px] object-contain rounded-2xl shadow-2xl mb-6">
-                        <div id="detail-thumbnails" class="flex gap-3 overflow-x-auto w-full pb-2 hide-scroll justify-center">
-                            </div>
-                    </div>
-                    <div class="p-8 space-y-6">
-                        <div>
-                            <h2 id="detail-name" class="text-3xl font-bold mb-2"></h2>
-                            <p id="detail-price" class="text-2xl font-bold text-blue-400"></p>
-                        </div>
-                        <div class="border-t border-slate-800 pt-6">
-                            <h4 class="text-xs font-bold text-slate-500 uppercase mb-2">Deskripsi</h4>
-                            <p id="detail-desc" class="text-slate-300 leading-relaxed whitespace-pre-line"></p>
-                        </div>
-                        <div class="bg-yellow-900/10 border border-yellow-900/30 p-4 rounded-2xl">
-                            <h4 class="text-xs font-bold text-yellow-500 uppercase mb-1">Note Admin</h4>
-                            <p id="detail-note" class="text-yellow-100/70 text-sm italic"></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <div id="modal-fullscreen" class="fixed inset-0 z-[100] bg-black/95 hidden flex-col items-center justify-center p-4">
-        <button onclick="window.closeImageModal()" class="absolute top-6 right-6 text-white text-3xl hover:text-red-500 transition">
-            <i class="fa fa-times"></i>
+        <button id="saveBtn"
+            class="bg-blue-600 hover:bg-blue-700 p-2 rounded-lg">
+            Simpan Produk
         </button>
-        
-        <div class="relative w-full h-full flex items-center justify-center">
-            <button onclick="window.prevImage()" class="absolute left-0 md:left-10 text-white/50 hover:text-white text-4xl p-4 transition">
-                <i class="fa fa-chevron-left"></i>
-            </button>
-            
-            <img id="modal-img" src="" class="max-h-[85vh] max-w-[90vw] object-contain shadow-2xl">
-            
-            <button onclick="window.nextImage()" class="absolute right-0 md:right-10 text-white/50 hover:text-white text-4xl p-4 transition">
-                <i class="fa fa-chevron-right"></i>
-            </button>
-        </div>
-
-        <div id="modal-counter" class="absolute bottom-10 bg-slate-800/80 px-6 py-2 rounded-full text-sm font-bold tracking-widest">
-            1 / 1
-        </div>
     </div>
+</div>
 
-    <script type="module">
-        // STATE GLOBAL
-        let products = [];
-        let currentImages = [];
-        let currentIndex = 0;
+<!-- ================= LIST PRODUK ================= -->
+<div id="productList" class="grid md:grid-cols-3 gap-4"></div>
 
-        // --- UTILS ---
-        const validateImage = (url) => {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = () => resolve(true);
-                img.onerror = () => resolve(false);
-                img.src = `${url}?t=${new Date().getTime()}`;
-            });
-        };
+<!-- ================= DETAIL ================= -->
+<div id="detailPage" class="hidden">
+    <button onclick="location.reload()" class="mb-4 text-blue-400">← Kembali</button>
 
-        // --- DYNAMIC URL SYSTEM ---
-        window.createUrlInput = (container) => {
-            const index = container.children.length;
-            if (index >= 20) return;
+    <h2 id="dNama" class="text-2xl font-bold"></h2>
+    <p id="dHarga" class="text-green-400 mb-2"></p>
+    <p id="dDeskripsi" class="mb-2"></p>
+    <p id="dNote" class="text-yellow-400 mb-4"></p>
 
-            const div = document.createElement('div');
-            div.className = "flex items-center gap-3 group animate-slide-in";
-            div.innerHTML = `
-                <div class="w-12 h-12 flex-shrink-0 bg-slate-800 rounded-lg overflow-hidden border border-slate-700 flex items-center justify-center">
-                    <img id="preview-${index}" src="" class="w-full h-full object-contain hidden">
-                    <i id="icon-${index}" class="fa fa-image text-slate-600"></i>
-                </div>
-                <input type="text" 
-                       placeholder="Masukkan URL Foto..." 
-                       class="flex-1 bg-slate-800/50 border border-slate-700 rounded-xl p-3 text-sm outline-none focus:border-blue-500 transition url-input"
-                       onchange="window.handleUrlChange(this, ${index})">
-            `;
-            container.appendChild(div);
-        };
+    <div id="dImages" class="flex gap-3 overflow-x-auto"></div>
+</div>
 
-        window.handleUrlChange = async (input, index) => {
-            const url = input.value.trim();
-            const preview = document.getElementById(`preview-${index}`);
-            const icon = document.getElementById(`icon-${index}`);
-            const container = document.getElementById('url-container');
+<!-- ================= MODAL ================= -->
+<div id="imageModal"
+    class="hidden fixed inset-0 bg-black bg-opacity-90 flex flex-col items-center justify-center z-50">
 
-            if (!url) {
-                preview.classList.add('hidden');
-                icon.classList.remove('hidden');
-                return;
-            }
+    <button onclick="closeImageModal()"
+        class="absolute top-4 right-6 text-3xl">✕</button>
 
-            const isValid = await validateImage(url);
-            if (isValid) {
-                preview.src = url;
-                preview.classList.remove('hidden');
-                icon.classList.add('hidden');
+    <button onclick="prevImage()"
+        class="absolute left-4 text-4xl">❮</button>
 
-                // Jika ini kolom terakhir, tambah kolom baru
-                const allInputs = container.querySelectorAll('.url-input');
-                if (index === allInputs.length - 1 && allInputs.length < 20) {
-                    window.createUrlInput(container);
-                }
-            } else {
-                alert("URL Gambar tidak valid atau tidak dapat diakses!");
-                input.value = "";
-                preview.classList.add('hidden');
-                icon.classList.remove('hidden');
-            }
-        };
+    <img id="modalImage"
+        class="max-h-[90vh] object-contain">
 
-        // --- PRODUCT ACTIONS ---
-        window.saveProduct = () => {
-            const name = document.getElementById('p-name').value;
-            const price = document.getElementById('p-price').value;
-            const desc = document.getElementById('p-desc').value;
-            const note = document.getElementById('p-note').value;
-            const urlInputs = document.querySelectorAll('.url-input');
-            const images = Array.from(urlInputs).map(i => i.value.trim()).filter(v => v !== "");
+    <button onclick="nextImage()"
+        class="absolute right-4 text-4xl">❯</button>
 
-            if (!name || !price || images.length === 0) {
-                return alert("Mohon lengkapi Nama, Harga, dan minimal 1 Foto!");
-            }
+    <p id="imageCounter" class="mt-4 text-lg"></p>
+</div>
 
-            const product = { id: Date.now(), name, price, desc, note, images };
-            products.push(product);
-            
-            // Reset Form
-            document.getElementById('p-name').value = "";
-            document.getElementById('p-price').value = "";
-            document.getElementById('p-desc').value = "";
-            document.getElementById('p-note').value = "";
-            document.getElementById('url-container').innerHTML = "";
-            window.createUrlInput(document.getElementById('url-container'));
-            
-            window.renderGrid();
-        };
+<script type="module">
 
-        window.renderGrid = () => {
-            const grid = document.getElementById('product-grid');
-            grid.innerHTML = products.map(p => `
-                <div class="glass rounded-2xl overflow-hidden border border-slate-800 group cursor-pointer hover:border-blue-500 transition-all shadow-lg" onclick="window.showDetail(${p.id})">
-                    <div class="h-40 bg-slate-950 p-4">
-                        <img src="${p.images[0]}" class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500">
-                    </div>
-                    <div class="p-4 bg-slate-800/30">
-                        <h3 class="font-bold text-sm truncate">${p.name}</h3>
-                        <p class="text-blue-400 font-bold text-xs mt-1">Rp ${Number(p.price).toLocaleString()}</p>
-                    </div>
-                </div>
-            `).join('');
-        };
+let products = [];
+let currentImages = [];
+let currentIndex = 0;
 
-        // --- NAVIGATION & DETAIL ---
-        window.showDetail = (id) => {
-            const p = products.find(item => item.id === id);
-            if (!p) return;
+const MAX_IMAGES = 20;
 
-            document.getElementById('page-list').classList.add('hidden');
-            document.getElementById('page-detail').classList.remove('hidden');
-            document.getElementById('nav-actions').classList.remove('hidden');
+/* ================= VALIDASI IMAGE ================= */
 
-            document.getElementById('detail-main-img').src = p.images[0];
-            document.getElementById('detail-name').innerText = p.name;
-            document.getElementById('detail-price').innerText = `Rp ${Number(p.price).toLocaleString()}`;
-            document.getElementById('detail-desc').innerText = p.desc;
-            document.getElementById('detail-note').innerText = p.note || '-';
+function isValidImageUrl(url) {
+    return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = url + (url.includes("?") ? "&" : "?") + "t=" + Date.now();
+    });
+}
 
-            const thumbContainer = document.getElementById('detail-thumbnails');
-            thumbContainer.innerHTML = p.images.map((img, idx) => `
-                <img src="${img}" 
-                     class="w-16 h-16 object-contain rounded-lg border-2 border-slate-800 cursor-pointer hover:border-blue-500 transition flex-shrink-0 bg-slate-900" 
-                     onclick="window.openImageModal(${JSON.stringify(p.images).replace(/"/g, '&quot;')}, ${idx})">
-            `).join('');
-        };
+/* ================= MULTI INPUT ================= */
 
-        window.backToList = () => {
-            document.getElementById('page-list').classList.remove('hidden');
-            document.getElementById('page-detail').classList.add('hidden');
-            document.getElementById('nav-actions').classList.add('hidden');
-        };
+function createImageInput(value = "") {
+    const container = document.getElementById("image-input-container");
+    const total = container.querySelectorAll("input").length;
+    if (total >= MAX_IMAGES) return;
 
-        // --- IMAGE MODAL LOGIC ---
-        window.openImageModal = (images, index) => {
-            currentImages = images;
-            currentIndex = index;
-            document.getElementById('modal-fullscreen').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-            window.updateModalView();
-        };
+    const wrapper = document.createElement("div");
+    wrapper.className = "flex gap-2 items-center";
 
-        window.closeImageModal = () => {
-            document.getElementById('modal-fullscreen').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        };
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = "Masukkan URL gambar...";
+    input.value = value;
+    input.className = "flex-1 p-2 bg-slate-900 border border-slate-700 rounded";
 
-        window.updateModalView = () => {
-            document.getElementById('modal-img').src = currentImages[currentIndex];
-            document.getElementById('modal-counter').innerText = `${currentIndex + 1} / ${currentImages.length}`;
-        };
+    const preview = document.createElement("img");
+    preview.className = "w-12 h-12 object-contain bg-slate-800 rounded hidden";
 
-        window.nextImage = () => {
-            currentIndex = (currentIndex + 1) % currentImages.length;
-            window.updateModalView();
-        };
+    input.addEventListener("change", async () => {
+        const url = input.value.trim();
+        if (!url) return;
 
-        window.prevImage = () => {
-            currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
-            window.updateModalView();
-        };
+        const valid = await isValidImageUrl(url);
+        if (!valid) {
+            alert("URL bukan gambar valid!");
+            input.value = "";
+            preview.classList.add("hidden");
+            return;
+        }
 
-        // INITIALIZE
-        document.addEventListener('DOMContentLoaded', () => {
-            window.createUrlInput(document.getElementById('url-container'));
-        });
-    </script>
+        preview.src = url;
+        preview.classList.remove("hidden");
+
+        const inputs = container.querySelectorAll("input");
+        if (input === inputs[inputs.length - 1] && inputs.length < MAX_IMAGES) {
+            createImageInput();
+        }
+    });
+
+    wrapper.appendChild(input);
+    wrapper.appendChild(preview);
+    container.appendChild(wrapper);
+}
+
+function getAllImages() {
+    const inputs = document.querySelectorAll("#image-input-container input");
+    return [...inputs]
+        .map(i => i.value.trim())
+        .filter(v => v !== "");
+}
+
+createImageInput();
+
+/* ================= SIMPAN PRODUK ================= */
+
+document.getElementById("saveBtn").addEventListener("click", () => {
+
+    const nama = document.getElementById("nama").value;
+    const harga = document.getElementById("harga").value;
+    const deskripsi = document.getElementById("deskripsi").value;
+    const note = document.getElementById("note").value;
+    const images = getAllImages();
+
+    if (!nama || !harga || images.length === 0) {
+        alert("Isi minimal Nama, Harga dan 1 Foto!");
+        return;
+    }
+
+    products.push({ nama, harga, deskripsi, note, images });
+    renderProducts();
+});
+
+/* ================= RENDER ================= */
+
+function renderProducts() {
+    const list = document.getElementById("productList");
+    list.innerHTML = "";
+
+    products.forEach((p, i) => {
+        const card = document.createElement("div");
+        card.className = "bg-slate-800 p-4 rounded cursor-pointer hover:bg-slate-700";
+
+        card.innerHTML = `
+            <img src="${p.images[0]}" class="h-40 w-full object-contain mb-2">
+            <h3 class="font-bold">${p.nama}</h3>
+            <p class="text-green-400">Rp ${p.harga}</p>
+        `;
+
+        card.onclick = () => showDetail(i);
+        list.appendChild(card);
+    });
+}
+
+function showDetail(index) {
+    const p = products[index];
+
+    document.querySelector("div.bg-slate-800").classList.add("hidden");
+    document.getElementById("productList").classList.add("hidden");
+    document.getElementById("detailPage").classList.remove("hidden");
+
+    dNama.innerText = p.nama;
+    dHarga.innerText = "Rp " + p.harga;
+    dDeskripsi.innerText = p.deskripsi;
+    dNote.innerText = p.note;
+
+    const imgContainer = document.getElementById("dImages");
+    imgContainer.innerHTML = "";
+
+    p.images.forEach((img, i) => {
+        const image = document.createElement("img");
+        image.src = img;
+        image.className = "h-24 cursor-pointer object-contain bg-slate-800 rounded";
+        image.onclick = () => openImageModal(p.images, i);
+        imgContainer.appendChild(image);
+    });
+}
+
+/* ================= MODAL ================= */
+
+window.openImageModal = function(images, index = 0) {
+    currentImages = images;
+    currentIndex = index;
+    updateModalImage();
+    imageModal.classList.remove("hidden");
+}
+
+window.closeImageModal = function() {
+    imageModal.classList.add("hidden");
+}
+
+window.nextImage = function() {
+    if (currentIndex < currentImages.length - 1) {
+        currentIndex++;
+        updateModalImage();
+    }
+}
+
+window.prevImage = function() {
+    if (currentIndex > 0) {
+        currentIndex--;
+        updateModalImage();
+    }
+}
+
+function updateModalImage() {
+    modalImage.src = currentImages[currentIndex];
+    imageCounter.innerText =
+        (currentIndex + 1) + " / " + currentImages.length;
+}
+
+</script>
 </body>
-</html>
+    </html>

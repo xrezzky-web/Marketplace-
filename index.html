@@ -3,437 +3,296 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XREZZKY STORE | Premium Marketplace</title>
+    <title>XREZZKY PREMIUM STORE</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: white; overflow-x: hidden; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .hidden { display: none !important; }
-        .tab-active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
-        input[type="range"] { accent-color: #3b82f6; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade { animation: fadeUp 0.4s ease forwards; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="pb-24">
+<body class="min-h-screen pb-10">
 
-    <div id="loader" class="fixed inset-0 flex items-center justify-center bg-slate-900 z-[999]">
-        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-blue-500"></div>
-    </div>
-
-    <div id="imageModal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center z-[200]">
-        <button onclick="closeImageModal()" class="absolute top-6 right-6 text-white text-3xl z-50"><i class="fa fa-times"></i></button>
-        <button onclick="prevImage()" class="absolute left-4 text-white text-4xl p-4">❮</button>
-        <img id="modalImage" class="max-h-[85vh] max-w-[90vw] object-contain transition-all duration-300">
-        <button onclick="nextImage()" class="absolute right-4 text-white text-4xl p-4">❯</button>
-        <div id="imageCounter" class="absolute bottom-10 text-white text-sm bg-black/50 px-4 py-2 rounded-full"></div>
-    </div>
-
-    <div id="modal-visi" class="hidden fixed inset-0 z-[150] flex items-center justify-center bg-black/90 p-6">
-        <div class="glass p-8 rounded-3xl max-w-lg w-full relative">
-            <button onclick="closeModal('modal-visi')" class="absolute top-4 right-4 text-gray-400">✕</button>
-            <h2 class="text-xl font-bold text-purple-400 mb-6 text-center">Visi & Misi XREZZKY STORE</h2>
-            <div class="space-y-4 text-sm text-gray-300">
-                <div><h3 class="font-bold text-white">🎯 Visi</h3><p>Menjadi toko digital terpercaya dengan sistem cepat dan aman.</p></div>
-                <div><h3 class="font-bold text-white">🚀 Misi</h3><ul class="list-disc ml-5"><li>Pelayanan responsif</li><li>Harga kompetitif</li><li>Transaksi transparan</li></ul></div>
-            </div>
-        </div>
-    </div>
-
-    <section id="page-auth" class="hidden min-h-screen flex items-center justify-center p-6">
-        <div class="glass p-8 rounded-3xl w-full max-w-md">
-            <h2 id="auth-title" class="text-3xl font-bold mb-6 text-center text-blue-500">XREZZKY</h2>
-            <div class="space-y-4">
-                <div id="reg-fields" class="hidden"><input type="text" id="auth-user" placeholder="Username" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none"></div>
-                <input type="email" id="auth-email" placeholder="Email" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
-                <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
-                <button id="btn-auth-submit" class="w-full bg-blue-600 py-4 rounded-xl font-bold hover:bg-blue-700 transition">Continue</button>
-                <p id="auth-toggle-text" class="text-center text-xs text-blue-400 cursor-pointer italic">Belum punya akun? Daftar</p>
-            </div>
-        </div>
-    </section>
-
-    <section id="page-marketplace" class="hidden min-h-screen p-4">
-        <header class="flex justify-between items-center mb-6 py-4">
-            <div onclick="showPage('page-profile')" class="flex items-center gap-3 cursor-pointer">
-                <img id="user-avatar" src="https://ui-avatars.com/api/?name=Guest" class="w-10 h-10 rounded-full border-2 border-blue-500">
-                <p id="user-name-display" class="font-bold text-sm truncate w-24">Guest</p>
-            </div>
-            <button onclick="showCart()" class="relative p-3 bg-slate-800 rounded-full">
-                <i class="fa fa-shopping-basket"></i>
-                <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-[8px] px-1.5 rounded-full font-bold">0</span>
+    <nav class="sticky top-0 z-40 glass border-b border-slate-800 px-6 py-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">XREZZKY ADMIN</h1>
+        <div id="nav-actions" class="hidden">
+            <button onclick="window.backToList()" class="text-sm font-semibold text-slate-400 hover:text-white transition">
+                <i class="fa fa-arrow-left mr-2"></i>Kembali
             </button>
-        </header>
-
-        <div class="mb-4">
-            <h2 class="font-bold text-lg text-blue-400">XREZZKY STORE</h2>
-            <p class="text-xs text-gray-400">Marketplace premium terpercaya</p>
         </div>
-
-        <input type="text" id="search-input" placeholder="Cari produk..." class="w-full p-4 rounded-2xl bg-slate-800 border border-slate-700 outline-none text-sm mb-6">
-        
-        <div id="search-empty" class="hidden text-center py-10 opacity-50">
-            <i class="fa fa-search text-4xl mb-3"></i>
-            <p>Produk tidak ditemukan</p>
-        </div>
-
-        <main id="product-list" class="grid grid-cols-2 md:grid-cols-4 gap-4"></main>
-    </section>
-
-    <section id="page-profile" class="hidden min-h-screen p-6">
-        <div class="flex items-center gap-4 mb-6">
-            <button onclick="showPage('page-marketplace')"><i class="fa fa-arrow-left"></i></button>
-            <h1 class="text-xl font-bold">Profil</h1>
-        </div>
-        <div id="profile-content" class="space-y-4"></div>
-        <div class="glass p-6 rounded-3xl mt-6">
-            <h3 class="font-bold mb-4">Riwayat Pesanan</h3>
-            <div id="user-history" class="space-y-4"></div>
-        </div>
-    </section>
-
-    <section id="page-admin" class="hidden min-h-screen p-6">
-        <h1 class="text-2xl font-bold text-blue-500 mb-6">Admin Panel</h1>
-        <div class="flex border-b border-slate-800 mb-4 text-[10px] font-bold overflow-x-auto">
-            <button onclick="switchAdminTab('pending')" id="tab-pending" class="flex-1 py-3 tab-active">PENDING</button>
-            <button onclick="switchAdminTab('process')" id="tab-process" class="flex-1 py-3">PROSES</button>
-            <button onclick="switchAdminTab('done')" id="tab-done" class="flex-1 py-3">SELESAI</button>
-            <button onclick="switchAdminTab('upload')" id="tab-upload" class="flex-1 py-3">STOK/TAMBAH</button>
-        </div>
-        
-        <div id="admin-pending" class="admin-tab"></div>
-        <div id="admin-process" class="admin-tab hidden"></div>
-        <div id="admin-done" class="admin-tab hidden"></div>
-
-        <div id="admin-upload" class="admin-tab hidden glass p-6 rounded-2xl">
-            <div id="edit-indicator" class="hidden bg-yellow-600/20 text-yellow-400 p-2 rounded mb-4 text-center text-xs">MODE EDIT AKTIF</div>
-            <input type="text" id="p-name" placeholder="Nama Produk" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
-            <input type="number" id="p-price" placeholder="Harga" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
-            <div id="image-input-container" class="space-y-2 mb-3"></div>
-            <textarea id="p-desc" placeholder="Deskripsi" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm h-24"></textarea>
-            <input type="number" id="p-stock" placeholder="Stok" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
-            <button id="btn-save-product" class="w-full bg-green-600 py-3 rounded-xl font-bold">Simpan Produk</button>
-            <button id="cancel-edit-btn" onclick="cancelEdit()" class="hidden w-full bg-gray-600 py-3 rounded-xl font-bold mt-2">Batal Edit</button>
-        </div>
-    </section>
-
-    <div id="modal-detail" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95">
-        <div class="bg-slate-900 w-full max-w-lg rounded-3xl overflow-hidden relative border border-slate-800 max-h-[90vh] overflow-y-auto">
-            <img id="m-img" src="" class="w-full max-h-72 object-contain bg-slate-800 p-4 cursor-pointer">
-            <div id="m-thumbs" class="flex gap-2 p-3 overflow-x-auto bg-slate-800/50"></div>
-            <div class="p-6">
-                <div class="flex justify-between items-start mb-2">
-                    <h2 id="m-title" class="text-xl font-bold"></h2>
-                    <p id="m-price" class="text-blue-500 font-bold text-lg"></p>
-                </div>
-                <p id="m-desc" class="text-gray-400 text-xs mb-6"></p>
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <button id="btn-buy-now" class="bg-green-600 py-4 rounded-2xl font-bold text-xs">BELI SEKARANG</button>
-                    <button id="btn-add-cart" class="bg-blue-600 py-4 rounded-2xl font-bold text-xs">+ KERANJANG</button>
-                </div>
-                <button onclick="closeModal('modal-detail')" class="w-full text-gray-500 text-[10px] py-2">TUTUP</button>
-            </div>
-        </div>
-    </div>
-
-    <nav class="fixed bottom-0 left-0 right-0 glass h-16 flex justify-around items-center z-50 border-t border-slate-800">
-        <button onclick="showPage('page-marketplace')" class="text-gray-400 hover:text-blue-500"><i class="fa fa-home text-xl"></i></button>
-        <button onclick="showPage('page-profile')" class="text-gray-400 hover:text-blue-500"><i class="fa fa-receipt text-xl"></i></button>
-        <button id="nav-admin" onclick="showPage('page-admin')" class="hidden text-gray-400 hover:text-blue-500"><i class="fa fa-shield-alt text-xl"></i></button>
     </nav>
 
+    <main class="max-w-6xl mx-auto p-6">
+        
+        <section id="page-list" class="space-y-10">
+            <div class="glass rounded-3xl p-8 shadow-2xl border border-slate-800">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                    <i class="fa fa-plus-circle text-blue-500"></i>Tambah Produk Baru
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Nama Produk</label>
+                            <input type="text" id="p-name" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 outline-none focus:border-blue-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Harga (Rp)</label>
+                            <input type="number" id="p-price" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 outline-none focus:border-blue-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Deskripsi</label>
+                            <textarea id="p-desc" rows="3" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 outline-none focus:border-blue-500 transition"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2 text-yellow-500">Note Admin (Internal)</label>
+                            <textarea id="p-note" rows="2" class="w-full bg-slate-900 border border-yellow-900/30 rounded-xl p-3 outline-none text-yellow-100/80 focus:border-yellow-600 transition"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <label class="block text-xs font-bold text-slate-500 uppercase">URL Foto Produk (Auto-detect)</label>
+                        <div id="url-container" class="space-y-3 max-h-[400px] overflow-y-auto pr-2 hide-scroll">
+                            </div>
+                        <p class="text-[10px] text-slate-500 italic">* Masukkan URL gambar yang valid untuk menambah kolom baru (Maks 20)</p>
+                    </div>
+                </div>
+
+                <button onclick="window.saveProduct()" class="w-full mt-8 bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-900/20 transition-all transform active:scale-[0.98]">
+                    SIMPAN PRODUK
+                </button>
+            </div>
+
+            <div>
+                <h2 class="text-xl font-bold mb-6">Katalog Produk</h2>
+                <div id="product-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    </div>
+            </div>
+        </section>
+
+        <section id="page-detail" class="hidden">
+            <div class="glass rounded-3xl overflow-hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2">
+                    <div class="p-8 bg-slate-950 flex flex-col items-center justify-center">
+                        <img id="detail-main-img" src="" class="max-h-[400px] object-contain rounded-2xl shadow-2xl mb-6">
+                        <div id="detail-thumbnails" class="flex gap-3 overflow-x-auto w-full pb-2 hide-scroll justify-center">
+                            </div>
+                    </div>
+                    <div class="p-8 space-y-6">
+                        <div>
+                            <h2 id="detail-name" class="text-3xl font-bold mb-2"></h2>
+                            <p id="detail-price" class="text-2xl font-bold text-blue-400"></p>
+                        </div>
+                        <div class="border-t border-slate-800 pt-6">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase mb-2">Deskripsi</h4>
+                            <p id="detail-desc" class="text-slate-300 leading-relaxed whitespace-pre-line"></p>
+                        </div>
+                        <div class="bg-yellow-900/10 border border-yellow-900/30 p-4 rounded-2xl">
+                            <h4 class="text-xs font-bold text-yellow-500 uppercase mb-1">Note Admin</h4>
+                            <p id="detail-note" class="text-yellow-100/70 text-sm italic"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="modal-fullscreen" class="fixed inset-0 z-[100] bg-black/95 hidden flex-col items-center justify-center p-4">
+        <button onclick="window.closeImageModal()" class="absolute top-6 right-6 text-white text-3xl hover:text-red-500 transition">
+            <i class="fa fa-times"></i>
+        </button>
+        
+        <div class="relative w-full h-full flex items-center justify-center">
+            <button onclick="window.prevImage()" class="absolute left-0 md:left-10 text-white/50 hover:text-white text-4xl p-4 transition">
+                <i class="fa fa-chevron-left"></i>
+            </button>
+            
+            <img id="modal-img" src="" class="max-h-[85vh] max-w-[90vw] object-contain shadow-2xl">
+            
+            <button onclick="window.nextImage()" class="absolute right-0 md:right-10 text-white/50 hover:text-white text-4xl p-4 transition">
+                <i class="fa fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <div id="modal-counter" class="absolute bottom-10 bg-slate-800/80 px-6 py-2 rounded-full text-sm font-bold tracking-widest">
+            1 / 1
+        </div>
+    </div>
+
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, set, get, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyA75bdcfawOi957by8y_4-l4sJCCo6pF88",
-            authDomain: "xrezzkystore-marketplace-83bc0.firebaseapp.com",
-            databaseURL: "https://xrezzkystore-marketplace-83bc0-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "xrezzkystore-marketplace-83bc0",
-            storageBucket: "xrezzkystore-marketplace-83bc0.appspot.com",
-            messagingSenderId: "604900856944",
-            appId: "1:604900856944:web:c48c973da45214c68a10b5"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-
-        // State Global
-        let globalProducts = [];
+        // STATE GLOBAL
+        let products = [];
         let currentImages = [];
         let currentIndex = 0;
-        let isLoginMode = true;
-        let currentEditId = null;
 
-        // --- AUTH LOGIC ---
-        onAuthStateChanged(auth, async (user) => {
-            document.getElementById('loader').classList.add('hidden');
-            if (user) {
-                const snap = await get(ref(db, `users/${user.uid}`));
-                const data = snap.val();
-                
-                document.getElementById('user-name-display').innerText = data?.username || "User";
-                document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${data?.username}&background=3b82f6&color=fff`;
-                
-                if (data?.role === 'admin') document.getElementById('nav-admin').classList.remove('hidden');
-                
-                renderProfile(user, data);
-                listenProducts();
-                listenUserHistory(user.uid);
-                listenCartCount(user.uid);
-                showPage('page-marketplace');
-            } else {
-                showPage('page-auth');
-                listenProducts();
-            }
-        });
-
-        // --- PRODUCT LOGIC ---
-        function listenProducts() {
-            onValue(ref(db, 'products'), (snap) => {
-                const container = document.getElementById('product-list');
-                container.innerHTML = "";
-                globalProducts = [];
-                snap.forEach(child => {
-                    const p = child.val(); p.id = child.key;
-                    globalProducts.push(p);
-                    const isAdmin = document.getElementById('nav-admin').classList.contains('hidden') === false;
-                    const img = (p.images && p.images.length > 0) ? p.images[0] : 'https://via.placeholder.com/300';
-                    
-                    container.innerHTML += `
-                        <div class="glass rounded-2xl p-2 flex flex-col product-item">
-                            <div class="relative">
-                                <img src="${img}" class="w-full h-36 object-contain bg-slate-900 rounded-xl mb-2 cursor-pointer" onclick="window.viewDetail('${p.id}')">
-                                ${isAdmin ? `
-                                    <div class="absolute top-1 right-1 flex gap-1">
-                                        <button onclick="window.editProductFull('${p.id}')" class="bg-yellow-500 p-1 rounded text-[10px]"><i class="fa fa-edit"></i></button>
-                                        <button onclick="window.deleteProduct('${p.id}')" class="bg-red-500 p-1 rounded text-[10px]"><i class="fa fa-trash"></i></button>
-                                    </div>
-                                ` : ''}
-                            </div>
-                            <p class="text-[11px] font-bold truncate">${p.name}</p>
-                            <p class="text-blue-400 font-bold text-xs">Rp ${Number(p.price).toLocaleString()}</p>
-                            <button onclick="window.viewDetail('${p.id}')" class="mt-2 bg-blue-600/20 text-blue-400 py-1.5 rounded-lg text-[10px] font-bold">DETAIL</button>
-                        </div>
-                    `;
-                });
+        // --- UTILS ---
+        const validateImage = (url) => {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+                img.src = `${url}?t=${new Date().getTime()}`;
             });
-        }
-
-        // --- GLOBAL FUNCTIONS (EXPOSE TO WINDOW) ---
-        window.viewDetail = (id) => {
-            const p = globalProducts.find(x => x.id === id);
-            if (!p) return;
-
-            currentImages = (p.images && p.images.length > 0) ? p.images : ['https://via.placeholder.com/300'];
-            currentIndex = 0;
-
-            const modal = document.getElementById('modal-detail');
-            document.getElementById('m-title').innerText = p.name;
-            document.getElementById('m-price').innerText = `Rp ${Number(p.price).toLocaleString()}`;
-            document.getElementById('m-desc').innerText = p.description || "Tidak ada deskripsi.";
-            document.getElementById('m-img').src = currentImages[0];
-
-            // Thumbs
-            const thumbContainer = document.getElementById('m-thumbs');
-            thumbContainer.innerHTML = "";
-            currentImages.forEach((url, i) => {
-                thumbContainer.innerHTML += `<img src="${url}" class="w-12 h-12 object-cover rounded-lg border border-slate-700 cursor-pointer" onclick="window.setMainImage(${i})">`;
-            });
-
-            document.getElementById('m-img').onclick = () => window.openImageModal(currentImages, 0);
-            document.getElementById('btn-buy-now').onclick = () => window.handleBuy(p, true);
-            document.getElementById('btn-add-cart').onclick = () => window.handleBuy(p, false);
-
-            modal.classList.remove('hidden');
         };
 
-        window.setMainImage = (i) => {
-            currentIndex = i;
-            document.getElementById('m-img').src = currentImages[i];
-        };
+        // --- DYNAMIC URL SYSTEM ---
+        window.createUrlInput = (container) => {
+            const index = container.children.length;
+            if (index >= 20) return;
 
-        window.openImageModal = (images, index) => {
-            currentImages = images;
-            currentIndex = index;
-            document.getElementById('imageModal').classList.remove('hidden');
-            window.updateGallery();
-        };
-
-        window.updateGallery = () => {
-            document.getElementById('modalImage').src = currentImages[currentIndex];
-            document.getElementById('imageCounter').innerText = `${currentIndex + 1} / ${currentImages.length}`;
-        };
-
-        window.nextImage = () => { if (currentIndex < currentImages.length - 1) { currentIndex++; window.updateGallery(); } };
-        window.prevImage = () => { if (currentIndex > 0) { currentIndex--; window.updateGallery(); } };
-        window.closeImageModal = () => document.getElementById('imageModal').classList.add('hidden');
-        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
-        window.showPage = (id) => {
-            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-        };
-
-        // --- ADMIN ACTIONS ---
-        window.editProductFull = async (id) => {
-            const p = globalProducts.find(x => x.id === id);
-            if(!p) return;
-            currentEditId = id;
-            document.getElementById('p-name').value = p.name;
-            document.getElementById('p-price').value = p.price;
-            document.getElementById('p-desc').value = p.description;
-            document.getElementById('p-stock').value = p.stock;
-            
-            const imgCont = document.getElementById('image-input-container');
-            imgCont.innerHTML = "";
-            if(p.images) p.images.forEach(url => window.createImageInput(url));
-            else window.createImageInput();
-            
-            document.getElementById('edit-indicator').classList.remove('hidden');
-            document.getElementById('cancel-edit-btn').classList.remove('hidden');
-            window.switchAdminTab('upload');
-            window.showPage('page-admin');
-        };
-
-        window.deleteProduct = async (id) => {
-            if(confirm("Hapus produk?")) await remove(ref(db, `products/${id}`));
-        };
-
-        window.createImageInput = (val = "") => {
-            const container = document.getElementById('image-input-container');
             const div = document.createElement('div');
-            div.className = "flex gap-2";
+            div.className = "flex items-center gap-3 group animate-slide-in";
             div.innerHTML = `
-                <input type="text" value="${val}" placeholder="URL Gambar" class="flex-1 p-2 bg-slate-900 border border-slate-700 rounded text-xs">
-                <button onclick="this.parentElement.remove()" class="text-red-500 px-2">✕</button>
+                <div class="w-12 h-12 flex-shrink-0 bg-slate-800 rounded-lg overflow-hidden border border-slate-700 flex items-center justify-center">
+                    <img id="preview-${index}" src="" class="w-full h-full object-contain hidden">
+                    <i id="icon-${index}" class="fa fa-image text-slate-600"></i>
+                </div>
+                <input type="text" 
+                       placeholder="Masukkan URL Foto..." 
+                       class="flex-1 bg-slate-800/50 border border-slate-700 rounded-xl p-3 text-sm outline-none focus:border-blue-500 transition url-input"
+                       onchange="window.handleUrlChange(this, ${index})">
             `;
             container.appendChild(div);
         };
 
-        window.cancelEdit = () => {
-            currentEditId = null;
-            document.getElementById('p-name').value = "";
-            document.getElementById('image-input-container').innerHTML = "";
-            window.createImageInput();
-            document.getElementById('edit-indicator').classList.add('hidden');
-            document.getElementById('cancel-edit-btn').classList.add('hidden');
-        };
+        window.handleUrlChange = async (input, index) => {
+            const url = input.value.trim();
+            const preview = document.getElementById(`preview-${index}`);
+            const icon = document.getElementById(`icon-${index}`);
+            const container = document.getElementById('url-container');
 
-        // --- BUY LOGIC ---
-        window.handleBuy = async (p, isInstant) => {
-            const user = auth.currentUser;
-            if(!user) return alert("Silahkan login terlebih dahulu");
-            
-            if(isInstant) {
-                const msg = `Halo Admin, saya ingin membeli ${p.name} seharga Rp ${p.price.toLocaleString()}`;
-                window.open(`https://wa.me/6288293064112?text=${encodeURIComponent(msg)}`);
-                
-                // Log order ke Firebase
-                await push(ref(db, 'orders'), {
-                    userId: user.uid,
-                    items: { [p.id]: { name: p.name, price: p.price, qty: 1 } },
-                    status: "Pending",
-                    createdAt: Date.now()
-                });
+            if (!url) {
+                preview.classList.add('hidden');
+                icon.classList.remove('hidden');
+                return;
+            }
+
+            const isValid = await validateImage(url);
+            if (isValid) {
+                preview.src = url;
+                preview.classList.remove('hidden');
+                icon.classList.add('hidden');
+
+                // Jika ini kolom terakhir, tambah kolom baru
+                const allInputs = container.querySelectorAll('.url-input');
+                if (index === allInputs.length - 1 && allInputs.length < 20) {
+                    window.createUrlInput(container);
+                }
             } else {
-                await set(ref(db, `carts/${user.uid}/${p.id}`), {
-                    name: p.name, price: p.price, qty: 1, img: (p.images ? p.images[0] : '')
-                });
-                alert("Berhasil ditambah ke keranjang");
+                alert("URL Gambar tidak valid atau tidak dapat diakses!");
+                input.value = "";
+                preview.classList.add('hidden');
+                icon.classList.remove('hidden');
             }
         };
 
-        // --- INITIALIZE UI ---
-        document.getElementById('btn-save-product').onclick = async () => {
-            const inputs = document.querySelectorAll('#image-input-container input');
-            const images = Array.from(inputs).map(i => i.value).filter(v => v !== "");
-            const data = {
-                name: document.getElementById('p-name').value,
-                price: Number(document.getElementById('p-price').value),
-                description: document.getElementById('p-desc').value,
-                stock: Number(document.getElementById('p-stock').value),
-                images: images
-            };
+        // --- PRODUCT ACTIONS ---
+        window.saveProduct = () => {
+            const name = document.getElementById('p-name').value;
+            const price = document.getElementById('p-price').value;
+            const desc = document.getElementById('p-desc').value;
+            const note = document.getElementById('p-note').value;
+            const urlInputs = document.querySelectorAll('.url-input');
+            const images = Array.from(urlInputs).map(i => i.value.trim()).filter(v => v !== "");
+
+            if (!name || !price || images.length === 0) {
+                return alert("Mohon lengkapi Nama, Harga, dan minimal 1 Foto!");
+            }
+
+            const product = { id: Date.now(), name, price, desc, note, images };
+            products.push(product);
             
-            if(currentEditId) await update(ref(db, `products/${currentEditId}`), data);
-            else await push(ref(db, 'products'), data);
+            // Reset Form
+            document.getElementById('p-name').value = "";
+            document.getElementById('p-price').value = "";
+            document.getElementById('p-desc').value = "";
+            document.getElementById('p-note').value = "";
+            document.getElementById('url-container').innerHTML = "";
+            window.createUrlInput(document.getElementById('url-container'));
             
-            alert("Berhasil!");
-            window.cancelEdit();
+            window.renderGrid();
         };
 
-        document.getElementById('auth-toggle-text').onclick = () => {
-            isLoginMode = !isLoginMode;
-            document.getElementById('reg-fields').classList.toggle('hidden', isLoginMode);
-            document.getElementById('auth-title').innerText = isLoginMode ? "LOGIN" : "DAFTAR";
-        };
-
-        document.getElementById('btn-auth-submit').onclick = async () => {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-pass').value;
-            try {
-                if(isLoginMode) await signInWithEmailAndPassword(auth, email, pass);
-                else {
-                    const res = await createUserWithEmailAndPassword(auth, email, pass);
-                    await set(ref(db, `users/${res.user.uid}`), {
-                        username: document.getElementById('auth-user').value || email.split('@')[0],
-                        email: email, role: "user"
-                    });
-                }
-            } catch(e) { alert(e.message); }
-        };
-
-        window.switchAdminTab = (tab) => {
-            document.querySelectorAll('.admin-tab').forEach(t => t.classList.add('hidden'));
-            document.getElementById('admin-' + tab).classList.remove('hidden');
-            document.querySelectorAll('[id^="tab-"]').forEach(t => t.classList.remove('tab-active'));
-            document.getElementById('tab-' + tab).classList.add('tab-active');
-        };
-
-        function renderProfile(user, data) {
-            const cont = document.getElementById('profile-content');
-            cont.innerHTML = `
-                <div class="glass p-6 rounded-3xl text-center">
-                    <img src="https://ui-avatars.com/api/?name=${data?.username}&background=3b82f6&color=fff" class="w-20 h-20 rounded-full mx-auto border-4 border-blue-500 mb-3">
-                    <h2 class="text-xl font-bold">${data?.username}</h2>
-                    <p class="text-xs text-gray-400 mb-4">${user.email}</p>
-                    <button onclick="window.logout()" class="w-full bg-red-600/20 text-red-400 py-2 rounded-lg font-bold">LOGOUT</button>
+        window.renderGrid = () => {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = products.map(p => `
+                <div class="glass rounded-2xl overflow-hidden border border-slate-800 group cursor-pointer hover:border-blue-500 transition-all shadow-lg" onclick="window.showDetail(${p.id})">
+                    <div class="h-40 bg-slate-950 p-4">
+                        <img src="${p.images[0]}" class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500">
+                    </div>
+                    <div class="p-4 bg-slate-800/30">
+                        <h3 class="font-bold text-sm truncate">${p.name}</h3>
+                        <p class="text-blue-400 font-bold text-xs mt-1">Rp ${Number(p.price).toLocaleString()}</p>
+                    </div>
                 </div>
-            `;
-        }
+            `).join('');
+        };
 
-        function listenUserHistory(uid) {
-            onValue(ref(db, 'orders'), (snap) => {
-                const cont = document.getElementById('user-history');
-                cont.innerHTML = "";
-                snap.forEach(child => {
-                    const o = child.val();
-                    if(o.userId === uid) {
-                        cont.innerHTML += `<div class="bg-slate-800 p-3 rounded-xl border border-slate-700 text-xs flex justify-between">
-                            <span>Order ID: ...${child.key.slice(-5)}</span>
-                            <span class="font-bold text-blue-400">${o.status}</span>
-                        </div>`;
-                    }
-                });
-            });
-        }
+        // --- NAVIGATION & DETAIL ---
+        window.showDetail = (id) => {
+            const p = products.find(item => item.id === id);
+            if (!p) return;
 
-        function listenCartCount(uid) {
-            onValue(ref(db, `carts/${uid}`), (snap) => {
-                document.getElementById('cart-count').innerText = snap.exists() ? Object.keys(snap.val()).length : 0;
-            });
-        }
+            document.getElementById('page-list').classList.add('hidden');
+            document.getElementById('page-detail').classList.remove('hidden');
+            document.getElementById('nav-actions').classList.remove('hidden');
 
-        window.logout = () => signOut(auth);
-        window.createImageInput(); // Start with one input
+            document.getElementById('detail-main-img').src = p.images[0];
+            document.getElementById('detail-name').innerText = p.name;
+            document.getElementById('detail-price').innerText = `Rp ${Number(p.price).toLocaleString()}`;
+            document.getElementById('detail-desc').innerText = p.desc;
+            document.getElementById('detail-note').innerText = p.note || '-';
 
+            const thumbContainer = document.getElementById('detail-thumbnails');
+            thumbContainer.innerHTML = p.images.map((img, idx) => `
+                <img src="${img}" 
+                     class="w-16 h-16 object-contain rounded-lg border-2 border-slate-800 cursor-pointer hover:border-blue-500 transition flex-shrink-0 bg-slate-900" 
+                     onclick="window.openImageModal(${JSON.stringify(p.images).replace(/"/g, '&quot;')}, ${idx})">
+            `).join('');
+        };
+
+        window.backToList = () => {
+            document.getElementById('page-list').classList.remove('hidden');
+            document.getElementById('page-detail').classList.add('hidden');
+            document.getElementById('nav-actions').classList.add('hidden');
+        };
+
+        // --- IMAGE MODAL LOGIC ---
+        window.openImageModal = (images, index) => {
+            currentImages = images;
+            currentIndex = index;
+            document.getElementById('modal-fullscreen').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            window.updateModalView();
+        };
+
+        window.closeImageModal = () => {
+            document.getElementById('modal-fullscreen').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        };
+
+        window.updateModalView = () => {
+            document.getElementById('modal-img').src = currentImages[currentIndex];
+            document.getElementById('modal-counter').innerText = `${currentIndex + 1} / ${currentImages.length}`;
+        };
+
+        window.nextImage = () => {
+            currentIndex = (currentIndex + 1) % currentImages.length;
+            window.updateModalView();
+        };
+
+        window.prevImage = () => {
+            currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
+            window.updateModalView();
+        };
+
+        // INITIALIZE
+        document.addEventListener('DOMContentLoaded', () => {
+            window.createUrlInput(document.getElementById('url-container'));
+        });
     </script>
 </body>
 </html>

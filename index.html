@@ -26,6 +26,27 @@
 </head>
 <body class="pb-24">
   
+  <div id="imageModal"
+class="fixed inset-0 bg-black bg-opacity-95 hidden flex items-center justify-center z-50">
+
+    <button onclick="closeImageModal()"
+    class="absolute top-4 right-4 text-white text-3xl">✕</button>
+
+    <button onclick="prevImage()"
+    class="absolute left-4 text-white text-3xl">❮</button>
+
+    <img id="modalImage"
+    class="max-h-[90%] max-w-[90%] object-contain">
+
+    <button onclick="nextImage()"
+    class="absolute right-4 text-white text-3xl">❯</button>
+
+    <div id="imageCounter"
+    class="absolute bottom-6 text-white text-sm bg-black/50 px-3 py-1 rounded-full">
+    </div>
+
+</div>
+  
   <div id="modal-visi" 
 class="hidden fixed inset-0 z-[150] flex items-center justify-center bg-black/90 p-6">
 
@@ -629,113 +650,42 @@ class="w-full h-32 object-contain bg-slate-900 rounded-xl mb-2 cursor-pointer p-
         };
 
         window.viewDetail = (id) => {
+
     const p = globalProducts.find(x => x.id === id);
     if (!p) return;
 
-    // Mengambil array images atau fallback ke p.image tunggal
-    const images = (p.images && p.images.length > 0) ? p.images : 
-        (p.image ? [p.image] : ["https://via.placeholder.com/300"]);
+    const images = (p.images && p.images.length > 0)
+        ? p.images
+        : (p.image ? [p.image] : ["https://via.placeholder.com/300"]);
 
     document.getElementById('m-img').src = images[0];
-    // ... sisa kode lainnya
 
+    document.getElementById('m-img').onclick = () => {
+        openImageModal(images, 0);
+    };
+
+    const thumbContainer = document.getElementById("m-thumbs");
+    thumbContainer.innerHTML = "";
+
+    images.forEach((img, index) => {
+        const el = document.createElement("img");
+        el.src = img;
+        el.className = "w-16 h-16 object-contain bg-slate-800 p-1 rounded-lg cursor-pointer border border-slate-700";
+        el.onclick = () => openImageModal(images, index);
+        thumbContainer.appendChild(el);
+    });
 
     document.getElementById('m-title').innerText = p.name;
-    document.getElementById('m-price').innerText = 
+    document.getElementById('m-price').innerText =
         "Rp " + Number(p.price).toLocaleString();
-    document.getElementById('m-desc').innerText = 
+    document.getElementById('m-desc').innerText =
         p.description || "Premium Quality Product.";
-
-    // Render Reviews
-    const revCont = document.getElementById('m-reviews');
-    revCont.innerHTML = "";
-
-    if (!p.reviews) {
-        revCont.innerHTML = 
-            "<p class='text-[10px] text-gray-600'>Belum ada ulasan.</p>";
-    } else {
-        Object.values(p.reviews).forEach(r => {
-            revCont.innerHTML += `
-                <div class="bg-slate-800/50 p-3 rounded-xl">
-                    <div class="flex justify-between mb-1">
-                        <span class="text-[10px] font-bold text-blue-400">
-                            ${r.user}
-                        </span>
-                        <span class="text-[10px] text-yellow-500">
-                            ${r.stars} ★
-                        </span>
-                    </div>
-                    <p class="text-[10px] text-gray-300 italic">
-                        "${r.text}"
-                    </p>
-                </div>
-            `;
-        });
-    }
 
     document.getElementById('btn-buy-now').onclick = () => instantBuy(id);
     document.getElementById('btn-add-cart').onclick = () => addToCart(id);
 
     document.getElementById('modal-detail').classList.remove('hidden');
 };
-
-        // --- CART & ORDER LOGIC ---
-        window.addToCart = async (id) => {
-            const p = globalProducts.find(x => x.id === id);
-            const current = userCart[id]?.qty || 0;
-            if (current >= p.stock) return alert("Stok habis!");
-            if (!auth.currentUser) {
-    alert("Login dulu untuk tambah keranjang!");
-    showPage('page-auth');
-    return;
-}
-            await update(ref(db, `carts/${auth.currentUser.uid}/${id}`), {
-    name: p.name,
-    price: p.price,
-    qty: current + 1,
-    maxStock: p.stock,
-    img: p.images?.[0] || p.image || 'https://via.placeholder.com/300',
-    pid: id
-});
-        };
-        
-        async function checkOrderLimit(uid) {
-    const snap = await get(ref(db, `users/${uid}`));
-    const user = snap.val();
-
-    const now = Date.now();
-
-    if (!user.orderLimit) {
-        await update(ref(db, `users/${uid}`), {
-            orderLimit: 5,
-            lastOrderTime: now
-        });
-        return true;
-    }
-
-    const diff = now - (user.lastOrderTime || 0);
-    const twelveHours = 12 * 60 * 60 * 1000;
-
-    if (diff > twelveHours) {
-        await update(ref(db, `users/${uid}`), {
-            orderLimit: 5,
-            lastOrderTime: now
-        });
-        return true;
-    }
-
-    if (user.orderLimit <= 0) {
-        alert("Limit order habis. Tunggu 12 jam.");
-        return false;
-    }
-
-    await update(ref(db, `users/${uid}`), {
-        orderLimit: user.orderLimit - 1,
-        lastOrderTime: now
-    });
-
-    return true;
-}
         
         window.instantBuy = async (id) => {
 
@@ -1186,66 +1136,121 @@ createImageInput();
 
 };
 
+/* ================= MULTI IMAGE INPUT ================= */
+
 const MAX_IMAGES = 20;
+
+function isValidImageUrl(url) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = url;
+    });
+}
 
 function createImageInput(value = "") {
 
     const container = document.getElementById("image-input-container");
+    const total = container.querySelectorAll("input").length;
 
-    if (container.children.length >= MAX_IMAGES) return;
+    if (total >= MAX_IMAGES) return;
 
     const wrapper = document.createElement("div");
-    wrapper.className = "space-y-2";
+    wrapper.className = "flex gap-2 items-center";
 
-    wrapper.innerHTML = `
-        <input type="text"
-            placeholder="URL Foto"
-            class="image-url w-full p-3 bg-slate-800 rounded border border-slate-700 text-sm"
-            value="${value}">
-        
-        <img class="preview-img hidden w-full max-h-40 object-contain bg-slate-900 p-2 rounded-xl border border-slate-700">
-    `;
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = "Masukkan URL gambar produk...";
+    input.value = value;
+    input.className = "flex-1 p-2 bg-slate-800 border border-slate-700 rounded-lg text-sm";
 
-    const input = wrapper.querySelector(".image-url");
-    const preview = wrapper.querySelector(".preview-img");
+    const preview = document.createElement("img");
+    preview.className = "w-12 h-12 object-contain bg-slate-800 rounded hidden";
 
-    input.addEventListener("input", () => {
+    input.addEventListener("blur", async () => {
+        const url = input.value.trim();
+        if (!url) return;
 
-        if (input.value.trim() !== "") {
-
-            preview.src = input.value;
-            preview.classList.remove("hidden");
-
-            if (wrapper === container.lastElementChild &&
-                container.children.length < MAX_IMAGES) {
-                createImageInput();
-            }
-
-        } else {
+        const valid = await isValidImageUrl(url);
+        if (!valid) {
+            alert("URL bukan gambar valid!");
+            input.value = "";
             preview.classList.add("hidden");
+            return;
         }
 
+        preview.src = url;
+        preview.classList.remove("hidden");
+
+        const inputs = container.querySelectorAll("input");
+        const lastInput = inputs[inputs.length - 1];
+
+        if (input === lastInput && inputs.length < MAX_IMAGES) {
+            createImageInput();
+        }
     });
 
+    wrapper.appendChild(input);
+    wrapper.appendChild(preview);
     container.appendChild(wrapper);
 }
 
 function getAllImages() {
-    const inputs = document.querySelectorAll(".image-url");
-    let images = [];
+    const inputs = document.querySelectorAll("#image-input-container input");
+    const urls = [];
 
     inputs.forEach(input => {
         if (input.value.trim() !== "") {
-            images.push(input.value.trim());
+            urls.push(input.value.trim());
         }
     });
 
-    return images;
+    return urls;
 }
 
-// Wajib 1 input saat pertama buka
+// WAJIB 1 INPUT AWAL
 createImageInput();
+
+
+/* ================= IMAGE MODAL ================= */
+
+
+function openImageModal(images, index) {
+    currentImages = images;
+    currentIndex = index;
+    updateModalImage();
+    document.getElementById("imageModal").classList.remove("hidden");
+}
+
+function closeImageModal() {
+    document.getElementById("imageModal").classList.add("hidden");
+}
+
+function nextImage() {
+    if (currentIndex < currentImages.length - 1) {
+        currentIndex++;
+        updateModalImage();
+    }
+}
+
+function prevImage() {
+    if (currentIndex > 0) {
+        currentIndex--;
+        updateModalImage();
+    }
+}
+
+function updateModalImage() {
+    const img = document.getElementById("modalImage");
+    const counter = document.getElementById("imageCounter");
+
+    img.src = currentImages[currentIndex];
+    counter.textContent = (currentIndex + 1) + " / " + currentImages.length;
+}
+
+
 
     </script>
 </body>
-</html>
+    </html>

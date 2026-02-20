@@ -27,6 +27,19 @@
     </style>
 </head>
 <body class="pb-24">
+  
+  <!-- LOADING SCREEN -->
+<div id="initial-loading" class="fixed inset-0 bg-black flex flex-col items-center justify-center z-[9999] transition-opacity duration-700">
+    <div class="text-3xl font-bold text-blue-500 animate-pulse mb-4">
+        XREZZKY STORE
+    </div>
+
+    <div class="w-48 h-2 bg-slate-800 rounded-full overflow-hidden">
+        <div id="loading-bar" class="h-full bg-blue-500 w-0 transition-all duration-300"></div>
+    </div>
+
+    <p class="text-gray-400 text-xs mt-3">Loading Marketplace...</p>
+</div>
 
     <div id="imageModal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center z-[200] animate-fade" onclick="handleModalBgClick(event)">
         <button onclick="closeImageModal()" class="absolute top-6 right-6 text-white text-3xl z-50"><i class="fa fa-times"></i></button>
@@ -399,15 +412,18 @@
             const revCont = document.getElementById('m-reviews');
             revCont.innerHTML = reviews.length ? "" : `<p class="text-[10px] text-gray-600 italic">Belum ada ulasan untuk produk ini.</p>`;
             reviews.sort((a,b) => b.time - a.time).forEach(r => {
-                revCont.innerHTML += `
-                    <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-700">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="font-bold text-[10px] text-blue-400">${r.user}</span>
-                            <span class="text-yellow-500 text-[10px]">${'★'.repeat(r.stars)}</span>
-                        </div>
-                        <p class="text-[10px] text-gray-300">${r.text}</p>
-                    </div>`;
-            });
+    revCont.innerHTML += `
+        <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-700">
+            <div class="flex justify-between items-center mb-1">
+                <div>
+                    <span class="font-bold text-[10px] text-blue-400">${r.user}</span>
+                    <p class="text-[8px] text-gray-500">${r.email || '-'}</p>
+                </div>
+                <span class="text-yellow-500 text-[10px]">${'★'.repeat(r.stars)}</span>
+            </div>
+            <p class="text-[10px] text-gray-300">${r.text}</p>
+        </div>`;
+});
 
             window.currentViewId = id;
             document.getElementById('btn-buy-now').onclick = () => instantBuy(id);
@@ -771,25 +787,67 @@
         }
 
         function listenUserHistory(uid) {
-            onValue(ref(db, 'orders'), (snap) => {
-                const cont = document.getElementById('user-history');
-                cont.innerHTML = "";
-                snap.forEach(c => {
-                    const o = c.val();
-                    if (o.userId === uid) {
-                        const items = Object.values(o.items || {});
-                        cont.innerHTML += `<div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 text-[10px] animate-fade">
-                            <div class="flex justify-between mb-2">
-                                <span class="text-gray-500">${new Date(o.createdAt).toLocaleDateString()}</span>
-                                <span class="font-bold ${o.status === 'Selesai' ? 'text-green-500' : o.status === 'Ditolak' ? 'text-red-500' : 'text-yellow-500'}">${o.status.toUpperCase()}</span>
-                            </div>
-                            <p class="font-bold text-sm mb-2">${items.map(i => i.name).join(", ")}</p>
-                            ${o.status === 'Selesai' && !o.isRated ? `<button onclick="openReviewModal('${c.key}', '${items[0].pid}', '${items[0].name}')" class="w-full bg-green-600/20 text-green-400 py-2 rounded-lg font-bold mt-2">BERI NILAI</button>` : ''}
-                        </div>`;
-                    }
-                });
-            });
-        }
+    onValue(ref(db, 'orders'), (snap) => {
+        const cont = document.getElementById('user-history');
+        cont.innerHTML = "";
+
+        snap.forEach(c => {
+            const o = c.val();
+            if (o.userId === uid) {
+                const items = Object.values(o.items || {});
+                const total = items.reduce((a,b)=>a + (b.price * b.qty),0);
+
+                const detailText =
+`INVOICE XREZZKY STORE
+========================
+Nama   : ${o.username}
+Email  : ${o.email}
+Tanggal: ${new Date(o.createdAt).toLocaleString()}
+
+Detail Pesanan:
+${items.map(i=>`- ${i.name}
+  Qty   : ${i.qty}
+  Harga : Rp ${i.price.toLocaleString()}
+  Subtotal : Rp ${(i.price*i.qty).toLocaleString()}
+`).join("\n")}
+
+TOTAL : Rp ${total.toLocaleString()}
+Status: ${o.status}
+========================`;
+
+                cont.innerHTML += `
+                <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 text-[10px] animate-fade">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-500">${new Date(o.createdAt).toLocaleDateString()}</span>
+                        <span class="font-bold ${
+                            o.status === 'Selesai' ? 'text-green-500' :
+                            o.status === 'Ditolak' ? 'text-red-500' :
+                            'text-yellow-500'
+                        }">${o.status.toUpperCase()}</span>
+                    </div>
+
+                    <p class="font-bold text-sm mb-2">${items.map(i => i.name).join(", ")}</p>
+                    <p class="text-gray-400 text-[9px] mb-2">Total: Rp ${total.toLocaleString()}</p>
+
+                    <div class="flex gap-2">
+                        <button onclick="copyInvoice(\`${detailText}\`)"
+                            class="flex-1 bg-blue-600/20 text-blue-400 py-2 rounded-lg font-bold">
+                            COPY DETAIL
+                        </button>
+
+                        ${
+                            o.status === 'Selesai' && !o.isRated ?
+                            `<button onclick="openReviewModal('${c.key}', '${items[0].pid}', '${items[0].name}')"
+                                class="flex-1 bg-green-600/20 text-green-400 py-2 rounded-lg font-bold">
+                                BERI NILAI
+                            </button>` : ''
+                        }
+                    </div>
+                </div>`;
+            }
+        });
+    });
+}
 
         window.openReviewModal = (oid, pid, pname) => {
             document.getElementById('review-product-name').innerText = pname;
@@ -798,17 +856,25 @@
         };
 
         window.submitReview = async (oid, pid) => {
-            const stars = document.getElementById('star-range').value;
-            const text = document.getElementById('review-text').value;
-            if(!text) return alert("Ulasan tidak boleh kosong!");
-            await push(ref(db, `products/${pid}/reviews`), {
-                user: document.getElementById('user-name-display').innerText,
-                stars, text, time: Date.now()
-            });
-            await update(ref(db, `orders/${oid}`), { isRated: true });
-            closeModal('modal-review');
-            alert("Terima kasih atas ulasannya!");
-        };
+    const stars = document.getElementById('star-range').value;
+    const text = document.getElementById('review-text').value;
+    const user = auth.currentUser;
+
+    if(!text) return alert("Ulasan tidak boleh kosong!");
+
+    await push(ref(db, `products/${pid}/reviews`), {
+        user: document.getElementById('user-name-display').innerText,
+        email: user.email,
+        stars,
+        text,
+        time: Date.now()
+    });
+
+    await update(ref(db, `orders/${oid}`), { isRated: true });
+
+    closeModal('modal-review');
+    alert("Terima kasih atas ulasannya!");
+};
 
         window.changeUsername = async () => {
             const n = prompt("Username baru:");
@@ -836,6 +902,51 @@
 
         // Init First Input
         createImageInput();
+        
+        window.copyInvoice = (text) => {
+    navigator.clipboard.writeText(text).then(()=>{
+        alert("Detail transaksi berhasil dicopy!");
+    }).catch(()=>{
+        alert("Gagal copy!");
+    });
+};
+
+// =========================
+// INITIAL LOADING SYSTEM
+// =========================
+
+window.addEventListener("load", () => {
+
+    const loader = document.getElementById("initial-loading");
+    const bar = document.getElementById("loading-bar");
+
+    let progress = 0;
+
+    const interval = setInterval(() => {
+        progress += 10;
+        bar.style.width = progress + "%";
+
+        if (progress >= 100) {
+            clearInterval(interval);
+
+            setTimeout(() => {
+                loader.style.opacity = "0";
+
+                setTimeout(() => {
+                    loader.style.display = "none";
+
+                    // Pastikan marketplace langsung muncul
+                    document.getElementById("page-auth").classList.add("hidden");
+                    document.getElementById("page-marketplace").classList.remove("hidden");
+                    document.getElementById("page-marketplace").classList.add("animate-fade");
+
+                }, 700);
+
+            }, 300);
+        }
+    }, 150);
+});
+
     </script>
 </body>
-</html>
+    </html>

@@ -19,26 +19,83 @@
         .animate-fade { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
+        
+        
+        #initial-loading {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  transition: opacity 0.6s ease;
+}
+
+.loader-box {
+  text-align: center;
+  width: 300px;
+}
+
+#loading-text {
+  color: white;
+  margin-bottom: 20px;
+}
+
+.progress-container {
+  width: 100%;
+  height: 8px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#loading-bar {
+  width: 0%;
+  height: 100%;
+  background: #22c55e;
+  transition: width 0.3s ease;
+}
+
+        
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .product-card:hover { transform: translateY(-5px); transition: all 0.3s; }
+
+.blur-in {
+    animation: blurIn .5s ease forwards;
+}
+
+@keyframes blurIn {
+    from { opacity:0; filter: blur(10px); }
+    to { opacity:1; filter: blur(0); }
+}
+
+
+
+
     </style>
 </head>
 <body class="pb-24">
   
-  <!-- LOADING SCREEN -->
-<div id="initial-loading" class="fixed inset-0 bg-black flex flex-col items-center justify-center z-[9999] transition-opacity duration-700">
-    <div class="text-3xl font-bold text-blue-500 animate-pulse mb-4">
+  
+  
+<!-- PRO LOADING SCREEN -->
+<div id="initial-loading" class="fixed inset-0 bg-gradient-to-br from-black via-slate-900 to-black flex flex-col items-center justify-center z-[9999] transition-all duration-700">
+
+    <div class="text-4xl font-extrabold text-blue-500 mb-6 animate-pulse scale-110 transition-all duration-500">
         XREZZKY STORE
     </div>
 
-    <div class="w-48 h-2 bg-slate-800 rounded-full overflow-hidden">
+    <div class="w-56 h-2 bg-slate-800 rounded-full overflow-hidden">
         <div id="loading-bar" class="h-full bg-blue-500 w-0 transition-all duration-300"></div>
     </div>
 
-    <p class="text-gray-400 text-xs mt-3">Loading Marketplace...</p>
+    <p id="loading-text" class="text-gray-400 text-xs mt-4 opacity-80">
+        Menyiapkan Marketplace...
+    </p>
 </div>
 
     <div id="imageModal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center z-[200] animate-fade" onclick="handleModalBgClick(event)">
@@ -911,42 +968,73 @@ Status: ${o.status}
     });
 };
 
+ // =========================
+// SMART LOADING SYSTEM FINAL
 // =========================
-// INITIAL LOADING SYSTEM
-// =========================
 
-window.addEventListener("load", () => {
+const loader = document.getElementById("initial-loading");
+const bar = document.getElementById("loading-bar");
+const loadingText = document.getElementById("loading-text");
 
-    const loader = document.getElementById("initial-loading");
-    const bar = document.getElementById("loading-bar");
+let progress = 0;
+let firebaseLoaded = false;
+let minTimePassed = false;
 
-    let progress = 0;
+const loadingMessages = [
+    "Menyiapkan Marketplace...",
+    "Mengambil produk...",
+    "Menyambungkan ke server...",
+    "Memuat gambar...",
+    "Hampir selesai..."
+];
 
-    const interval = setInterval(() => {
-        progress += 10;
-        bar.style.width = progress + "%";
+let msgIndex = 0;
 
-        if (progress >= 100) {
-            clearInterval(interval);
+const interval = setInterval(() => {
+
+    progress += Math.random() * 8;
+    if (progress > 95) progress = 95;
+
+    bar.style.width = progress + "%";
+
+    msgIndex = (msgIndex + 1) % loadingMessages.length;
+    loadingText.innerText = loadingMessages[msgIndex];
+
+}, 400);
+
+// minimal tampil 2 detik biar smooth
+setTimeout(() => {
+    minTimePassed = true;
+    checkFinish();
+}, 2000);
+
+// cek products sekali saja
+onValue(ref(db, "products"), () => {
+    firebaseLoaded = true;
+    checkFinish();
+}, { onlyOnce: true });
+
+function checkFinish() {
+    if (firebaseLoaded && minTimePassed) {
+
+        clearInterval(interval);
+
+        bar.style.width = "100%";
+        loadingText.innerText = "Marketplace Siap 🚀";
+
+        setTimeout(() => {
+
+            loader.style.opacity = "0";
 
             setTimeout(() => {
-                loader.style.opacity = "0";
+                loader.remove();
+                document.getElementById("page-marketplace").classList.remove("hidden");
+            }, 600);
 
-                setTimeout(() => {
-                    loader.style.display = "none";
-
-                    // Pastikan marketplace langsung muncul
-                    document.getElementById("page-auth").classList.add("hidden");
-                    document.getElementById("page-marketplace").classList.remove("hidden");
-                    document.getElementById("page-marketplace").classList.add("animate-fade");
-
-                }, 700);
-
-            }, 300);
-        }
-    }, 150);
-});
+        }, 500);
+    }
+}
 
     </script>
 </body>
-    </html>
+                </html>

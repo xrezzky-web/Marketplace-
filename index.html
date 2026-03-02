@@ -98,6 +98,11 @@
             font-size: 8px;
             font-weight: bold;
         }
+        
+        /* PAYMENT BUTTON */
+        .payment-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
     </style>
 </head>
 <body class="pb-24">
@@ -127,7 +132,7 @@
 <!-- QR PAYMENT MODAL -->
 <div id="modal-payment" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-6 bg-black/95 animate-fade">
     <div class="glass p-8 rounded-3xl max-w-md w-full border border-green-500/30 text-center">
-        <i class="fas fa-check-circle text-green-500 text-5xl mb-4"></i>
+        <i class="fas fa-qrcode text-green-500 text-5xl mb-4"></i>
         <h3 class="text-xl font-bold mb-2">SCAN QR UNTUK BAYAR</h3>
         <p id="payment-amount" class="text-blue-400 font-bold text-2xl mb-4">Rp 0</p>
         
@@ -137,6 +142,11 @@
         
         <p class="text-xs text-gray-400 mb-2">Scan dengan QRIS / OVO / DANA / GoPay</p>
         <p id="payment-expiry" class="text-[10px] text-red-400 mb-4">Berlaku 30 menit</p>
+        
+        <!-- REAL PAYMENT CONFIRMATION BUTTON (UNTUK TESTING - nanti diintegrasi dengan payment gateway) -->
+        <button onclick="confirmPayment()" class="payment-btn w-full py-3 rounded-xl font-bold mb-2 text-white">
+            <i class="fas fa-check-circle mr-2"></i> KONFIRMASI PEMBAYARAN
+        </button>
         
         <button onclick="closeModal('modal-payment')" class="w-full bg-blue-600 py-3 rounded-xl font-bold">TUTUP</button>
     </div>
@@ -148,18 +158,23 @@
         <button onclick="closeModal('modal-visi')" class="absolute top-4 right-4 text-gray-400">✕</button>
         <h2 class="text-xl font-bold text-purple-400 mb-6 text-center">Visi & Misi XREZZKY STORE</h2>
         <div class="space-y-4 text-sm text-gray-300">
-            <div class="visi-item opacity-0">
+            <div>
                 <h3 class="font-bold text-white mb-1">🎯 Visi</h3>
-                <p>Menjadi toko digital terpercaya yang menghadirkan produk berkualitas dengan sistem cepat, aman, dan transparan.</p>
+                <p>Menjadi marketplace digital terpercaya nomor 1 di Indonesia dengan sistem cepat, aman, dan transparan.</p>
             </div>
-            <div class="visi-item opacity-0">
+            <div>
                 <h3 class="font-bold text-white mb-1">🚀 Misi</h3>
                 <ul class="list-disc ml-5 space-y-1">
-                    <li>Pelayanan cepat & responsif.</li>
-                    <li>Harga kompetitif & kualitas terbaik.</li>
-                    <li>Transaksi aman & transparan.</li>
-                    <li>Terus upgrade fitur marketplace.</li>
+                    <li>Menyediakan platform jual-beli yang aman dan nyaman</li>
+                    <li>Memberikan pelayanan cepat & responsif 24/7</li>
+                    <li>Harga kompetitif dengan kualitas terjamin</li>
+                    <li>Sistem transaksi yang transparan dan terpercaya</li>
+                    <li>Terus berinovasi mengembangkan fitur marketplace</li>
+                    <li>Memberdayakan UMKM dan seller lokal Indonesia</li>
                 </ul>
+            </div>
+            <div class="pt-4 border-t border-slate-700">
+                <p class="text-[10px] text-gray-400">© 2026 XREZZKY STORE. All rights reserved.</p>
             </div>
         </div>
     </div>
@@ -179,7 +194,7 @@
 </div>
 
 <!-- LOADER -->
-<div id="loader" class="fixed inset-0 flex items-center justify-center bg-slate-900 z-[999]">
+<div id="loader" class="fixed inset-0 flex items-center justify-center bg-slate-900 z-[999] hidden">
     <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-blue-500"></div>
 </div>
 
@@ -189,6 +204,7 @@
         <i class="fa fa-hand-paper text-6xl text-red-500 mb-4"></i>
         <h1 class="text-3xl font-bold mb-2">AKUN DIBLOKIR</h1>
         <p id="ban-reason" class="text-red-300 mb-6 text-sm"></p>
+        <button onclick="signOutUser()" class="bg-red-600 px-6 py-3 rounded-xl font-bold">LOGOUT</button>
     </div>
 </div>
 
@@ -205,7 +221,7 @@
             </div>
         </div>
         
-        <!-- FORM LOGIN (DEFAULT) -->
+        <!-- FORM LOGIN -->
         <div id="login-form" class="space-y-4">
             <input type="email" id="login-email" placeholder="Email" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
             <input type="password" id="login-pass" placeholder="Password" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
@@ -216,7 +232,7 @@
             </div>
         </div>
         
-        <!-- FORM REGISTER (HIDDEN DEFAULT) -->
+        <!-- FORM REGISTER -->
         <div id="register-form" class="hidden space-y-4">
             <!-- PILIHAN ROLE -->
             <div class="flex gap-2 mb-2">
@@ -224,24 +240,22 @@
                 <button type="button" onclick="setRole('seller')" id="role-seller-btn" class="flex-1 py-3 rounded-xl bg-slate-700 font-bold text-sm">SELLER</button>
             </div>
             
-            <!-- FORM DASAR (UNTUK SEMUA) -->
+            <!-- FORM DASAR -->
             <input type="text" id="reg-username" placeholder="Username" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
             <input type="email" id="reg-email" placeholder="Email" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
             <input type="password" id="reg-pass" placeholder="Password (min 6 karakter)" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
             
-            <!-- FORM KHUSUS SELLER (HIDDEN DEFAULT) -->
+            <!-- FORM KHUSUS SELLER -->
             <div id="seller-fields" class="hidden space-y-3 border-t border-slate-700 pt-4 mt-2">
                 <p class="text-xs text-yellow-400 font-bold mb-2">DATA SELLER (WAJIB DIISI)</p>
                 
                 <input type="text" id="seller-id-card" placeholder="Nomor KTP (16 digit)" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none text-sm">
                 <input type="text" id="seller-store-name" placeholder="Nama Toko" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none text-sm">
                 
-                <!-- NOMOR WAJIB -->
                 <p class="text-xs text-blue-400 font-bold mt-2 mb-1">KONTAK (WAJIB)</p>
                 <input type="text" id="seller-wa" placeholder="Nomor WhatsApp (contoh: 628123456789)" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none text-sm">
                 
-                <!-- E-WALLET Wajib -->
-                <p class="text-xs text-green-400 font-bold mt-2 mb-1">E-WALLET (WAJIB - Untuk Pembayaran)</p>
+                <p class="text-xs text-green-400 font-bold mt-2 mb-1">E-WALLET (WAJIB)</p>
                 <select id="seller-ewallet" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none text-sm mb-2">
                     <option value="DANA">DANA</option>
                     <option value="OVO">OVO</option>
@@ -265,11 +279,7 @@
                     </select>
                     <input type="text" id="seller-account-number" placeholder="No Rekening" class="col-span-2 p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none text-sm">
                 </div>
-                <input type="text" id="seller-account-name" placeholder="Nama Pemilik Rekening (opsional)" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none text-sm">
-                
-                <!-- NOMOR HP OPSIONAL -->
-                <p class="text-xs text-gray-400 font-bold mt-3 mb-1">NOMOR HP (OPSIONAL)</p>
-                <input type="text" id="seller-phone" placeholder="Nomor HP (contoh: 08123456789)" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none text-sm">
+                <input type="text" id="seller-account-name" placeholder="Nama Pemilik Rekening" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none text-sm">
                 
                 <p class="text-[8px] text-red-400 mt-2"><i class="fas fa-lock mr-1"></i> Data pribadi Anda AMAN dan hanya bisa dilihat oleh ADMIN.</p>
             </div>
@@ -356,11 +366,13 @@
 </section>
 
 <!-- PROFILE PAGE -->
-<section id="page-profile" class="hidden min-h-screen p-6 animate-fade">
+<section id="page-profile" class="hidden min-h-screen p-6 animate-fade pb-32">
     <div class="flex items-center gap-4 mb-8">
         <button onclick="showPage('page-marketplace')"><i class="fa fa-arrow-left"></i></button>
-        <h1 class="text-xl font-bold">Profil & Riwayat</h1>
+        <h1 class="text-xl font-bold">Profil Saya</h1>
     </div>
+    
+    <!-- PROFILE CONTENT AKAN DIISI JAVASCRIPT -->
     <div id="profile-content"></div>
     
     <!-- SELLER DASHBOARD (AKAN MUNCUL JIKA USER ADALAH SELLER) -->
@@ -388,26 +400,42 @@
                 <p id="seller-rating" class="text-lg font-bold text-yellow-400">0.0</p>
             </div>
         </div>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <div class="bg-slate-800 p-4 rounded-xl">
+                <p class="text-[8px] text-gray-400">Total Produk</p>
+                <p id="seller-total-products" class="text-lg font-bold">0</p>
+            </div>
+            <div class="bg-slate-800 p-4 rounded-xl">
+                <p class="text-[8px] text-gray-400">Sudah Ditarik</p>
+                <p id="seller-withdrawn" class="text-lg font-bold">Rp 0</p>
+            </div>
+        </div>
         <button onclick="requestWithdraw()" class="w-full bg-blue-600 py-3 rounded-xl text-sm font-bold mb-2">
             TARIK SALDO
         </button>
+        <button onclick="viewSellerProducts()" class="w-full bg-green-600/20 text-green-400 py-3 rounded-xl text-sm font-bold">
+            LIHAT PRODUK SAYA
+        </button>
     </div>
     
+    <!-- RIWAYAT TRANSAKSI -->
     <div class="glass p-6 rounded-3xl mt-6">
-        <h3 class="font-bold mb-4">Pesanan Saya</h3>
+        <h3 class="font-bold mb-4 flex items-center gap-2">
+            <i class="fas fa-history"></i> Riwayat Transaksi
+        </h3>
         <div id="user-history" class="space-y-4"></div>
     </div>
 </section>
 
 <!-- ADMIN PAGE -->
-<section id="page-admin" class="hidden min-h-screen p-6 animate-fade">
+<section id="page-admin" class="hidden min-h-screen p-6 animate-fade pb-32">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-blue-500">Admin Panel (Owner)</h1>
+        <h1 class="text-2xl font-bold text-blue-500">Admin Panel</h1>
         <button onclick="showPage('page-marketplace')" class="text-xs bg-slate-700 px-3 py-1.5 rounded-lg">Back</button>
     </div>
     
     <!-- STATS CARD -->
-    <div class="grid grid-cols-4 gap-3 mb-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <div class="glass p-4 rounded-xl">
             <p class="text-[8px] text-gray-400">Total User</p>
             <p class="text-2xl font-bold" id="stat-total-users">0</p>
@@ -443,7 +471,7 @@
     <div id="admin-done" class="admin-tab hidden"></div>
     <div id="admin-reject" class="admin-tab hidden"></div>
     
-    <!-- SELLER DATA TAB (PRIVAT - HANYA ADMIN) -->
+    <!-- SELLER DATA TAB -->
     <div id="admin-sellers" class="admin-tab hidden">
         <h3 class="font-bold mb-3 text-yellow-400">VERIFIKASI SELLER BARU</h3>
         <div id="seller-verification-list" class="space-y-3 mb-6"></div>
@@ -488,7 +516,7 @@
         <p class="text-[10px] text-blue-400 font-bold mb-2 uppercase tracking-widest">Gambar Produk (Max 20)</p>
         <div id="image-input-container" class="space-y-2 mb-4"></div>
         
-        <button onclick="saveProduct()" id="btn-save-prod" class="w-full bg-green-600 py-3 rounded-xl font-bold">Upload Produk</button>
+                <button onclick="saveProduct()" id="btn-save-prod" class="w-full bg-green-600 py-3 rounded-xl font-bold">Upload Produk</button>
         <button id="cancel-edit-btn" onclick="cancelEdit()" class="hidden w-full bg-gray-600 py-3 rounded-xl font-bold mt-2">BATAL EDIT</button>
     </div>
 </section>
@@ -497,7 +525,7 @@
 <div id="modal-detail" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 animate-fade">
     <div class="bg-slate-900 w-full max-w-lg rounded-3xl overflow-hidden relative border border-slate-800 max-h-[90vh] overflow-y-auto">
         <div class="relative">
-                        <img id="m-img" src="" class="w-full h-64 object-contain bg-slate-900 cursor-pointer">
+            <img id="m-img" src="" class="w-full h-64 object-contain bg-slate-900 cursor-pointer">
             <div id="m-badge-out" class="absolute top-4 right-4 bg-red-600 text-white text-[10px] font-bold px-3 py-1 rounded-full hidden">STOK HABIS</div>
             <div id="m-seller-badge" class="absolute top-4 left-4 seller-badge hidden">Seller</div>
         </div>
@@ -556,12 +584,54 @@
     </div>
 </div>
 
+<!-- SELLER PRODUCTS MODAL -->
+<div id="modal-seller-products" class="hidden fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/95 animate-fade">
+    <div class="bg-slate-900 w-full max-w-2xl rounded-3xl p-6 border border-slate-700 max-h-[80vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-blue-400">Produk Saya</h2>
+            <button onclick="closeModal('modal-seller-products')" class="text-gray-400"><i class="fa fa-times"></i></button>
+        </div>
+        <div id="seller-products-list" class="space-y-3"></div>
+    </div>
+</div>
+
+<!-- KONFIRMASI MODAL -->
+<div id="modal-confirm" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/95 animate-fade">
+    <div class="glass p-6 rounded-3xl max-w-sm w-full text-center">
+        <i class="fas fa-exclamation-triangle text-yellow-500 text-4xl mb-4"></i>
+        <h3 class="text-xl font-bold mb-2">Konfirmasi</h3>
+        <p id="confirm-message" class="text-sm text-gray-400 mb-6">Apakah Anda yakin?</p>
+        <div class="flex gap-3">
+            <button id="confirm-yes" class="flex-1 bg-red-600 py-3 rounded-xl font-bold">YA</button>
+            <button id="confirm-no" class="flex-1 bg-slate-700 py-3 rounded-xl font-bold">TIDAK</button>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div id="toast" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-4 py-2 rounded-full text-xs shadow-lg z-[1000] hidden transition-all duration-300">
+    <span id="toast-message"></span>
+</div>
+
 <!-- BOTTOM NAV -->
 <nav class="fixed bottom-0 left-0 right-0 glass h-16 flex justify-around items-center z-50 border-t border-slate-800">
     <button onclick="showPage('page-marketplace')" class="text-gray-400 hover:text-blue-500 transition"><i class="fa fa-home text-xl"></i></button>
-    <button onclick="showPage('page-profile')" class="text-gray-400 hover:text-blue-500 transition"><i class="fa fa-receipt text-xl"></i></button>
+    <button onclick="showPage('page-profile')" class="text-gray-400 hover:text-blue-500 transition"><i class="fa fa-user text-xl"></i></button>
     <button id="nav-admin" onclick="showPage('page-admin')" class="hidden text-gray-400 hover:text-blue-500 transition"><i class="fa fa-shield-alt text-xl"></i></button>
 </nav>
+
+<!-- FLOATING ACTION BUTTONS -->
+<div id="fab-admin" class="fixed bottom-20 right-4 hidden">
+    <button onclick="switchAdminTab('upload')" class="bg-blue-600 w-12 h-12 rounded-full shadow-lg flex items-center justify-center">
+        <i class="fas fa-plus"></i>
+    </button>
+</div>
+
+<div id="fab-seller" class="fixed bottom-20 right-4 hidden">
+    <button onclick="viewSellerProducts()" class="bg-green-600 w-12 h-12 rounded-full shadow-lg flex items-center justify-center">
+        <i class="fas fa-store"></i>
+    </button>
+</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -587,12 +657,50 @@
     let userCart = {};
     let currentImages = [];
     let currentIndex = 0;
+    let currentPaymentId = null;
+    let currentOrderId = null;
     const MAX_IMAGES = 20;
-    const PLATFORM_COMMISSION = 0.1; // 10% untuk platform
+    const PLATFORM_COMMISSION = 0.1;
+
+    // Toast function
+    window.showToast = (message, type = 'info') => {
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toast-message');
+        toastMsg.innerText = message;
+        
+        if (type === 'success') toast.style.backgroundColor = '#10b981';
+        else if (type === 'error') toast.style.backgroundColor = '#ef4444';
+        else toast.style.backgroundColor = '#1e293b';
+        
+        toast.classList.remove('hidden');
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 3000);
+    };
+
+    // Confirm modal
+    window.showConfirm = (message, onYes) => {
+        const modal = document.getElementById('modal-confirm');
+        const msg = document.getElementById('confirm-message');
+        const yesBtn = document.getElementById('confirm-yes');
+        const noBtn = document.getElementById('confirm-no');
+        
+        msg.innerText = message;
+        modal.classList.remove('hidden');
+        
+        yesBtn.onclick = () => {
+            modal.classList.add('hidden');
+            onYes();
+        };
+        
+        noBtn.onclick = () => {
+            modal.classList.add('hidden');
+        };
+    };
 
     // ==================== AUTH UI STATE ====================
-    let currentRole = 'buyer'; // buyer atau seller
-    let currentAuthMode = 'login'; // login atau register
+    let currentRole = 'buyer';
+    let currentAuthMode = 'login';
 
     window.setAuthMode = (mode) => {
         currentAuthMode = mode;
@@ -635,37 +743,35 @@
         }
     };
 
-    window.switchToRegister = () => {
-        setAuthMode('register');
-    };
-
-    window.switchToLogin = () => {
-        setAuthMode('login');
-    };
-
-    window.showTerms = () => {
-        document.getElementById('modal-terms').classList.remove('hidden');
-    };
-
-    window.showPrivacy = () => {
-        document.getElementById('modal-privacy').classList.remove('hidden');
-    };
-
-    window.showForgotModal = () => {
-        document.getElementById('modal-forgot').classList.remove('hidden');
-    };
+    window.switchToRegister = () => setAuthMode('register');
+    window.switchToLogin = () => setAuthMode('login');
+    window.showTerms = () => document.getElementById('modal-terms').classList.remove('hidden');
+    window.showPrivacy = () => document.getElementById('modal-privacy').classList.remove('hidden');
+    window.showForgotModal = () => document.getElementById('modal-forgot').classList.remove('hidden');
 
     // ==================== AUTH LOGIC ====================
     onAuthStateChanged(auth, async (user) => {
         document.getElementById('loader').classList.add('hidden');
-        const profileBox = document.getElementById('profile-content');
+        
+        // Sembunyikan semua FAB dulu
+        document.getElementById('fab-admin').classList.add('hidden');
+        document.getElementById('fab-seller').classList.add('hidden');
 
         if (!user) {
-            profileBox.innerHTML = `
+            // Guest mode
+            document.getElementById('profile-content').innerHTML = `
                 <div class="glass p-6 rounded-3xl text-center">
-                    <p class="mb-4">Belum Login</p>
-                    <button onclick="showPage('page-auth')" class="bg-blue-600 px-6 py-2 rounded-xl font-bold">Login / Daftar</button>
-                </div>`;
+                    <img src="https://ui-avatars.com/api/?name=Guest&background=3b82f6&color=fff" class="w-20 h-20 rounded-full mx-auto border-4 border-blue-500 mb-3">
+                    <h2 class="text-xl font-bold mb-4">Guest</h2>
+                    <p class="text-xs text-gray-400 mb-6">Silahkan login untuk mengakses profil</p>
+                    <button onclick="showPage('page-auth')" class="bg-blue-600 px-6 py-3 rounded-xl font-bold w-full">Login / Daftar</button>
+                </div>
+                <div class="glass p-4 rounded-3xl text-center mt-4">
+                    <button onclick="openVisiModal()" class="w-full bg-purple-600/20 text-purple-400 py-2 rounded-lg font-bold">Lihat Visi & Misi</button>
+                </div>
+            `;
+            document.getElementById('user-name-display').innerText = 'Guest';
+            document.getElementById('user-avatar').src = 'https://ui-avatars.com/api/?name=Guest&background=3b82f6&color=fff';
             document.getElementById('nav-admin').classList.add('hidden');
             document.getElementById('seller-dashboard').classList.add('hidden');
             showPage('page-marketplace');
@@ -673,42 +779,43 @@
             return;
         }
 
-        const s = await get(ref(db, `users/${user.uid}`));
-        const data = s.val() || {};
+        const userSnap = await get(ref(db, `users/${user.uid}`));
+        const userData = userSnap.val() || {};
 
-        if (data?.banned) {
+        if (userData?.banned) {
             document.getElementById('page-banned').classList.remove('hidden');
-            document.getElementById('ban-reason').innerText = data.banReason;
+            document.getElementById('ban-reason').innerText = userData.banReason || 'Akun diblokir oleh admin';
             return;
         }
 
-        const username = data?.username || user.email.split('@')[0];
+        const username = userData?.username || user.email.split('@')[0];
         document.getElementById('user-name-display').innerText = username;
         document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${username}&background=3b82f6&color=fff`;
 
         // Cek role user
-        if (data?.role === 'admin') {
+        if (userData?.role === 'admin') {
             document.getElementById('nav-admin').classList.remove('hidden');
+            document.getElementById('fab-admin').classList.remove('hidden');
             listenAdminOrders();
             loadSellersForSelect();
             loadAdminStats();
-        } else {
-            document.getElementById('nav-admin').classList.add('hidden');
         }
 
-        // Cek apakah user adalah seller (status active)
+        // Cek data seller
         const sellerSnap = await get(ref(db, `sellers/${user.uid}`));
         const sellerData = sellerSnap.val();
-
-        // Cek apakah user pending seller
+        
+        // Cek pending seller
         const pendingSnap = await get(ref(db, `verificationRequests/${user.uid}`));
         const pendingData = pendingSnap.val();
 
-        profileBox.innerHTML = `
+        // Tampilkan profile content
+        document.getElementById('profile-content').innerHTML = `
             <div class="glass p-6 rounded-3xl text-center mb-4">
                 <img src="https://ui-avatars.com/api/?name=${username}&background=3b82f6&color=fff" class="w-20 h-20 rounded-full mx-auto border-4 border-blue-500 mb-3">
                 <h2 class="text-xl font-bold">${username}</h2>
-                <p class="text-xs text-gray-400 mb-4">${user.email}</p>
+                <p class="text-xs text-gray-400 mb-2">${user.email}</p>
+                <p class="text-[10px] text-gray-500 mb-4">Bergabung: ${new Date(user.metadata?.createdAt || Date.now()).toLocaleDateString('id-ID')}</p>
                 
                 ${sellerData ? `
                 <div class="bg-green-600/20 text-green-400 py-2 rounded-lg mb-3 text-xs font-bold">
@@ -734,11 +841,21 @@
         // Tampilkan seller dashboard jika seller aktif
         if (sellerData && sellerData.status === 'active') {
             document.getElementById('seller-dashboard').classList.remove('hidden');
+            document.getElementById('fab-seller').classList.remove('hidden');
             
-            document.getElementById('seller-balance').innerText = 'Rp ' + (sellerData.balance || 0).toLocaleString();
-            document.getElementById('seller-pending').innerText = 'Rp ' + (sellerData.pendingWithdraw || 0).toLocaleString();
+            document.getElementById('seller-balance').innerText = 'Rp ' + (sellerData.balance || 0).toLocaleString('id-ID');
+            document.getElementById('seller-pending').innerText = 'Rp ' + (sellerData.pendingWithdraw || 0).toLocaleString('id-ID');
             document.getElementById('seller-total-sales').innerText = sellerData.totalSales || 0;
             document.getElementById('seller-rating').innerText = (sellerData.rating || 0).toFixed(1);
+            
+            // Hitung total produk seller
+            const productsSnap = await get(ref(db, 'products'));
+            let sellerProductCount = 0;
+            productsSnap.forEach(p => {
+                if (p.val().sellerId === user.uid) sellerProductCount++;
+            });
+            document.getElementById('seller-total-products').innerText = sellerProductCount;
+            document.getElementById('seller-withdrawn').innerText = 'Rp ' + (sellerData.totalWithdrawn || 0).toLocaleString('id-ID');
         } else {
             document.getElementById('seller-dashboard').classList.add('hidden');
         }
@@ -754,64 +871,60 @@
         const pass = document.getElementById('login-pass').value;
         
         if (!email || !pass) {
-            return alert("Email dan password harus diisi!");
+            return showToast("Email dan password harus diisi!", 'error');
         }
         
         try {
             await signInWithEmailAndPassword(auth, email, pass);
+            showToast("Login berhasil!", 'success');
         } catch (e) { 
-            alert(e.message); 
+            showToast(e.message, 'error');
         }
     };
 
     // ==================== HANDLE REGISTER ====================
     window.handleRegister = async () => {
-        // Validasi dasar
         const username = document.getElementById('reg-username').value;
         const email = document.getElementById('reg-email').value;
         const pass = document.getElementById('reg-pass').value;
         const agreeTerms = document.getElementById('agree-terms').checked;
         
         if (!username || !email || !pass) {
-            return alert("Username, email, dan password harus diisi!");
+            return showToast("Username, email, dan password harus diisi!", 'error');
         }
         
         if (pass.length < 6) {
-            return alert("Password minimal 6 karakter!");
+            return showToast("Password minimal 6 karakter!", 'error');
         }
         
         if (!agreeTerms) {
-            return alert("Anda harus menyetujui Syarat & Ketentuan!");
+            return showToast("Anda harus menyetujui Syarat & Ketentuan!", 'error');
         }
         
-        // Validasi seller
         if (currentRole === 'seller') {
             const idCard = document.getElementById('seller-id-card').value;
             const storeName = document.getElementById('seller-store-name').value;
             const wa = document.getElementById('seller-wa').value;
-            const ewallet = document.getElementById('seller-ewallet').value;
             const ewalletNumber = document.getElementById('seller-ewallet-number').value;
             const ewalletName = document.getElementById('seller-ewallet-name').value;
             
             if (!idCard || !storeName || !wa || !ewalletNumber || !ewalletName) {
-                return alert("KTP, Nama Toko, WA, dan E-Wallet wajib diisi!");
+                return showToast("KTP, Nama Toko, WA, dan E-Wallet wajib diisi!", 'error');
             }
             
             if (idCard.length < 16) {
-                return alert("Nomor KTP minimal 16 digit!");
+                return showToast("Nomor KTP minimal 16 digit!", 'error');
             }
             
             if (wa.length < 10 || !wa.startsWith('62')) {
-                return alert("Nomor WA harus dimulai dengan 62 (contoh: 628123456789)");
+                return showToast("Nomor WA harus dimulai dengan 62 (contoh: 628123456789)", 'error');
             }
         }
         
         try {
-            // Buat user di Firebase Auth
             const res = await createUserWithEmailAndPassword(auth, email, pass);
             const userId = res.user.uid;
             
-            // Data dasar user
             const userData = {
                 username: username,
                 email: email,
@@ -821,10 +934,8 @@
                 agreeTerms: true
             };
             
-            // Simpan user ke database
             await set(ref(db, `users/${userId}`), userData);
             
-            // Jika seller, buat verification request
             if (currentRole === 'seller') {
                 const idCard = document.getElementById('seller-id-card').value;
                 const storeName = document.getElementById('seller-store-name').value;
@@ -833,11 +944,9 @@
                 const ewalletNumber = document.getElementById('seller-ewallet-number').value;
                 const ewalletName = document.getElementById('seller-ewallet-name').value;
                 
-                // Data bank (opsional)
                 const bank = document.getElementById('seller-bank').value;
                 const accountNumber = document.getElementById('seller-account-number').value;
                 const accountName = document.getElementById('seller-account-name').value;
-                const phone = document.getElementById('seller-phone').value;
                 
                 const bankAccount = {
                     ewallet: {
@@ -855,10 +964,6 @@
                     };
                 }
                 
-                if (phone) {
-                    bankAccount.phone = phone;
-                }
-                
                 await set(ref(db, `verificationRequests/${userId}`), {
                     userId: userId,
                     userEmail: email,
@@ -871,9 +976,9 @@
                     submittedAt: Date.now()
                 });
                 
-                alert("Pendaftaran berhasil! Data seller Anda akan diverifikasi admin maksimal 1x24 jam.");
+                showToast("Pendaftaran berhasil! Data seller akan diverifikasi admin.", 'success');
             } else {
-                alert("Pendaftaran berhasil! Selamat berbelanja.");
+                showToast("Pendaftaran berhasil! Selamat berbelanja.", 'success');
             }
             
             // Reset form
@@ -882,7 +987,7 @@
             document.getElementById('reg-pass').value = '';
             
         } catch (e) { 
-            alert(e.message); 
+            showToast(e.message, 'error');
         }
     };
 
@@ -891,23 +996,22 @@
         const email = document.getElementById('forgot-email').value;
         
         if (!email) {
-            return alert("Masukkan email Anda!");
+            return showToast("Masukkan email Anda!", 'error');
         }
         
         try {
             await sendPasswordResetEmail(auth, email);
-            alert("Link reset password telah dikirim ke email Anda!");
+            showToast("Link reset password telah dikirim ke email Anda!", 'success');
             closeModal('modal-forgot');
         } catch (e) {
-            alert(e.message);
+            showToast(e.message, 'error');
         }
     };
 
-    // ==================== SELLER VERIFICATION (ADMIN) ====================
+    // ==================== SELLER VERIFICATION ====================
     window.approveSeller = async (requestId, userId) => {
         const request = (await get(ref(db, `verificationRequests/${requestId}`))).val();
         
-        // Buat seller profile
         await set(ref(db, `sellers/${userId}`), {
             userId: userId,
             userEmail: request.userEmail,
@@ -929,17 +1033,14 @@
             approvedBy: auth.currentUser.uid
         });
         
-        // Update user role
         await update(ref(db, `users/${userId}`), { role: 'seller' });
-        
-        // Update status request
         await update(ref(db, `verificationRequests/${requestId}`), {
             status: "approved",
             processedAt: Date.now(),
             processedBy: auth.currentUser.uid
         });
         
-        alert("Seller berhasil diverifikasi!");
+        showToast("Seller berhasil diverifikasi!", 'success');
         loadAdminStats();
     };
 
@@ -954,67 +1055,69 @@
             processedBy: auth.currentUser.uid
         });
         
-        alert("Seller ditolak!");
+        showToast("Seller ditolak!", 'success');
     };
 
     window.banSeller = async (sellerId) => {
-        if (!confirm("Yakin ban seller ini?")) return;
-        
-        await update(ref(db, `sellers/${sellerId}`), {
-            status: "banned",
-            bannedAt: Date.now(),
-            bannedBy: auth.currentUser.uid
+        showConfirm("Yakin ban seller ini?", async () => {
+            await update(ref(db, `sellers/${sellerId}`), {
+                status: "banned",
+                bannedAt: Date.now(),
+                bannedBy: auth.currentUser.uid
+            });
+            
+            await update(ref(db, `users/${sellerId}`), { 
+                role: 'banned_seller',
+                banned: true,
+                banReason: 'Diblokir oleh admin'
+            });
+            
+            showToast("Seller dibanned!", 'success');
+            loadAdminStats();
         });
-        
-        await update(ref(db, `users/${sellerId}`), { 
-            role: 'banned_seller',
-            banned: true,
-            banReason: 'Diblokir oleh admin'
-        });
-        
-        alert("Seller dibanned!");
-        loadAdminStats();
     };
 
     window.banUser = async (userId) => {
-        if (!confirm("Yakin ban user ini?")) return;
-        
-        await update(ref(db, `users/${userId}`), { 
-            banned: true,
-            banReason: 'Diblokir oleh admin',
-            bannedAt: Date.now(),
-            bannedBy: auth.currentUser.uid
+        showConfirm("Yakin ban user ini?", async () => {
+            await update(ref(db, `users/${userId}`), { 
+                banned: true,
+                banReason: 'Diblokir oleh admin',
+                bannedAt: Date.now(),
+                bannedBy: auth.currentUser.uid
+            });
+            
+            showToast("User dibanned!", 'success');
+            loadAdminStats();
         });
-        
-        alert("User dibanned!");
-        loadAdminStats();
     };
 
     window.unbanUser = async (userId) => {
-        if (!confirm("Yakin unban user ini?")) return;
-        
-        await update(ref(db, `users/${userId}`), { 
-            banned: false,
-            banReason: null
+        showConfirm("Yakin unban user ini?", async () => {
+            await update(ref(db, `users/${userId}`), { 
+                banned: false,
+                banReason: null
+            });
+            
+            showToast("User diunban!", 'success');
+            loadAdminStats();
         });
-        
-        alert("User diunban!");
-        loadAdminStats();
     };
 
     // ==================== WITHDRAWAL ====================
     window.requestWithdraw = async () => {
         const user = auth.currentUser;
+        if (!user) return showToast("Silahkan login!", 'error');
+        
         const sellerSnap = await get(ref(db, `sellers/${user.uid}`));
         const seller = sellerSnap.val();
         
-        if (!seller) return alert("Anda bukan seller!");
-        if (seller.status !== "active") return alert("Akun seller tidak aktif!");
+        if (!seller) return showToast("Anda bukan seller!", 'error');
+        if (seller.status !== "active") return showToast("Akun seller tidak aktif!", 'error');
         
         const amount = parseInt(prompt("Jumlah penarikan (min Rp 50.000):"));
-        if (!amount || amount < 50000) return alert("Minimal Rp 50.000");
+        if (!amount || amount < 50000) return showToast("Minimal Rp 50.000", 'error');
         
-        if (amount > seller.balance) return alert("Saldo tidak cukup!");
+        if (amount > seller.balance) return showToast("Saldo tidak cukup!", 'error');
         
         await push(ref(db, "withdrawals"), {
             sellerId: user.uid,
@@ -1025,13 +1128,12 @@
             requestedAt: Date.now()
         });
         
-        // Kurangi saldo sementara (pending)
         await update(ref(db, `sellers/${user.uid}`), {
             balance: (seller.balance || 0) - amount,
             pendingWithdraw: (seller.pendingWithdraw || 0) + amount
         });
         
-        alert("Permintaan penarikan terkirim! Admin akan memproses.");
+        showToast("Permintaan penarikan terkirim!", 'success');
     };
 
     window.processWithdraw = async (withdrawId, action) => {
@@ -1049,7 +1151,7 @@
                 totalWithdrawn: increment(withdraw.amount)
             });
             
-            alert("Penarikan disetujui!");
+            showToast("Penarikan disetujui!", 'success');
             
         } else if (action === "reject") {
             const reason = prompt("Alasan penolakan:");
@@ -1069,7 +1171,7 @@
                 processedBy: auth.currentUser.uid
             });
             
-            alert("Penarikan ditolak!");
+            showToast("Penarikan ditolak!", 'success');
         }
     };
 
@@ -1080,9 +1182,7 @@
         const pendingSnap = await get(ref(db, 'verificationRequests'));
         const ordersSnap = await get(ref(db, 'orders'));
         
-        let totalUsers = 0;
-        let totalSellers = 0;
-        let pendingVerify = 0;
+        let totalUsers = 0, totalSellers = 0, pendingVerify = 0;
         
         usersSnap.forEach(() => totalUsers++);
         sellersSnap.forEach(() => totalSellers++);
@@ -1097,7 +1197,7 @@
         document.getElementById('stat-total-orders').innerText = ordersSnap.size || 0;
     }
 
-    // ==================== RENDER FUNCTIONS FOR ADMIN ====================
+    // ==================== RENDER FUNCTIONS ====================
     function renderSellerVerification() {
         onValue(ref(db, 'verificationRequests'), (snap) => {
             const list = document.getElementById('seller-verification-list');
@@ -1107,9 +1207,6 @@
             snap.forEach(child => {
                 const req = child.val();
                 if (req.status === "pending") {
-                    const bankInfo = req.bankAccount?.ewallet ? 
-                        `<p class="text-[10px] mt-1">E-Wallet: ${req.bankAccount.ewallet.type} - ${req.bankAccount.ewallet.number} (${req.bankAccount.ewallet.name})</p>` : '';
-                    
                     list.innerHTML += `
                     <div class="glass p-4 rounded-2xl border border-yellow-500/30">
                         <div class="flex justify-between">
@@ -1119,9 +1216,7 @@
                         <p class="text-[10px] text-gray-400">${req.username} (${req.userEmail})</p>
                         <p class="text-[10px] mt-1">WA: ${req.wa || '-'}</p>
                         <p class="text-[10px]">KTP: ${req.idCard}</p>
-                        ${bankInfo}
-                        ${req.bankAccount?.bank ? `<p class="text-[10px]">Bank: ${req.bankAccount.bank.name} - ${req.bankAccount.bank.number}</p>` : ''}
-                        <p class="text-[8px] text-gray-500 mt-1">${new Date(req.submittedAt).toLocaleString()}</p>
+                        <p class="text-[8px] text-gray-500 mt-1">${new Date(req.submittedAt).toLocaleString('id-ID')}</p>
                         <div class="flex gap-2 mt-3">
                             <button onclick="approveSeller('${child.key}', '${req.userId}')" class="flex-1 bg-green-600 py-2 rounded-lg text-xs font-bold">SETUJUI</button>
                             <button onclick="rejectSeller('${child.key}')" class="flex-1 bg-red-600 py-2 rounded-lg text-xs font-bold">TOLAK</button>
@@ -1140,25 +1235,22 @@
             
             snap.forEach(child => {
                 const seller = child.val();
-                const ewalletInfo = seller.bankAccount?.ewallet ? 
-                    `<p class="text-[8px] text-gray-400 mt-1">E-Wallet: ${seller.bankAccount.ewallet.type} - ${seller.bankAccount.ewallet.number}</p>` : '';
-                
                 list.innerHTML += `
                 <div class="glass p-4 rounded-2xl border border-slate-700">
                     <div class="flex justify-between">
                         <p class="font-bold text-blue-400">${seller.storeName}</p>
-                        <span class="text-[8px] bg-${seller.status === 'active' ? 'green' : 'red'}-600/20 text-${seller.status === 'active' ? 'green' : 'red'}-400 px-2 py-1 rounded">${seller.status}</span>
+                                                <span class="text-[8px] bg-${seller.status === 'active' ? 'green' : 'red'}-600/20 text-${seller.status === 'active' ? 'green' : 'red'}-400 px-2 py-1 rounded">${seller.status}</span>
                     </div>
                     <p class="text-[10px] text-gray-400">${seller.username} (${seller.userEmail})</p>
                     <p class="text-[10px] text-gray-400 mt-1">WA: ${seller.wa || '-'}</p>
                     <p class="text-[8px] text-red-400 mt-1"><i class="fas fa-lock mr-1"></i> DATA PRIVAT:</p>
                     <p class="text-[8px] text-gray-400">KTP: ${seller.idCard}</p>
-                    ${ewalletInfo}
+                    <p class="text-[8px] text-gray-400">E-Wallet: ${seller.bankAccount?.ewallet?.type} - ${seller.bankAccount?.ewallet?.number}</p>
                     ${seller.bankAccount?.bank ? `<p class="text-[8px] text-gray-400">Bank: ${seller.bankAccount.bank.name} - ${seller.bankAccount.bank.number}</p>` : ''}
                     <div class="grid grid-cols-3 gap-2 mt-2 text-center">
                         <div>
                             <p class="text-[8px] text-gray-500">Saldo</p>
-                            <p class="text-xs font-bold">Rp ${(seller.balance || 0).toLocaleString()}</p>
+                            <p class="text-xs font-bold">Rp ${(seller.balance || 0).toLocaleString('id-ID')}</p>
                         </div>
                         <div>
                             <p class="text-[8px] text-gray-500">Penjualan</p>
@@ -1196,7 +1288,7 @@
                                 '<span class="text-[8px] bg-green-600/20 text-green-400 px-2 py-1 rounded">ACTIVE</span>'}
                         </div>
                         <p class="text-[10px] text-gray-400">${user.email}</p>
-                        <p class="text-[8px] text-gray-500 mt-1">Bergabung: ${new Date(user.createdAt).toLocaleDateString()}</p>
+                        <p class="text-[8px] text-gray-500 mt-1">Bergabung: ${new Date(user.createdAt).toLocaleDateString('id-ID')}</p>
                         ${!user.banned ? `
                         <button onclick="banUser('${child.key}')" class="w-full mt-3 bg-red-600/20 text-red-400 py-2 rounded-lg text-xs font-bold">
                             BAN USER
@@ -1222,27 +1314,23 @@
                 if (w.status === "processed") statusColor = "text-green-400";
                 if (w.status === "rejected") statusColor = "text-red-400";
                 
-                const paymentInfo = w.bankAccount?.ewallet ? 
-                    `<p class="text-[8px] text-gray-400">E-Wallet: ${w.bankAccount.ewallet.type} - ${w.bankAccount.ewallet.number}</p>` :
-                    `<p class="text-[8px] text-gray-400">Bank: ${w.bankAccount?.bank?.name} - ${w.bankAccount?.bank?.number}</p>`;
-                
                 list.innerHTML += `
                 <div class="glass p-4 rounded-2xl border border-slate-700">
                     <div class="flex justify-between">
                         <p class="font-bold">${w.sellerName}</p>
                         <span class="text-[8px] ${statusColor} px-2 py-1 rounded">${w.status.toUpperCase()}</span>
                     </div>
-                    <p class="text-blue-400 font-bold text-lg my-1">Rp ${w.amount.toLocaleString()}</p>
-                    ${paymentInfo}
-                    <p class="text-[8px] text-gray-500 mt-1">${new Date(w.requestedAt).toLocaleString()}</p>
+                    <p class="text-blue-400 font-bold text-lg my-1">Rp ${w.amount.toLocaleString('id-ID')}</p>
+                    <p class="text-[8px] text-gray-400">E-Wallet: ${w.bankAccount?.ewallet?.type} - ${w.bankAccount?.ewallet?.number}</p>
+                    <p class="text-[8px] text-gray-500 mt-1">${new Date(w.requestedAt).toLocaleString('id-ID')}</p>
                     
-                                        ${w.status === "pending" ? `
+                    ${w.status === "pending" ? `
                     <div class="flex gap-2 mt-3">
                         <button onclick="processWithdraw('${child.key}', 'approve')" class="flex-1 bg-green-600 py-2 rounded-lg text-xs font-bold">PROSES</button>
                         <button onclick="processWithdraw('${child.key}', 'reject')" class="flex-1 bg-red-600 py-2 rounded-lg text-xs font-bold">TOLAK</button>
                     </div>` : ''}
                     
-                    ${w.status === "processed" ? `<p class="text-[8px] text-green-400 mt-2">Diproses: ${new Date(w.processedAt).toLocaleString()}</p>` : ''}
+                    ${w.status === "processed" ? `<p class="text-[8px] text-green-400 mt-2">Diproses: ${new Date(w.processedAt).toLocaleString('id-ID')}</p>` : ''}
                     ${w.rejectReason ? `<p class="text-[8px] text-red-400 mt-2">Alasan: ${w.rejectReason}</p>` : ''}
                 </div>`;
             });
@@ -1268,12 +1356,12 @@
                         <p class="font-bold text-blue-400">Payment #${child.key.slice(0,6)}</p>
                         <span class="text-[8px] ${statusColor} px-2 py-1 rounded">${p.status.toUpperCase()}</span>
                     </div>
-                    <p class="text-lg font-bold mt-1">Rp ${p.amount.toLocaleString()}</p>
+                    <p class="text-lg font-bold mt-1">Rp ${p.amount.toLocaleString('id-ID')}</p>
                     <p class="text-[8px] text-gray-400">Pembeli: ${p.buyerName}</p>
                     <p class="text-[8px] text-gray-400">Metode: ${p.method}</p>
-                    <p class="text-[8px] text-gray-500">Dibuat: ${new Date(p.createdAt).toLocaleString()}</p>
-                    ${p.paidAt ? `<p class="text-[8px] text-green-400">Dibayar: ${new Date(p.paidAt).toLocaleString()}</p>` : ''}
-                    ${p.expiresAt ? `<p class="text-[8px] text-red-400">Exp: ${new Date(p.expiresAt).toLocaleString()}</p>` : ''}
+                    <p class="text-[8px] text-gray-500">Dibuat: ${new Date(p.createdAt).toLocaleString('id-ID')}</p>
+                    ${p.paidAt ? `<p class="text-[8px] text-green-400">Dibayar: ${new Date(p.paidAt).toLocaleString('id-ID')}</p>` : ''}
+                    ${p.expiresAt ? `<p class="text-[8px] text-red-400">Exp: ${new Date(p.expiresAt).toLocaleString('id-ID')}</p>` : ''}
                 </div>`;
             });
         });
@@ -1312,7 +1400,8 @@
 
     function renderProductCard(p) {
         const list = document.getElementById('product-list');
-        const isAdmin = !document.getElementById('nav-admin').classList.contains('hidden');
+        const user = auth.currentUser;
+        const isAdmin = user ? (document.getElementById('nav-admin').classList.contains('hidden') ? false : true) : false;
         const displayImg = (p.images && p.images.length > 0) ? p.images[0] : 'https://via.placeholder.com/300';
         const isOut = (p.stock || 0) <= 0;
 
@@ -1336,7 +1425,7 @@
 
                 <div class="px-1">
                     <p class="text-[11px] font-bold truncate">${p.name}</p>
-                    <p class="text-blue-400 font-bold text-xs mt-1">Rp ${Number(p.price).toLocaleString()}</p>
+                    <p class="text-blue-400 font-bold text-xs mt-1">Rp ${Number(p.price).toLocaleString('id-ID')}</p>
                     <div class="flex justify-between items-center mt-2">
                         <span class="text-[9px] text-gray-500">Stok: ${p.stock || 0}</span>
                         <button onclick="viewDetail('${p.id}')" class="text-[9px] bg-slate-800 px-2 py-1 rounded text-blue-400">Detail</button>
@@ -1360,7 +1449,7 @@
         });
 
         document.getElementById('m-title').innerText = p.name;
-        document.getElementById('m-price').innerText = "Rp " + Number(p.price).toLocaleString();
+        document.getElementById('m-price').innerText = "Rp " + Number(p.price).toLocaleString('id-ID');
         document.getElementById('m-desc').innerText = p.description || "Tidak ada deskripsi.";
         
         if (p.sellerName) {
@@ -1406,10 +1495,15 @@
     // ==================== CART & ORDER LOGIC ====================
     window.addToCart = async (id) => {
         const user = auth.currentUser;
-        if (!user) return alert("Silahkan login terlebih dahulu!");
+        if (!user) {
+            showToast("Silahkan login terlebih dahulu!", 'error');
+            return showPage('page-auth');
+        }
 
         const p = globalProducts.find(x => x.id === id);
-        if (p.stock <= 0) return alert("Stok habis!");
+        if (p.stock <= 0) {
+            return showToast("Stok habis!", 'error');
+        }
 
         await update(ref(db, `carts/${user.uid}/${id}`), {
             name: p.name,
@@ -1419,7 +1513,7 @@
             maxStock: p.stock,
             sellerId: p.sellerId || "admin"
         });
-        alert("Berhasil ditambah ke keranjang!");
+        showToast("Berhasil ditambah ke keranjang!", 'success');
     };
 
     function listenCart(uid) {
@@ -1427,11 +1521,13 @@
             const cont = document.getElementById('cart-items');
             const totalEl = document.getElementById('cart-total');
             const countEl = document.getElementById('cart-count');
-            cont.innerHTML = ""; userCart = {};
+            cont.innerHTML = ""; 
+            userCart = {};
             let total = 0, count = 0;
 
             if (!snap.exists()) {
-                totalEl.innerText = "Rp 0"; countEl.innerText = "0";
+                totalEl.innerText = "Rp 0"; 
+                countEl.innerText = "0";
                 cont.innerHTML = `<p class="text-center text-gray-500 py-10">Keranjang kosong</p>`;
                 return;
             }
@@ -1446,7 +1542,7 @@
                         <img src="${item.img}" class="w-16 h-16 rounded-xl object-cover">
                         <div class="flex-1">
                             <p class="font-bold text-sm truncate">${item.name}</p>
-                            <p class="text-blue-400 text-xs font-bold">Rp ${item.price.toLocaleString()}</p>
+                            <p class="text-blue-400 text-xs font-bold">Rp ${item.price.toLocaleString('id-ID')}</p>
                             <div class="flex items-center gap-3 mt-2">
                                 <button onclick="updateCartQty('${child.key}', -1)" class="bg-slate-700 w-6 h-6 rounded-lg">-</button>
                                 <span class="text-xs font-bold">${item.qty}</span>
@@ -1455,17 +1551,26 @@
                         </div>
                     </div>`;
             });
-            totalEl.innerText = "Rp " + total.toLocaleString();
+            totalEl.innerText = "Rp " + total.toLocaleString('id-ID');
             countEl.innerText = count;
         });
     }
 
     window.updateCartQty = async (id, change) => {
+        const user = auth.currentUser;
+        if (!user) return;
+        
         const item = userCart[id];
         const newQty = item.qty + change;
-        if (newQty <= 0) return remove(ref(db, `carts/${auth.currentUser.uid}/${id}`));
-        if (newQty > item.maxStock) return alert("Stok tidak mencukupi!");
-        await update(ref(db, `carts/${auth.currentUser.uid}/${id}`), { qty: newQty });
+        if (newQty <= 0) {
+            await remove(ref(db, `carts/${user.uid}/${id}`));
+            showToast("Item dihapus dari keranjang", 'success');
+            return;
+        }
+        if (newQty > item.maxStock) {
+            return showToast("Stok tidak mencukupi!", 'error');
+        }
+        await update(ref(db, `carts/${user.uid}/${id}`), { qty: newQty });
     };
 
     window.checkOrderLimit = async (uid) => {
@@ -1476,7 +1581,7 @@
             if (o.userId === uid && (o.status === "Pending" || o.status === "Diproses")) active++;
         });
         if (active >= 5) {
-            alert("Kamu memiliki 5 order aktif. Selesaikan transaksi sebelumnya!");
+            showToast("Kamu memiliki 5 order aktif. Selesaikan transaksi sebelumnya!", 'error');
             return false;
         }
         return true;
@@ -1484,8 +1589,15 @@
 
     window.checkoutCart = async () => {
         const user = auth.currentUser;
-        if (!user) return showPage('page-auth');
-        if (!Object.keys(userCart).length) return alert("Keranjang kosong!");
+        if (!user) {
+            showToast("Silahkan login terlebih dahulu!", 'error');
+            return showPage('page-auth');
+        }
+        
+        if (!Object.keys(userCart).length) {
+            return showToast("Keranjang kosong!", 'error');
+        }
+        
         if (!(await checkOrderLimit(user.uid))) return;
 
         let total = 0;
@@ -1518,13 +1630,15 @@
         
         sellerAmounts["platform"] = total * PLATFORM_COMMISSION;
 
+        // Cek stok
         for (const id in userCart) {
             const fresh = (await get(ref(db, `products/${id}`))).val();
             if (fresh.stock < userCart[id].qty) {
-                return alert(`Stok ${userCart[id].name} tidak cukup!`);
+                return showToast(`Stok ${userCart[id].name} tidak cukup!`, 'error');
             }
         }
 
+        // Kurangi stok
         for (const id in userCart) {
             await update(ref(db, `products/${id}`), { 
                 stock: increment(-userCart[id].qty) 
@@ -1532,6 +1646,8 @@
         }
 
         const orderRef = push(ref(db, "orders"));
+        const orderId = orderRef.key;
+        
         await set(orderRef, {
             userId: user.uid,
             username: document.getElementById('user-name-display').innerText,
@@ -1544,19 +1660,27 @@
         });
 
         await remove(ref(db, `carts/${user.uid}`));
-        await showPaymentModal(orderRef.key, total, sellerAmounts);
+        
+        // Generate payment
+        await generatePaymentQR(orderId, total, sellerAmounts);
         
         closeModal('modal-cart');
     };
 
     window.instantBuy = async (id) => {
         const user = auth.currentUser;
-        if (!user) return showPage('page-auth');
+        if (!user) {
+            showToast("Silahkan login terlebih dahulu!", 'error');
+            return showPage('page-auth');
+        }
+        
         if (!(await checkOrderLimit(user.uid))) return;
 
         const p = globalProducts.find(x => x.id === id);
         const fresh = (await get(ref(db, `products/${id}`))).val();
-        if (!fresh || fresh.stock <= 0) return alert("Stok habis!");
+        if (!fresh || fresh.stock <= 0) {
+            return showToast("Stok habis!", 'error');
+        }
 
         const sellerId = p.sellerId || "admin";
         const price = p.price;
@@ -1570,6 +1694,8 @@
         await update(ref(db, `products/${id}`), { stock: fresh.stock - 1 });
         
         const orderRef = push(ref(db, "orders"));
+        const orderId = orderRef.key;
+        
         await set(orderRef, {
             userId: user.uid,
             username: document.getElementById('user-name-display').innerText,
@@ -1581,7 +1707,7 @@
             createdAt: Date.now()
         });
 
-        await showPaymentModal(orderRef.key, price, sellerAmounts);
+        await generatePaymentQR(orderId, price, sellerAmounts);
         closeModal('modal-detail');
     };
 
@@ -1591,6 +1717,8 @@
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`;
         
         const paymentId = push(ref(db, "payments")).key;
+        currentPaymentId = paymentId;
+        currentOrderId = orderId;
         
         await set(ref(db, `payments/${paymentId}`), {
             orderId,
@@ -1606,23 +1734,27 @@
             createdAt: Date.now()
         });
         
-        return { paymentId, qrUrl };
-    };
-
-    window.showPaymentModal = async (orderId, amount, sellers) => {
-        const { qrUrl } = await generatePaymentQR(orderId, amount, sellers);
-        
         document.getElementById('qr-image').src = qrUrl;
-        document.getElementById('payment-amount').innerText = 'Rp ' + amount.toLocaleString();
+        document.getElementById('payment-amount').innerText = 'Rp ' + amount.toLocaleString('id-ID');
         
         const expiryTime = Date.now() + 30 * 60 * 1000;
         const expiryDate = new Date(expiryTime);
-        document.getElementById('payment-expiry').innerText = `Berlaku sampai ${expiryDate.toLocaleTimeString()}`;
+        document.getElementById('payment-expiry').innerText = `Berlaku sampai ${expiryDate.toLocaleTimeString('id-ID')}`;
         
         document.getElementById('modal-payment').classList.remove('hidden');
         
-        setTimeout(() => {
-            checkPayment(paymentId);
+        // Auto check payment every 5 seconds
+        const checkInterval = setInterval(async () => {
+            const payment = await checkPayment(paymentId);
+            if (payment && payment.status === "paid") {
+                clearInterval(checkInterval);
+                closeModal('modal-payment');
+                showToast("Pembayaran berhasil! Pesanan sedang diproses.", 'success');
+            } else if (payment && payment.status === "expired") {
+                clearInterval(checkInterval);
+                showToast("Waktu pembayaran habis. Silahkan checkout ulang.", 'error');
+                closeModal('modal-payment');
+            }
         }, 5000);
     };
 
@@ -1639,22 +1771,34 @@
         return payment;
     };
 
-    window.processPaidPayment = async (paymentId) => {
-        const payment = (await get(ref(db, `payments/${paymentId}`))).val();
+    // ==================== CONFIRM PAYMENT (UNTUK TESTING REAL) ====================
+    window.confirmPayment = async () => {
+        if (!currentPaymentId) {
+            return showToast("Tidak ada pembayaran yang sedang diproses!", 'error');
+        }
         
-        if (payment.status !== "pending") return;
+        const payment = (await get(ref(db, `payments/${currentPaymentId}`))).val();
         
-        await update(ref(db, `payments/${paymentId}`), {
+        if (!payment) {
+            return showToast("Payment tidak ditemukan!", 'error');
+        }
+        
+        if (payment.status !== "pending") {
+            return showToast("Payment sudah diproses atau expired!", 'error');
+        }
+        
+        await update(ref(db, `payments/${currentPaymentId}`), {
             status: "paid",
             paidAt: Date.now()
         });
         
         await update(ref(db, `orders/${payment.orderId}`), {
             status: "Diproses",
-            paymentId: paymentId,
+            paymentId: currentPaymentId,
             paidAt: Date.now()
         });
         
+        // Update saldo seller
         for (const [sellerId, amount] of Object.entries(payment.sellers)) {
             if (sellerId !== "platform") {
                 const sellerRef = ref(db, `sellers/${sellerId}`);
@@ -1668,7 +1812,8 @@
             }
         }
         
-        alert("Pembayaran berhasil diproses!");
+        showToast("Pembayaran berhasil dikonfirmasi!", 'success');
+        closeModal('modal-payment');
     };
 
     // ==================== ADMIN ORDER LISTENER ====================
@@ -1693,14 +1838,14 @@
                     </div>
                     <p class="text-gray-400 text-[8px]">${o.email}</p>
                     <p class="my-2">${items}</p>
-                    <p class="text-blue-400 font-bold">Rp ${total.toLocaleString()}</p>
-                    <p class="text-gray-500 text-[8px]">${new Date(o.createdAt).toLocaleString()}</p>
+                    <p class="text-blue-400 font-bold">Rp ${total.toLocaleString('id-ID')}</p>
+                    <p class="text-gray-500 text-[8px]">${new Date(o.createdAt).toLocaleString('id-ID')}</p>
                     ${o.rejectReason ? `<p class="text-red-400 mt-1">Alasan: ${o.rejectReason}</p>` : ''}
                     
                     ${o.paymentId ? `
                     <div class="mt-2 p-2 bg-slate-800 rounded-lg">
                         <p class="text-[8px] text-gray-400">Payment ID: ${o.paymentId}</p>
-                        ${o.paidAt ? `<p class="text-[8px] text-green-400">Lunas: ${new Date(o.paidAt).toLocaleString()}</p>` : ''}
+                        ${o.paidAt ? `<p class="text-[8px] text-green-400">Lunas: ${new Date(o.paidAt).toLocaleString('id-ID')}</p>` : ''}
                     </div>` : ''}
                     
                     <div class="flex gap-2 mt-3">
@@ -1736,16 +1881,16 @@
 ========================
 Nama   : ${o.username}
 Email  : ${o.email}
-Tanggal: ${new Date(o.createdAt).toLocaleString()}
+Tanggal: ${new Date(o.createdAt).toLocaleString('id-ID')}
 
 Detail Pesanan:
 ${items.map(i=>`- ${i.name}
   Qty   : ${i.qty}
-  Harga : Rp ${i.price.toLocaleString()}
-  Subtotal : Rp ${(i.price*i.qty).toLocaleString()}
+  Harga : Rp ${i.price.toLocaleString('id-ID')}
+  Subtotal : Rp ${(i.price*i.qty).toLocaleString('id-ID')}
 `).join("\n")}
 
-TOTAL : Rp ${total.toLocaleString()}
+TOTAL : Rp ${total.toLocaleString('id-ID')}
 Status: ${o.status}
 Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
 ========================`;
@@ -1753,7 +1898,7 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
                     cont.innerHTML += `
                     <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 text-[10px] animate-fade">
                         <div class="flex justify-between mb-2">
-                            <span class="text-gray-500">${new Date(o.createdAt).toLocaleDateString()}</span>
+                            <span class="text-gray-500">${new Date(o.createdAt).toLocaleDateString('id-ID')}</span>
                             <span class="font-bold ${
                                 o.status === 'Selesai' ? 'text-green-500' :
                                 o.status === 'Ditolak' ? 'text-red-500' :
@@ -1765,10 +1910,10 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
                         
                         ${o.paidAt ? `
                         <div class="bg-green-600/20 text-green-400 p-2 rounded-lg mb-2 text-[8px]">
-                            <i class="fas fa-check-circle mr-1"></i> Pembayaran lunas ${new Date(o.paidAt).toLocaleString()}
+                            <i class="fas fa-check-circle mr-1"></i> Pembayaran lunas ${new Date(o.paidAt).toLocaleString('id-ID')}
                         </div>` : ''}
                         
-                        <p class="text-gray-400 text-[9px] mb-2">Total: Rp ${total.toLocaleString()}</p>
+                        <p class="text-gray-400 text-[9px] mb-2">Total: Rp ${total.toLocaleString('id-ID')}</p>
 
                         <div class="flex gap-2">
                             <button onclick="copyInvoice(\`${detailText}\`)"
@@ -1785,6 +1930,10 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
                     </div>`;
                 }
             });
+            
+            if (cont.innerHTML === "") {
+                cont.innerHTML = '<p class="text-center text-gray-500 py-4">Belum ada transaksi</p>';
+            }
         });
     }
 
@@ -1799,7 +1948,9 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
         const text = document.getElementById('review-text').value;
         const user = auth.currentUser;
 
-        if(!text) return alert("Ulasan tidak boleh kosong!");
+        if(!text) {
+            return showToast("Ulasan tidak boleh kosong!", 'error');
+        }
 
         await push(ref(db, `products/${pid}/reviews`), {
             user: document.getElementById('user-name-display').innerText,
@@ -1812,60 +1963,128 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
         await update(ref(db, `orders/${oid}`), { isRated: true });
 
         closeModal('modal-review');
-        alert("Terima kasih atas ulasannya!");
+        showToast("Terima kasih atas ulasannya!", 'success');
+    };
+
+    // ==================== SELLER PRODUCTS VIEW ====================
+    window.viewSellerProducts = async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        const productsSnap = await get(ref(db, 'products'));
+        const list = document.getElementById('seller-products-list');
+        list.innerHTML = "";
+        
+                productsSnap.forEach(child => {
+            const p = child.val();
+            if (p.sellerId === user.uid) {
+                list.innerHTML += `
+                <div class="glass p-4 rounded-2xl border border-slate-700">
+                    <div class="flex gap-3">
+                        <img src="${p.images?.[0] || 'https://via.placeholder.com/100'}" class="w-16 h-16 object-contain bg-slate-800 rounded-lg">
+                        <div class="flex-1">
+                            <p class="font-bold">${p.name}</p>
+                            <p class="text-blue-400 text-sm">Rp ${p.price.toLocaleString('id-ID')}</p>
+                            <p class="text-[10px] text-gray-400">Stok: ${p.stock || 0}</p>
+                            <p class="text-[8px] text-gray-500 mt-1">Terjual: ${p.sold || 0}</p>
+                            <div class="flex gap-2 mt-2">
+                                <button onclick="editProductFull('${child.key}')" class="text-[8px] bg-yellow-600/20 text-yellow-400 px-2 py-1 rounded">EDIT</button>
+                                <button onclick="deleteProduct('${child.key}')" class="text-[8px] bg-red-600/20 text-red-400 px-2 py-1 rounded">HAPUS</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+        });
+        
+        if (list.innerHTML === "") {
+            list.innerHTML = '<p class="text-center text-gray-400 py-4">Belum ada produk</p>';
+        }
+        
+        document.getElementById('modal-seller-products').classList.remove('hidden');
     };
 
     // ==================== UTILITY FUNCTIONS ====================
     window.updateStat = async (id, stat) => {
         await update(ref(db, `orders/${id}`), { status: stat });
+        showToast(`Status order diubah menjadi ${stat}`, 'success');
     };
 
     window.rejectOrder = async (id) => {
         const reason = prompt("Alasan penolakan:");
         if (!reason) return;
+        
         const o = (await get(ref(db, `orders/${id}`))).val();
+        
+        // Kembalikan stok
         for (const pid in o.items) {
             const p = (await get(ref(db, `products/${pid}`))).val();
-            await update(ref(db, `products/${pid}`), { stock: (p.stock || 0) + o.items[pid].qty });
+            await update(ref(db, `products/${pid}`), { 
+                stock: (p.stock || 0) + o.items[pid].qty 
+            });
         }
-        await update(ref(db, `orders/${id}`), { status: "Ditolak", rejectReason: reason });
+        
+        await update(ref(db, `orders/${id}`), { 
+            status: "Ditolak", 
+            rejectReason: reason 
+        });
+        
+        showToast("Order ditolak", 'success');
     };
 
     window.delOrder = async (id) => {
-        if (confirm("Hapus permanen?")) await remove(ref(db, `orders/${id}`));
+        showConfirm("Hapus permanen order ini?", async () => {
+            await remove(ref(db, `orders/${id}`));
+            showToast("Order dihapus", 'success');
+        });
     };
 
     window.deleteProduct = async (id) => {
-        if (confirm("Hapus produk ini?")) await remove(ref(db, `products/${id}`));
+        showConfirm("Hapus produk ini?", async () => {
+            await remove(ref(db, `products/${id}`));
+            showToast("Produk dihapus", 'success');
+        });
     };
 
     window.changeUsername = async () => {
         const n = prompt("Username baru:");
-        if (n) await update(ref(db, `users/${auth.currentUser.uid}`), { username: n });
-    };
-
-    window.changePasswordCustom = async () => {
-        const p = prompt("Password baru:");
-        if (p) {
-            try { await updatePassword(auth.currentUser, p); alert("Password diganti!"); }
-            catch (e) { alert("Login ulang diperlukan."); }
+        if (n && n.length >= 3) {
+            await update(ref(db, `users/${auth.currentUser.uid}`), { username: n });
+            showToast("Username diganti!", 'success');
+        } else {
+            showToast("Username minimal 3 karakter", 'error');
         }
     };
 
-    window.signOutUser = () => signOut(auth);
+    window.changePasswordCustom = async () => {
+        const p = prompt("Password baru (min 6 karakter):");
+        if (p && p.length >= 6) {
+            try { 
+                await updatePassword(auth.currentUser, p); 
+                showToast("Password diganti!", 'success');
+            }
+            catch (e) { 
+                showToast("Login ulang diperlukan", 'error');
+            }
+        } else {
+            showToast("Password minimal 6 karakter", 'error');
+        }
+    };
+
+    window.signOutUser = () => {
+        signOut(auth);
+        showToast("Berhasil logout", 'success');
+    };
 
     window.openVisiModal = () => {
         document.getElementById('modal-visi').classList.remove('hidden');
-        document.querySelectorAll('.visi-item').forEach((it, i) => {
-            it.style.animation = `fadeUp 0.5s ease forwards ${i * 0.2}s`;
-        });
     };
 
     window.copyInvoice = (text) => {
         navigator.clipboard.writeText(text).then(()=>{
-            alert("Detail transaksi berhasil dicopy!");
+            showToast("Detail transaksi berhasil dicopy!", 'success');
         }).catch(()=>{
-            alert("Gagal copy!");
+            showToast("Gagal copy!", 'error');
         });
     };
 
@@ -1966,7 +2185,9 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
         const sellerSelect = document.getElementById('product-seller');
         const sellerId = sellerSelect ? sellerSelect.value : null;
 
-        if (!name || !price || urls.length === 0) return alert("Lengkapi data produk!");
+        if (!name || !price || urls.length === 0) {
+            return showToast("Lengkapi data produk!", 'error');
+        }
 
         btn.disabled = true;
         btn.innerHTML = `<i class="fa fa-spinner animate-spin"></i> Saving...`;
@@ -1983,10 +2204,10 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
 
         if (window.currentEditId) {
             await update(ref(db, `products/${window.currentEditId}`), data);
-            alert("Produk diupdate!");
+            showToast("Produk diupdate!", 'success');
         } else {
             await push(ref(db, "products"), { ...data, createdAt: Date.now() });
-            alert("Produk ditambahkan!");
+            showToast("Produk ditambahkan!", 'success');
         }
 
         cancelEdit();
@@ -1997,6 +2218,7 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
     window.editProductFull = async (id) => {
         const p = globalProducts.find(x => x.id === id);
         if (!p) return;
+        
         window.currentEditId = id;
         document.getElementById('p-name').value = p.name;
         document.getElementById('p-price').value = p.price;
@@ -2027,7 +2249,7 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
         document.getElementById("p-stock").value = "";
         document.getElementById("image-input-container").innerHTML = "";
         createImageInput();
-                document.getElementById('edit-indicator').classList.add('hidden');
+        document.getElementById('edit-indicator').classList.add('hidden');
         document.getElementById('cancel-edit-btn').classList.add('hidden');
         document.getElementById('btn-save-prod').innerText = "Upload Produk";
     };
@@ -2056,8 +2278,11 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
 
         const wrap = document.createElement("div");
         wrap.className = "flex gap-2 items-center animate-fade";
+        
         const input = document.createElement("input");
-        input.type = "text"; input.placeholder = "URL Gambar..."; input.value = val;
+        input.type = "text"; 
+        input.placeholder = "URL Gambar..."; 
+        input.value = val;
         input.className = "flex-1 p-2 bg-slate-800 border border-slate-700 rounded-lg text-[10px]";
         
         const prev = document.createElement("img");
@@ -2067,16 +2292,31 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
         input.onchange = async () => {
             const url = input.value.trim();
             if (!url) return;
-            const img = new Image();
-            img.onload = () => {
-                prev.src = url + "?t=" + Date.now();
-                prev.classList.remove("hidden");
-                const inputs = cont.querySelectorAll("input");
-                if (input === inputs[inputs.length - 1]) createImageInput();
-            };
-            img.onerror = () => { alert("URL Gambar tidak valid!"); input.value = ""; prev.classList.add("hidden"); };
-            img.src = url;
+            
+            // Validasi URL gambar dengan CORS proxy
+            try {
+                const img = new Image();
+                img.onload = () => {
+                    prev.src = url;
+                    prev.classList.remove("hidden");
+                    
+                    // Cek apakah ini input terakhir, kalau iya tambah input baru
+                    const inputs = cont.querySelectorAll("input");
+                    if (input === inputs[inputs.length - 1] && inputs.length < MAX_IMAGES) {
+                        createImageInput();
+                    }
+                };
+                img.onerror = () => { 
+                    showToast("URL Gambar tidak valid atau tidak bisa diakses!", 'error');
+                    input.value = ""; 
+                    prev.classList.add("hidden");
+                };
+                img.src = url;
+            } catch (e) {
+                showToast("Error validasi gambar", 'error');
+            }
         };
+        
         wrap.append(input, prev);
         cont.appendChild(wrap);
     }
@@ -2086,7 +2326,14 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
     }
 
     // ==================== INIT ====================
-    createImageInput();
+    // Set default
+    setAuthMode('login');
+    setRole('buyer');
+    
+    // Create first image input
+    setTimeout(() => {
+        createImageInput();
+    }, 1000);
 
     // =========================
     // SMART LOADING SYSTEM
@@ -2123,7 +2370,9 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
         tryFinishLoading();
     }, 2500);
 
-    onValue(ref(db, "products"), () => {
+    // Tunggu Firebase siap
+    const productsRef = ref(db, "products");
+    onValue(productsRef, () => {
         firebaseReady = true;
         tryFinishLoading();
     }, { onlyOnce: true });
@@ -2144,9 +2393,112 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
         }
     }
 
-    // Set default auth mode
-    setAuthMode('login');
-    setRole('buyer');
+    // Sample products for testing (opsional - bisa dihapus)
+    window.addSampleProducts = async () => {
+        const products = [
+            {
+                name: "iPhone 15 Pro Max",
+                price: 25000000,
+                description: "iPhone 15 Pro Max 256GB - Titanium Natural",
+                stock: 10,
+                images: ["https://fdn2.gsmarena.com/vv/pics/apple/apple-iphone-15-pro-max-1.jpg"],
+                sellerId: "admin",
+                createdAt: Date.now(),
+                sold: 0
+            },
+            {
+                name: "Samsung Galaxy S24 Ultra",
+                price: 22000000,
+                description: "Samsung Galaxy S24 Ultra 512GB - Titanium Gray",
+                stock: 8,
+                images: ["https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-s24-ultra-5g-1.jpg"],
+                sellerId: "admin",
+                createdAt: Date.now(),
+                sold: 0
+            },
+            {
+                name: "MacBook Pro M3",
+                price: 35000000,
+                description: "MacBook Pro 14-inch M3 Pro 16GB/512GB - Space Gray",
+                stock: 5,
+                images: ["https://fdn2.gsmarena.com/vv/pics/apple/apple-macbook-pro-14-2023-1.jpg"],
+                sellerId: "admin",
+                createdAt: Date.now(),
+                sold: 0
+            },
+            {
+                name: "PlayStation 5",
+                price: 8000000,
+                description: "PS5 Digital Edition + 1 Controller DualSense",
+                stock: 15,
+                images: ["https://fdn2.gsmarena.com/vv/pics/sony/sony-playstation-5-1.jpg"],
+                sellerId: "admin",
+                createdAt: Date.now(),
+                sold: 0
+            },
+            {
+                name: "Nike Air Max 270",
+                price: 1800000,
+                description: "Nike Air Max 270 Original - Hitam Putih",
+                stock: 20,
+                images: ["https://static.nike.com/a/images/t_PDP_864_v1/f_auto,b_rgb:f5f5f5/qw6x1m8g4vj9k8l7m6n5/air-max-270-sepatu.png"],
+                sellerId: "admin",
+                createdAt: Date.now(),
+                sold: 0
+            },
+            {
+                name: "Adidas Ultraboost 22",
+                price: 2100000,
+                description: "Adidas Ultraboost 22 - Cloud White / Core Black",
+                stock: 12,
+                images: ["https://assets.adidas.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/abc123/ultraboost-22-shoes.jpg"],
+                sellerId: "admin",
+                createdAt: Date.now(),
+                sold: 0
+            }
+        ];
+        
+        for (const p of products) {
+            await push(ref(db, "products"), p);
+        }
+        showToast("Sample products added!", 'success');
+    };
+
+    // Untuk testing, tambahkan sample products (jalankan sekali)
+    // setTimeout(() => {
+    //     if (confirm("Tambah sample products?")) {
+    //         addSampleProducts();
+    //     }
+    // }, 3000);
+
+    // Fungsi untuk ngecek apakah user admin (untuk FAB)
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const userSnap = await get(ref(db, `users/${user.uid}`));
+            const userData = userSnap.val();
+            
+            if (userData?.role === 'admin') {
+                document.getElementById('fab-admin').classList.remove('hidden');
+                document.getElementById('fab-seller').classList.add('hidden');
+            } else {
+                const sellerSnap = await get(ref(db, `sellers/${user.uid}`));
+                const sellerData = sellerSnap.val();
+                if (sellerData && sellerData.status === 'active') {
+                    document.getElementById('fab-seller').classList.remove('hidden');
+                    document.getElementById('fab-admin').classList.add('hidden');
+                } else {
+                    document.getElementById('fab-seller').classList.add('hidden');
+                    document.getElementById('fab-admin').classList.add('hidden');
+                }
+            }
+        }
+    });
 </script>
+
+<!-- FOOTER (OPSIONAL) -->
+<div class="text-center text-[8px] text-gray-600 py-4">
+    © 2026 XREZZKY STORE - Marketplace Premium. All rights reserved.
+</div>
+
 </body>
-                    </html>
+            </html>

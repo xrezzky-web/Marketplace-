@@ -87,6 +87,17 @@
             border-radius: 10px;
             display: inline-block;
         }
+        
+        /* PRIVACY BADGE */
+        .privacy-badge {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 8px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body class="pb-24">
@@ -154,6 +165,19 @@
     </div>
 </div>
 
+<!-- FORGOT PASSWORD MODAL -->
+<div id="modal-forgot" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/95 animate-fade">
+    <div class="glass p-6 rounded-3xl max-w-md w-full">
+        <h3 class="text-xl font-bold mb-4 text-blue-400">Lupa Password</h3>
+        <p class="text-xs text-gray-400 mb-4">Masukkan email Anda, kami akan kirim link reset password</p>
+        
+        <input type="email" id="forgot-email" placeholder="Email Anda" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none mb-4">
+        
+        <button onclick="sendResetPassword()" class="w-full bg-blue-600 py-4 rounded-xl font-bold hover:bg-blue-700 transition">KIRIM LINK RESET</button>
+        <button onclick="closeModal('modal-forgot')" class="w-full mt-2 text-gray-500 text-xs">Tutup</button>
+    </div>
+</div>
+
 <!-- LOADER -->
 <div id="loader" class="fixed inset-0 flex items-center justify-center bg-slate-900 z-[999]">
     <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-blue-500"></div>
@@ -171,7 +195,7 @@
 <!-- AUTH PAGE -->
 <section id="page-auth" class="hidden min-h-screen flex items-center justify-center p-6 animate-fade">
     <div class="glass p-8 rounded-3xl w-full max-w-md">
-        <h2 id="auth-title" class="text-3xl font-bold mb-6 text-center text-blue-500">XREZZKY</h2>
+        <h2 id="auth-title" class="text-3xl font-bold mb-6 text-center text-blue-500">XREZZKY STORE</h2>
         
         <!-- PILIHAN LOGIN/REGISTER -->
         <div id="auth-choice" class="text-center mb-6">
@@ -186,6 +210,10 @@
             <input type="email" id="login-email" placeholder="Email" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
             <input type="password" id="login-pass" placeholder="Password" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
             <button onclick="handleLogin()" class="w-full bg-blue-600 py-4 rounded-xl font-bold hover:bg-blue-700 transition">LOGIN</button>
+            
+            <div class="flex justify-between items-center text-xs mt-2">
+                <p onclick="showForgotModal()" class="text-blue-400 cursor-pointer italic">Lupa Password?</p>
+            </div>
         </div>
         
         <!-- FORM REGISTER (HIDDEN DEFAULT) -->
@@ -199,30 +227,51 @@
             <!-- FORM DASAR (UNTUK SEMUA) -->
             <input type="text" id="reg-username" placeholder="Username" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
             <input type="email" id="reg-email" placeholder="Email" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
-            <input type="password" id="reg-pass" placeholder="Password" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
-            <input type="text" id="reg-wa" placeholder="Nomor WhatsApp (contoh: 628123456789)" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
+            <input type="password" id="reg-pass" placeholder="Password (min 6 karakter)" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
             
             <!-- FORM KHUSUS SELLER (HIDDEN DEFAULT) -->
             <div id="seller-fields" class="hidden space-y-3 border-t border-slate-700 pt-4 mt-2">
                 <p class="text-xs text-yellow-400 font-bold mb-2">DATA SELLER (WAJIB DIISI)</p>
                 
                 <input type="text" id="seller-id-card" placeholder="Nomor KTP (16 digit)" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none text-sm">
-                <input type="text" id="seller-family-card" placeholder="Nomor KK" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none text-sm">
                 <input type="text" id="seller-store-name" placeholder="Nama Toko" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none text-sm">
                 
+                <!-- NOMOR WAJIB -->
+                <p class="text-xs text-blue-400 font-bold mt-2 mb-1">KONTAK (WAJIB)</p>
+                <input type="text" id="seller-wa" placeholder="Nomor WhatsApp (contoh: 628123456789)" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none text-sm">
+                
+                <!-- E-WALLET Wajib -->
+                <p class="text-xs text-green-400 font-bold mt-2 mb-1">E-WALLET (WAJIB - Untuk Pembayaran)</p>
+                <select id="seller-ewallet" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none text-sm mb-2">
+                    <option value="DANA">DANA</option>
+                    <option value="OVO">OVO</option>
+                    <option value="GOPAY">GoPay</option>
+                    <option value="SHOPEEPAY">ShopeePay</option>
+                    <option value="LINKAJA">LinkAja</option>
+                </select>
+                <input type="text" id="seller-ewallet-number" placeholder="Nomor E-Wallet" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none text-sm mb-2">
+                <input type="text" id="seller-ewallet-name" placeholder="Nama Pemilik E-Wallet" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none text-sm">
+                
+                <!-- REKENING OPSIONAL -->
+                <p class="text-xs text-gray-400 font-bold mt-3 mb-1">REKENING BANK (OPSIONAL)</p>
                 <div class="grid grid-cols-3 gap-2">
                     <select id="seller-bank" class="p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none text-sm">
+                        <option value="">Pilih Bank</option>
                         <option value="BCA">BCA</option>
                         <option value="MANDIRI">Mandiri</option>
                         <option value="BRI">BRI</option>
                         <option value="BNI">BNI</option>
-                        <option value="DANA">DANA</option>
-                        <option value="OVO">OVO</option>
-                        <option value="GOPAY">GoPay</option>
+                        <option value="CIMB">CIMB</option>
                     </select>
                     <input type="text" id="seller-account-number" placeholder="No Rekening" class="col-span-2 p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none text-sm">
                 </div>
-                <input type="text" id="seller-account-name" placeholder="Nama Pemilik Rekening" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none text-sm">
+                <input type="text" id="seller-account-name" placeholder="Nama Pemilik Rekening (opsional)" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none text-sm">
+                
+                <!-- NOMOR HP OPSIONAL -->
+                <p class="text-xs text-gray-400 font-bold mt-3 mb-1">NOMOR HP (OPSIONAL)</p>
+                <input type="text" id="seller-phone" placeholder="Nomor HP (contoh: 08123456789)" class="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 outline-none text-sm">
+                
+                <p class="text-[8px] text-red-400 mt-2"><i class="fas fa-lock mr-1"></i> Data pribadi Anda AMAN dan hanya bisa dilihat oleh ADMIN.</p>
             </div>
             
             <!-- CEKLIS PERSETUJUAN -->
@@ -230,21 +279,14 @@
                 <input type="checkbox" id="agree-terms" class="mt-1 accent-blue-600">
                 <label for="agree-terms" class="text-[10px] text-gray-400">
                     Saya menyetujui <span class="text-blue-400 cursor-pointer" onclick="showTerms()">Syarat & Ketentuan</span> dan 
-                    <span class="text-blue-400 cursor-pointer" onclick="showPrivacy()">Kebijakan Privasi</span>. Data saya akan diproses sesuai ketentuan yang berlaku.
-                </label>
-            </div>
-            
-            <div class="flex items-start gap-2 mb-4">
-                <input type="checkbox" id="agree-anti-scam" class="mt-1 accent-blue-600">
-                <label for="agree-anti-scam" class="text-[10px] text-gray-400">
-                    Saya setuju untuk tidak melakukan penipuan, spam, atau tindakan merugikan lainnya. Pelanggaran akan mengakibatkan pemblokiran akun permanen.
+                    <span class="text-blue-400 cursor-pointer" onclick="showPrivacy()">Kebijakan Privasi</span>.
                 </label>
             </div>
             
             <button onclick="handleRegister()" class="w-full bg-green-600 py-4 rounded-xl font-bold hover:bg-green-700 transition">DAFTAR SEKARANG</button>
         </div>
         
-        <!-- LINK GANTI MODE (UNTUK LOGIN) -->
+        <!-- LINK GANTI MODE -->
         <p onclick="switchToRegister()" id="switch-to-register" class="text-center text-xs text-blue-400 cursor-pointer italic mt-4">Belum punya akun? Daftar</p>
         <p onclick="switchToLogin()" id="switch-to-login" class="hidden text-center text-xs text-blue-400 cursor-pointer italic mt-4">Sudah punya akun? Login</p>
     </div>
@@ -262,7 +304,7 @@
             <p>5. Komisi platform sebesar 10% dari setiap transaksi.</p>
             <p>6. Seller dilarang melakukan tindakan penipuan, spam, atau merugikan pembeli.</p>
             <p>7. Pelanggaran akan mengakibatkan pemblokiran akun permanen dan saldo hangus.</p>
-            <p>8. XREZZKY STORE tidak bertanggung jawab atas sengketa antara seller dan pembeli di luar platform.</p>
+            <p>8. Data pribadi seller (KTP, WA, E-WALLET) hanya dapat diakses oleh ADMIN.</p>
         </div>
         <button onclick="closeModal('modal-terms')" class="w-full mt-4 bg-blue-600 py-3 rounded-xl font-bold">TUTUP</button>
     </div>
@@ -273,15 +315,15 @@
     <div class="glass p-6 rounded-3xl max-w-lg w-full">
         <h3 class="text-xl font-bold mb-4 text-blue-400">Kebijakan Privasi</h3>
         <div class="text-xs text-gray-300 space-y-3">
-            <p>Data pribadi Anda (KTP, KK, Rekening) hanya digunakan untuk verifikasi dan keperluan transaksi.</p>
+            <p>Data pribadi Anda (KTP, WA, E-WALLET) hanya digunakan untuk verifikasi dan keperluan transaksi.</p>
             <p>Kami tidak akan membagikan data Anda kepada pihak ketiga tanpa persetujuan.</p>
             <p>Data disimpan dengan aman di database terenkripsi.</p>
+            <p>Hanya ADMIN yang memiliki akses ke data sensitif seller.</p>
             <p>Anda dapat meminta penghapusan data dengan menghubungi admin.</p>
         </div>
         <button onclick="closeModal('modal-privacy')" class="w-full mt-4 bg-blue-600 py-3 rounded-xl font-bold">TUTUP</button>
     </div>
 </div>
-</section>
 
 <!-- MARKETPLACE PAGE -->
 <section id="page-marketplace" class="hidden min-h-screen p-4 animate-fade">
@@ -349,40 +391,6 @@
         <button onclick="requestWithdraw()" class="w-full bg-blue-600 py-3 rounded-xl text-sm font-bold mb-2">
             TARIK SALDO
         </button>
-        <button onclick="showMyProducts()" class="w-full bg-green-600/20 text-green-400 py-3 rounded-xl text-sm font-bold">
-            LIHAT PRODUK SAYA
-        </button>
-    </div>
-    
-    <!-- SELLER VERIFICATION FORM (AKAN MUNCUL JIKA USER BELUM JADI SELLER) -->
-    <div id="seller-verification-form" class="hidden glass p-6 rounded-3xl mt-4">
-        <h3 class="font-bold text-yellow-400 mb-3 flex items-center gap-2">
-            <i class="fas fa-id-card"></i> DAFTAR SELLER
-        </h3>
-        <p class="text-[10px] text-gray-400 mb-4">Isi data berikut untuk menjadi seller (data aman & rahasia)</p>
-        
-        <input type="text" id="seller-id-card" placeholder="Nomor KTP" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
-        <input type="text" id="seller-family-card" placeholder="Nomor KK" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
-        <input type="text" id="seller-store-name" placeholder="Nama Toko" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
-        
-        <div class="grid grid-cols-3 gap-2 mb-4">
-            <select id="seller-bank" class="p-3 bg-slate-800 rounded border border-slate-700 text-sm">
-                <option value="BCA">BCA</option>
-                <option value="MANDIRI">Mandiri</option>
-                <option value="BRI">BRI</option>
-                <option value="BNI">BNI</option>
-                <option value="DANA">DANA</option>
-                <option value="OVO">OVO</option>
-                <option value="GOPAY">GoPay</option>
-            </select>
-            <input type="text" id="seller-account-number" placeholder="No Rekening" class="col-span-2 p-3 bg-slate-800 rounded border border-slate-700 text-sm">
-        </div>
-        <input type="text" id="seller-account-name" placeholder="Nama Pemilik Rekening" class="w-full p-3 mb-4 bg-slate-800 rounded border border-slate-700 text-sm">
-        
-        <button onclick="submitSellerVerification()" class="w-full bg-green-600 py-3 rounded-xl font-bold">
-            KIRIM VERIFIKASI
-        </button>
-        <p class="text-[8px] text-gray-500 text-center mt-3">Data akan diverifikasi admin maksimal 1x24 jam</p>
     </div>
     
     <div class="glass p-6 rounded-3xl mt-6">
@@ -394,16 +402,38 @@
 <!-- ADMIN PAGE -->
 <section id="page-admin" class="hidden min-h-screen p-6 animate-fade">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-blue-500">Admin Panel</h1>
+        <h1 class="text-2xl font-bold text-blue-500">Admin Panel (Owner)</h1>
         <button onclick="showPage('page-marketplace')" class="text-xs bg-slate-700 px-3 py-1.5 rounded-lg">Back</button>
     </div>
+    
+    <!-- STATS CARD -->
+    <div class="grid grid-cols-4 gap-3 mb-6">
+        <div class="glass p-4 rounded-xl">
+            <p class="text-[8px] text-gray-400">Total User</p>
+            <p class="text-2xl font-bold" id="stat-total-users">0</p>
+        </div>
+        <div class="glass p-4 rounded-xl">
+            <p class="text-[8px] text-gray-400">Total Seller</p>
+            <p class="text-2xl font-bold" id="stat-total-sellers">0</p>
+        </div>
+        <div class="glass p-4 rounded-xl">
+            <p class="text-[8px] text-gray-400">Pending Verify</p>
+            <p class="text-2xl font-bold" id="stat-pending-verify">0</p>
+        </div>
+        <div class="glass p-4 rounded-xl">
+            <p class="text-[8px] text-gray-400">Total Order</p>
+            <p class="text-2xl font-bold" id="stat-total-orders">0</p>
+        </div>
+    </div>
+    
     <div class="flex border-b border-slate-800 mb-4 text-[10px] font-bold overflow-x-auto">
-        <button onclick="switchAdminTab('pending')" id="tab-pending" class="flex-1 py-3">KONFIRMASI</button>
+        <button onclick="switchAdminTab('pending')" id="tab-pending" class="flex-1 py-3 tab-active">KONFIRMASI</button>
         <button onclick="switchAdminTab('process')" id="tab-process" class="flex-1 py-3">PROSES</button>
         <button onclick="switchAdminTab('done')" id="tab-done" class="flex-1 py-3">SELESAI</button>
         <button onclick="switchAdminTab('reject')" id="tab-reject" class="flex-1 py-3">DITOLAK</button>
         <button onclick="switchAdminTab('upload')" id="tab-upload" class="flex-1 py-3">STOK/UPLOAD</button>
-        <button onclick="switchAdminTab('sellers')" id="tab-sellers" class="flex-1 py-3">SELLER</button>
+        <button onclick="switchAdminTab('sellers')" id="tab-sellers" class="flex-1 py-3">DATA SELLER</button>
+        <button onclick="switchAdminTab('buyers')" id="tab-buyers" class="flex-1 py-3">DATA BUYER</button>
         <button onclick="switchAdminTab('withdrawals')" id="tab-withdrawals" class="flex-1 py-3">PENARIKAN</button>
         <button onclick="switchAdminTab('payments')" id="tab-payments" class="flex-1 py-3">PAYMENT</button>
     </div>
@@ -413,13 +443,19 @@
     <div id="admin-done" class="admin-tab hidden"></div>
     <div id="admin-reject" class="admin-tab hidden"></div>
     
-    <!-- SELLER VERIFICATION TAB -->
+    <!-- SELLER DATA TAB (PRIVAT - HANYA ADMIN) -->
     <div id="admin-sellers" class="admin-tab hidden">
         <h3 class="font-bold mb-3 text-yellow-400">VERIFIKASI SELLER BARU</h3>
         <div id="seller-verification-list" class="space-y-3 mb-6"></div>
         
-        <h3 class="font-bold mb-3 text-blue-400">DAFTAR SELLER AKTIF</h3>
+        <h3 class="font-bold mb-3 text-blue-400">SEMUA SELLER (DATA PRIVAT)</h3>
         <div id="seller-active-list" class="space-y-3"></div>
+    </div>
+    
+    <!-- BUYER DATA TAB -->
+    <div id="admin-buyers" class="admin-tab hidden">
+        <h3 class="font-bold mb-3 text-green-400">DATA SEMUA BUYER</h3>
+        <div id="buyers-list" class="space-y-3"></div>
     </div>
     
     <!-- WITHDRAWALS TAB -->
@@ -438,10 +474,9 @@
         <div id="edit-indicator" class="hidden bg-yellow-600/20 text-yellow-400 p-3 rounded-xl text-xs font-bold mb-4 text-center">✏️ SEDANG EDIT PRODUK</div>
         <h3 class="font-bold mb-3">Form Produk</h3>
         
-        <!-- SELLER SELECT (HANYA UNTUK ADMIN) -->
         <div id="seller-select-container" class="mb-3">
             <select id="product-seller" class="w-full p-3 bg-slate-800 rounded border border-slate-700 text-sm">
-                <option value="">Pilih Seller (untuk admin)</option>
+                <option value="">Pilih Seller</option>
             </select>
         </div>
         
@@ -462,7 +497,7 @@
 <div id="modal-detail" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 animate-fade">
     <div class="bg-slate-900 w-full max-w-lg rounded-3xl overflow-hidden relative border border-slate-800 max-h-[90vh] overflow-y-auto">
         <div class="relative">
-            <img id="m-img" src="" class="w-full h-64 object-contain bg-slate-900 cursor-pointer">
+                        <img id="m-img" src="" class="w-full h-64 object-contain bg-slate-900 cursor-pointer">
             <div id="m-badge-out" class="absolute top-4 right-4 bg-red-600 text-white text-[10px] font-bold px-3 py-1 rounded-full hidden">STOK HABIS</div>
             <div id="m-seller-badge" class="absolute top-4 left-4 seller-badge hidden">Seller</div>
         </div>
@@ -530,7 +565,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getDatabase, ref, set, get, onValue, push, remove, update, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
@@ -550,48 +585,89 @@
     let globalProducts = [];
     let globalSellers = [];
     let userCart = {};
-    let isLoginMode = true;
     let currentImages = [];
     let currentIndex = 0;
     const MAX_IMAGES = 20;
     const PLATFORM_COMMISSION = 0.1; // 10% untuk platform
 
-    // --- AUTH LOGIC ---
+    // ==================== AUTH UI STATE ====================
+    let currentRole = 'buyer'; // buyer atau seller
+    let currentAuthMode = 'login'; // login atau register
+
+    window.setAuthMode = (mode) => {
+        currentAuthMode = mode;
+        if (mode === 'login') {
+            document.getElementById('login-form').classList.remove('hidden');
+            document.getElementById('register-form').classList.add('hidden');
+            document.getElementById('auth-login-btn').classList.add('bg-blue-600');
+            document.getElementById('auth-login-btn').classList.remove('bg-slate-700');
+            document.getElementById('auth-register-btn').classList.add('bg-slate-700');
+            document.getElementById('auth-register-btn').classList.remove('bg-blue-600');
+            document.getElementById('switch-to-register').classList.remove('hidden');
+            document.getElementById('switch-to-login').classList.add('hidden');
+        } else {
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('register-form').classList.remove('hidden');
+            document.getElementById('auth-login-btn').classList.add('bg-slate-700');
+            document.getElementById('auth-login-btn').classList.remove('bg-blue-600');
+            document.getElementById('auth-register-btn').classList.add('bg-blue-600');
+            document.getElementById('auth-register-btn').classList.remove('bg-slate-700');
+            document.getElementById('switch-to-register').classList.add('hidden');
+            document.getElementById('switch-to-login').classList.remove('hidden');
+        }
+    };
+
+    window.setRole = (role) => {
+        currentRole = role;
+        
+        if (role === 'seller') {
+            document.getElementById('role-seller-btn').classList.add('bg-green-600');
+            document.getElementById('role-seller-btn').classList.remove('bg-slate-700');
+            document.getElementById('role-buyer-btn').classList.add('bg-slate-700');
+            document.getElementById('role-buyer-btn').classList.remove('bg-green-600');
+            document.getElementById('seller-fields').classList.remove('hidden');
+        } else {
+            document.getElementById('role-buyer-btn').classList.add('bg-green-600');
+            document.getElementById('role-buyer-btn').classList.remove('bg-slate-700');
+            document.getElementById('role-seller-btn').classList.add('bg-slate-700');
+            document.getElementById('role-seller-btn').classList.remove('bg-green-600');
+            document.getElementById('seller-fields').classList.add('hidden');
+        }
+    };
+
+    window.switchToRegister = () => {
+        setAuthMode('register');
+    };
+
+    window.switchToLogin = () => {
+        setAuthMode('login');
+    };
+
+    window.showTerms = () => {
+        document.getElementById('modal-terms').classList.remove('hidden');
+    };
+
+    window.showPrivacy = () => {
+        document.getElementById('modal-privacy').classList.remove('hidden');
+    };
+
+    window.showForgotModal = () => {
+        document.getElementById('modal-forgot').classList.remove('hidden');
+    };
+
+    // ==================== AUTH LOGIC ====================
     onAuthStateChanged(auth, async (user) => {
         document.getElementById('loader').classList.add('hidden');
         const profileBox = document.getElementById('profile-content');
 
         if (!user) {
             profileBox.innerHTML = `
-    <div class="glass p-6 rounded-3xl text-center mb-4">
-        <img src="https://ui-avatars.com/api/?name=${username}&background=3b82f6&color=fff" class="w-20 h-20 rounded-full mx-auto border-4 border-blue-500 mb-3">
-        <h2 class="text-xl font-bold">${username}</h2>
-        <p class="text-xs text-gray-400 mb-2">${user.email}</p>
-        <p class="text-xs text-gray-500 mb-4">WA: ${data?.wa || '-'}</p>
-        
-        ${sellerData ? `
-        <div class="bg-green-600/20 text-green-400 py-2 rounded-lg mb-3 text-xs font-bold">
-            <i class="fas fa-store mr-1"></i> SELLER: ${sellerData.storeName}
-        </div>` : ''}
-        
-        ${pendingData ? `
-        <div class="bg-yellow-600/20 text-yellow-400 py-2 rounded-lg mb-3 text-xs font-bold">
-            <i class="fas fa-clock mr-1"></i> VERIFIKASI SELLER PENDING
-        </div>` : ''}
-        
-        <div class="space-y-2">
-            <button onclick="changeUsername()" class="w-full bg-blue-600/20 text-blue-400 py-2 rounded-lg font-bold">Ganti Username</button>
-            <button onclick="changePasswordCustom()" class="w-full bg-green-600/20 text-green-400 py-2 rounded-lg font-bold">Ganti Password</button>
-            <button onclick="signOutUser()" class="w-full bg-red-600/20 text-red-400 py-2 rounded-lg font-bold">Logout</button>
-        </div>
-    </div>
-    <div class="glass p-4 rounded-3xl text-center">
-        <button onclick="openVisiModal()" class="w-full bg-purple-600/20 text-purple-400 py-2 rounded-lg font-bold">Lihat Visi & Misi</button>
-    </div>
-`;
+                <div class="glass p-6 rounded-3xl text-center">
+                    <p class="mb-4">Belum Login</p>
+                    <button onclick="showPage('page-auth')" class="bg-blue-600 px-6 py-2 rounded-xl font-bold">Login / Daftar</button>
+                </div>`;
             document.getElementById('nav-admin').classList.add('hidden');
             document.getElementById('seller-dashboard').classList.add('hidden');
-            document.getElementById('seller-verification-form').classList.add('hidden');
             showPage('page-marketplace');
             listenProducts();
             return;
@@ -610,49 +686,55 @@
         document.getElementById('user-name-display').innerText = username;
         document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${username}&background=3b82f6&color=fff`;
 
-// Cek role user
-if (data?.role === 'admin') {
-    document.getElementById('nav-admin').classList.remove('hidden');
-    listenAdminOrders();
-    loadSellersForSelect();
-} else {
-    document.getElementById('nav-admin').classList.add('hidden');
-}
+        // Cek role user
+        if (data?.role === 'admin') {
+            document.getElementById('nav-admin').classList.remove('hidden');
+            listenAdminOrders();
+            loadSellersForSelect();
+            loadAdminStats();
+        } else {
+            document.getElementById('nav-admin').classList.add('hidden');
+        }
 
-// Cek apakah user adalah seller (status active)
-const sellerSnap = await get(ref(db, `sellers/${user.uid}`));
-const sellerData = sellerSnap.val();
+        // Cek apakah user adalah seller (status active)
+        const sellerSnap = await get(ref(db, `sellers/${user.uid}`));
+        const sellerData = sellerSnap.val();
 
-// Cek apakah user pending seller
-const pendingSnap = await get(ref(db, `verificationRequests/${user.uid}`));
-const pendingData = pendingSnap.val();
+        // Cek apakah user pending seller
+        const pendingSnap = await get(ref(db, `verificationRequests/${user.uid}`));
+        const pendingData = pendingSnap.val();
 
         profileBox.innerHTML = `
             <div class="glass p-6 rounded-3xl text-center mb-4">
                 <img src="https://ui-avatars.com/api/?name=${username}&background=3b82f6&color=fff" class="w-20 h-20 rounded-full mx-auto border-4 border-blue-500 mb-3">
                 <h2 class="text-xl font-bold">${username}</h2>
                 <p class="text-xs text-gray-400 mb-4">${user.email}</p>
+                
                 ${sellerData ? `
                 <div class="bg-green-600/20 text-green-400 py-2 rounded-lg mb-3 text-xs font-bold">
                     <i class="fas fa-store mr-1"></i> SELLER: ${sellerData.storeName}
                 </div>` : ''}
+                
+                ${pendingData ? `
+                <div class="bg-yellow-600/20 text-yellow-400 py-2 rounded-lg mb-3 text-xs font-bold">
+                    <i class="fas fa-clock mr-1"></i> VERIFIKASI SELLER PENDING
+                </div>` : ''}
+                
                 <div class="space-y-2">
                     <button onclick="changeUsername()" class="w-full bg-blue-600/20 text-blue-400 py-2 rounded-lg font-bold">Ganti Username</button>
                     <button onclick="changePasswordCustom()" class="w-full bg-green-600/20 text-green-400 py-2 rounded-lg font-bold">Ganti Password</button>
                     <button onclick="signOutUser()" class="w-full bg-red-600/20 text-red-400 py-2 rounded-lg font-bold">Logout</button>
                 </div>
             </div>
-                        <div class="glass p-4 rounded-3xl text-center">
+            <div class="glass p-4 rounded-3xl text-center">
                 <button onclick="openVisiModal()" class="w-full bg-purple-600/20 text-purple-400 py-2 rounded-lg font-bold">Lihat Visi & Misi</button>
             </div>
         `;
 
-        // Tampilkan seller dashboard atau form verifikasi
-        if (sellerData) {
+        // Tampilkan seller dashboard jika seller aktif
+        if (sellerData && sellerData.status === 'active') {
             document.getElementById('seller-dashboard').classList.remove('hidden');
-            document.getElementById('seller-verification-form').classList.add('hidden');
             
-            // Update dashboard seller
             document.getElementById('seller-balance').innerText = 'Rp ' + (sellerData.balance || 0).toLocaleString();
             document.getElementById('seller-pending').innerText = 'Rp ' + (sellerData.pendingWithdraw || 0).toLocaleString();
             document.getElementById('seller-total-sales').innerText = sellerData.totalSales || 0;
@@ -666,70 +748,162 @@ const pendingData = pendingSnap.val();
         listenUserHistory(user.uid);
     });
 
-    window.handleAuth = async () => {
-        const email = document.getElementById('auth-email').value;
-        const pass = document.getElementById('auth-pass').value;
-        try {
-            if (isLoginMode) {
-                await signInWithEmailAndPassword(auth, email, pass);
-            } else {
-                const res = await createUserWithEmailAndPassword(auth, email, pass);
-                await set(ref(db, `users/${res.user.uid}`), {
-                    username: document.getElementById('auth-user').value || email.split('@')[0],
-                    email: email,
-                    role: email === 'xrezzkystore.id@gmail.com' ? "admin" : "user",
-                    banned: false,
-                    createdAt: Date.now()
-                });
-            }
-        } catch (e) { alert(e.message); }
-    };
-
-    // --- SELLER VERIFICATION ---
-    window.submitSellerVerification = async () => {
-        const user = auth.currentUser;
-        if (!user) return alert("Login dulu!");
+    // ==================== HANDLE LOGIN ====================
+    window.handleLogin = async () => {
+        const email = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-pass').value;
         
-        const idCard = document.getElementById('seller-id-card').value.trim();
-        const familyCard = document.getElementById('seller-family-card').value.trim();
-        const storeName = document.getElementById('seller-store-name').value.trim();
-        const bank = document.getElementById('seller-bank').value;
-        const accountNumber = document.getElementById('seller-account-number').value.trim();
-        const accountName = document.getElementById('seller-account-name').value.trim();
-        
-        if (!idCard || !familyCard || !storeName || !accountNumber || !accountName) {
-            return alert("Semua field harus diisi!");
+        if (!email || !pass) {
+            return alert("Email dan password harus diisi!");
         }
         
-        if (idCard.length < 16) return alert("Nomor KTP minimal 16 digit!");
-        
-        await push(ref(db, "verificationRequests"), {
-            userId: user.uid,
-            userEmail: user.email,
-            username: document.getElementById('user-name-display').innerText,
-            storeName,
-            idCard,
-            familyCard,
-            bankAccount: {
-                bank,
-                accountNumber,
-                accountName
-            },
-            status: "pending",
-            submittedAt: Date.now()
-        });
-        
-        alert("Permintaan verifikasi terkirim! Admin akan memproses.");
-        
-        // Reset form
-        document.getElementById('seller-id-card').value = '';
-        document.getElementById('seller-family-card').value = '';
-        document.getElementById('seller-store-name').value = '';
-        document.getElementById('seller-account-number').value = '';
-        document.getElementById('seller-account-name').value = '';
+        try {
+            await signInWithEmailAndPassword(auth, email, pass);
+        } catch (e) { 
+            alert(e.message); 
+        }
     };
 
-    // --- ADMIN VERIFY SELLER ---
+    // ==================== HANDLE REGISTER ====================
+    window.handleRegister = async () => {
+        // Validasi dasar
+        const username = document.getElementById('reg-username').value;
+        const email = document.getElementById('reg-email').value;
+        const pass = document.getElementById('reg-pass').value;
+        const agreeTerms = document.getElementById('agree-terms').checked;
+        
+        if (!username || !email || !pass) {
+            return alert("Username, email, dan password harus diisi!");
+        }
+        
+        if (pass.length < 6) {
+            return alert("Password minimal 6 karakter!");
+        }
+        
+        if (!agreeTerms) {
+            return alert("Anda harus menyetujui Syarat & Ketentuan!");
+        }
+        
+        // Validasi seller
+        if (currentRole === 'seller') {
+            const idCard = document.getElementById('seller-id-card').value;
+            const storeName = document.getElementById('seller-store-name').value;
+            const wa = document.getElementById('seller-wa').value;
+            const ewallet = document.getElementById('seller-ewallet').value;
+            const ewalletNumber = document.getElementById('seller-ewallet-number').value;
+            const ewalletName = document.getElementById('seller-ewallet-name').value;
+            
+            if (!idCard || !storeName || !wa || !ewalletNumber || !ewalletName) {
+                return alert("KTP, Nama Toko, WA, dan E-Wallet wajib diisi!");
+            }
+            
+            if (idCard.length < 16) {
+                return alert("Nomor KTP minimal 16 digit!");
+            }
+            
+            if (wa.length < 10 || !wa.startsWith('62')) {
+                return alert("Nomor WA harus dimulai dengan 62 (contoh: 628123456789)");
+            }
+        }
+        
+        try {
+            // Buat user di Firebase Auth
+            const res = await createUserWithEmailAndPassword(auth, email, pass);
+            const userId = res.user.uid;
+            
+            // Data dasar user
+            const userData = {
+                username: username,
+                email: email,
+                role: currentRole === 'seller' ? 'pending_seller' : 'user',
+                banned: false,
+                createdAt: Date.now(),
+                agreeTerms: true
+            };
+            
+            // Simpan user ke database
+            await set(ref(db, `users/${userId}`), userData);
+            
+            // Jika seller, buat verification request
+            if (currentRole === 'seller') {
+                const idCard = document.getElementById('seller-id-card').value;
+                const storeName = document.getElementById('seller-store-name').value;
+                const wa = document.getElementById('seller-wa').value;
+                const ewallet = document.getElementById('seller-ewallet').value;
+                const ewalletNumber = document.getElementById('seller-ewallet-number').value;
+                const ewalletName = document.getElementById('seller-ewallet-name').value;
+                
+                // Data bank (opsional)
+                const bank = document.getElementById('seller-bank').value;
+                const accountNumber = document.getElementById('seller-account-number').value;
+                const accountName = document.getElementById('seller-account-name').value;
+                const phone = document.getElementById('seller-phone').value;
+                
+                const bankAccount = {
+                    ewallet: {
+                        type: ewallet,
+                        number: ewalletNumber,
+                        name: ewalletName
+                    }
+                };
+                
+                if (bank && accountNumber) {
+                    bankAccount.bank = {
+                        name: bank,
+                        number: accountNumber,
+                        accountName: accountName || username
+                    };
+                }
+                
+                if (phone) {
+                    bankAccount.phone = phone;
+                }
+                
+                await set(ref(db, `verificationRequests/${userId}`), {
+                    userId: userId,
+                    userEmail: email,
+                    username: username,
+                    wa: wa,
+                    storeName: storeName,
+                    idCard: idCard,
+                    bankAccount: bankAccount,
+                    status: "pending",
+                    submittedAt: Date.now()
+                });
+                
+                alert("Pendaftaran berhasil! Data seller Anda akan diverifikasi admin maksimal 1x24 jam.");
+            } else {
+                alert("Pendaftaran berhasil! Selamat berbelanja.");
+            }
+            
+            // Reset form
+            document.getElementById('reg-username').value = '';
+            document.getElementById('reg-email').value = '';
+            document.getElementById('reg-pass').value = '';
+            
+        } catch (e) { 
+            alert(e.message); 
+        }
+    };
+
+    // ==================== FORGOT PASSWORD ====================
+    window.sendResetPassword = async () => {
+        const email = document.getElementById('forgot-email').value;
+        
+        if (!email) {
+            return alert("Masukkan email Anda!");
+        }
+        
+        try {
+            await sendPasswordResetEmail(auth, email);
+            alert("Link reset password telah dikirim ke email Anda!");
+            closeModal('modal-forgot');
+        } catch (e) {
+            alert(e.message);
+        }
+    };
+
+    // ==================== SELLER VERIFICATION (ADMIN) ====================
     window.approveSeller = async (requestId, userId) => {
         const request = (await get(ref(db, `verificationRequests/${requestId}`))).val();
         
@@ -739,8 +913,8 @@ const pendingData = pendingSnap.val();
             userEmail: request.userEmail,
             username: request.username,
             storeName: request.storeName,
+            wa: request.wa,
             idCard: request.idCard,
-            familyCard: request.familyCard,
             bankAccount: request.bankAccount,
             status: "active",
             balance: 0,
@@ -755,6 +929,9 @@ const pendingData = pendingSnap.val();
             approvedBy: auth.currentUser.uid
         });
         
+        // Update user role
+        await update(ref(db, `users/${userId}`), { role: 'seller' });
+        
         // Update status request
         await update(ref(db, `verificationRequests/${requestId}`), {
             status: "approved",
@@ -763,6 +940,7 @@ const pendingData = pendingSnap.val();
         });
         
         alert("Seller berhasil diverifikasi!");
+        loadAdminStats();
     };
 
     window.rejectSeller = async (requestId) => {
@@ -788,10 +966,43 @@ const pendingData = pendingSnap.val();
             bannedBy: auth.currentUser.uid
         });
         
+        await update(ref(db, `users/${sellerId}`), { 
+            role: 'banned_seller',
+            banned: true,
+            banReason: 'Diblokir oleh admin'
+        });
+        
         alert("Seller dibanned!");
+        loadAdminStats();
     };
 
-    // --- WITHDRAWAL ---
+    window.banUser = async (userId) => {
+        if (!confirm("Yakin ban user ini?")) return;
+        
+        await update(ref(db, `users/${userId}`), { 
+            banned: true,
+            banReason: 'Diblokir oleh admin',
+            bannedAt: Date.now(),
+            bannedBy: auth.currentUser.uid
+        });
+        
+        alert("User dibanned!");
+        loadAdminStats();
+    };
+
+    window.unbanUser = async (userId) => {
+        if (!confirm("Yakin unban user ini?")) return;
+        
+        await update(ref(db, `users/${userId}`), { 
+            banned: false,
+            banReason: null
+        });
+        
+        alert("User diunban!");
+        loadAdminStats();
+    };
+
+    // ==================== WITHDRAWAL ====================
     window.requestWithdraw = async () => {
         const user = auth.currentUser;
         const sellerSnap = await get(ref(db, `sellers/${user.uid}`));
@@ -844,7 +1055,6 @@ const pendingData = pendingSnap.val();
             const reason = prompt("Alasan penolakan:");
             if (!reason) return;
             
-            // Kembalikan saldo ke seller
             const seller = (await get(ref(db, `sellers/${withdraw.sellerId}`))).val();
             
             await update(ref(db, `sellers/${withdraw.sellerId}`), {
@@ -863,215 +1073,219 @@ const pendingData = pendingSnap.val();
         }
     };
 
-    // --- PAYMENT QR ---
-    window.generatePaymentQR = async (orderId, amount, sellers) => {
-        // Generate QR code (simulasi, di real pakai API)
-        const qrData = `xrezzky://pay/${orderId}/${amount}`;
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`;
+    // ==================== LOAD ADMIN STATS ====================
+    async function loadAdminStats() {
+        const usersSnap = await get(ref(db, 'users'));
+        const sellersSnap = await get(ref(db, 'sellers'));
+        const pendingSnap = await get(ref(db, 'verificationRequests'));
+        const ordersSnap = await get(ref(db, 'orders'));
         
-        const paymentId = push(ref(db, "payments")).key;
+        let totalUsers = 0;
+        let totalSellers = 0;
+        let pendingVerify = 0;
         
-        await set(ref(db, `payments/${paymentId}`), {
-            orderId,
-            amount,
-            qrCode: qrUrl,
-            qrString: qrData,
-            status: "pending",
-            method: "qris",
-            expiresAt: Date.now() + 30 * 60 * 1000, // 30 menit
-            sellers: sellers,
-            buyerId: auth.currentUser?.uid || "guest",
-            buyerName: document.getElementById('user-name-display').innerText,
-            createdAt: Date.now()
+        usersSnap.forEach(() => totalUsers++);
+        sellersSnap.forEach(() => totalSellers++);
+        
+        pendingSnap.forEach(child => {
+            if (child.val().status === 'pending') pendingVerify++;
         });
         
-        return { paymentId, qrUrl };
-    };
+        document.getElementById('stat-total-users').innerText = totalUsers;
+        document.getElementById('stat-total-sellers').innerText = totalSellers;
+        document.getElementById('stat-pending-verify').innerText = pendingVerify;
+        document.getElementById('stat-total-orders').innerText = ordersSnap.size || 0;
+    }
 
-    window.showPaymentModal = async (orderId, amount, sellers) => {
-        const { qrUrl } = await generatePaymentQR(orderId, amount, sellers);
-        
-        document.getElementById('qr-image').src = qrUrl;
-        document.getElementById('payment-amount').innerText = 'Rp ' + amount.toLocaleString();
-        
-        // Hitung expiry
-        const expiryTime = Date.now() + 30 * 60 * 1000;
-        const expiryDate = new Date(expiryTime);
-        document.getElementById('payment-expiry').innerText = `Berlaku sampai ${expiryDate.toLocaleTimeString()}`;
-        
-        document.getElementById('modal-payment').classList.remove('hidden');
-        
-        // Simulasi auto-check payment (di real pakai webhook)
-        setTimeout(() => {
-            checkPayment(paymentId);
-        }, 5000);
-    };
-
-    window.checkPayment = async (paymentId) => {
-        const payment = (await get(ref(db, `payments/${paymentId}`))).val();
-        
-        if (!payment) return null;
-        
-        if (payment.status === "pending" && Date.now() > payment.expiresAt) {
-            await update(ref(db, `payments/${paymentId}`), { status: "expired" });
-            return { status: "expired" };
-        }
-        
-        return payment;
-    };
-
-    window.processPaidPayment = async (paymentId) => {
-        const payment = (await get(ref(db, `payments/${paymentId}`))).val();
-        
-        if (payment.status !== "pending") return;
-        
-        await update(ref(db, `payments/${paymentId}`), {
-            status: "paid",
-            paidAt: Date.now()
-        });
-        
-        await update(ref(db, `orders/${payment.orderId}`), {
-            status: "Diproses",
-            paymentId: paymentId,
-            paidAt: Date.now()
-        });
-        
-        // Tambah saldo ke masing-masing seller
-        for (const [sellerId, amount] of Object.entries(payment.sellers)) {
-            if (sellerId !== "platform") {
-                const sellerRef = ref(db, `sellers/${sellerId}`);
-                const seller = (await get(sellerRef)).val();
-                
-                await update(sellerRef, {
-                    balance: (seller.balance || 0) + amount,
-                    totalSales: (seller.totalSales || 0) + 1,
-                    totalRevenue: (seller.totalRevenue || 0) + amount
-                });
-            }
-        }
-        
-        alert("Pembayaran berhasil diproses!");
-    };
-
-    // --- MODIFIED CHECKOUT WITH QR ---
-    window.checkoutCart = async () => {
-        const user = auth.currentUser;
-        if (!user) return showPage('page-auth');
-        if (!Object.keys(userCart).length) return alert("Keranjang kosong!");
-        if (!(await checkOrderLimit(user.uid))) return;
-
-        let total = 0;
-        const itemsToOrder = {};
-        const sellerAmounts = {};
-
-        // Hitung total dan kumpulkan seller
-        for (const id in userCart) {
-            const item = userCart[id];
-            const product = globalProducts.find(p => p.id === id);
-            if (!product) continue;
+    // ==================== RENDER FUNCTIONS FOR ADMIN ====================
+    function renderSellerVerification() {
+        onValue(ref(db, 'verificationRequests'), (snap) => {
+            const list = document.getElementById('seller-verification-list');
+            if (!list) return;
+            list.innerHTML = "";
             
-            const sellerId = product.sellerId || "admin";
-            const price = item.price * item.qty;
-            const commission = price * PLATFORM_COMMISSION;
-            const sellerGets = price - commission;
-            
-            itemsToOrder[id] = { 
-                name: item.name, 
-                price: item.price, 
-                qty: item.qty, 
-                pid: id,
-                sellerId: sellerId
-            };
-            
-            total += price;
-            
-            if (!sellerAmounts[sellerId]) sellerAmounts[sellerId] = 0;
-            sellerAmounts[sellerId] += sellerGets;
-        }
-        
-        sellerAmounts["platform"] = total * PLATFORM_COMMISSION;
-
-        // Cek stok
-        for (const id in userCart) {
-            const fresh = (await get(ref(db, `products/${id}`))).val();
-            if (fresh.stock < userCart[id].qty) {
-                return alert(`Stok ${userCart[id].name} tidak cukup!`);
-            }
-        }
-
-        // Kurangi stok
-        for (const id in userCart) {
-            await update(ref(db, `products/${id}`), { 
-                stock: increment(-userCart[id].qty) 
+            snap.forEach(child => {
+                const req = child.val();
+                if (req.status === "pending") {
+                    const bankInfo = req.bankAccount?.ewallet ? 
+                        `<p class="text-[10px] mt-1">E-Wallet: ${req.bankAccount.ewallet.type} - ${req.bankAccount.ewallet.number} (${req.bankAccount.ewallet.name})</p>` : '';
+                    
+                    list.innerHTML += `
+                    <div class="glass p-4 rounded-2xl border border-yellow-500/30">
+                        <div class="flex justify-between">
+                            <p class="font-bold text-yellow-400">${req.storeName}</p>
+                            <span class="text-[8px] bg-yellow-600/20 px-2 py-1 rounded">PENDING</span>
+                        </div>
+                        <p class="text-[10px] text-gray-400">${req.username} (${req.userEmail})</p>
+                        <p class="text-[10px] mt-1">WA: ${req.wa || '-'}</p>
+                        <p class="text-[10px]">KTP: ${req.idCard}</p>
+                        ${bankInfo}
+                        ${req.bankAccount?.bank ? `<p class="text-[10px]">Bank: ${req.bankAccount.bank.name} - ${req.bankAccount.bank.number}</p>` : ''}
+                        <p class="text-[8px] text-gray-500 mt-1">${new Date(req.submittedAt).toLocaleString()}</p>
+                        <div class="flex gap-2 mt-3">
+                            <button onclick="approveSeller('${child.key}', '${req.userId}')" class="flex-1 bg-green-600 py-2 rounded-lg text-xs font-bold">SETUJUI</button>
+                            <button onclick="rejectSeller('${child.key}')" class="flex-1 bg-red-600 py-2 rounded-lg text-xs font-bold">TOLAK</button>
+                        </div>
+                    </div>`;
+                }
             });
-        }
-
-        // Buat order
-        const orderRef = push(ref(db, "orders"));
-        await set(orderRef, {
-            userId: user.uid,
-            username: document.getElementById('user-name-display').innerText,
-            email: user.email,
-            items: itemsToOrder,
-            status: "Pending",
-            total: total,
-            sellerAmounts: sellerAmounts,
-            createdAt: Date.now()
         });
+    }
 
-        // Hapus cart
-        await remove(ref(db, `carts/${user.uid}`));
-        
-        // Tampilkan QR payment
-        await showPaymentModal(orderRef.key, total, sellerAmounts);
-        
-        closeModal('modal-cart');
-    };
-
-    window.instantBuy = async (id) => {
-        const user = auth.currentUser;
-        if (!user) return showPage('page-auth');
-        if (!(await checkOrderLimit(user.uid))) return;
-
-        const p = globalProducts.find(x => x.id === id);
-        const fresh = (await get(ref(db, `products/${id}`))).val();
-        if (!fresh || fresh.stock <= 0) return alert("Stok habis!");
-
-        const sellerId = p.sellerId || "admin";
-        const price = p.price;
-        const commission = price * PLATFORM_COMMISSION;
-        const sellerGets = price - commission;
-        
-        const sellerAmounts = {};
-        sellerAmounts[sellerId] = sellerGets;
-        sellerAmounts["platform"] = commission;
-
-        await update(ref(db, `products/${id}`), { stock: fresh.stock - 1 });
-        
-        const orderRef = push(ref(db, "orders"));
-        await set(orderRef, {
-            userId: user.uid,
-            username: document.getElementById('user-name-display').innerText,
-            email: user.email,
-            items: { [id]: { name: p.name, price: p.price, qty: 1, pid: id, sellerId: sellerId } },
-            status: "Pending",
-            total: price,
-            sellerAmounts: sellerAmounts,
-            createdAt: Date.now()
+    function renderActiveSellers() {
+        onValue(ref(db, 'sellers'), (snap) => {
+            const list = document.getElementById('seller-active-list');
+            if (!list) return;
+            list.innerHTML = "";
+            
+            snap.forEach(child => {
+                const seller = child.val();
+                const ewalletInfo = seller.bankAccount?.ewallet ? 
+                    `<p class="text-[8px] text-gray-400 mt-1">E-Wallet: ${seller.bankAccount.ewallet.type} - ${seller.bankAccount.ewallet.number}</p>` : '';
+                
+                list.innerHTML += `
+                <div class="glass p-4 rounded-2xl border border-slate-700">
+                    <div class="flex justify-between">
+                        <p class="font-bold text-blue-400">${seller.storeName}</p>
+                        <span class="text-[8px] bg-${seller.status === 'active' ? 'green' : 'red'}-600/20 text-${seller.status === 'active' ? 'green' : 'red'}-400 px-2 py-1 rounded">${seller.status}</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400">${seller.username} (${seller.userEmail})</p>
+                    <p class="text-[10px] text-gray-400 mt-1">WA: ${seller.wa || '-'}</p>
+                    <p class="text-[8px] text-red-400 mt-1"><i class="fas fa-lock mr-1"></i> DATA PRIVAT:</p>
+                    <p class="text-[8px] text-gray-400">KTP: ${seller.idCard}</p>
+                    ${ewalletInfo}
+                    ${seller.bankAccount?.bank ? `<p class="text-[8px] text-gray-400">Bank: ${seller.bankAccount.bank.name} - ${seller.bankAccount.bank.number}</p>` : ''}
+                    <div class="grid grid-cols-3 gap-2 mt-2 text-center">
+                        <div>
+                            <p class="text-[8px] text-gray-500">Saldo</p>
+                            <p class="text-xs font-bold">Rp ${(seller.balance || 0).toLocaleString()}</p>
+                        </div>
+                        <div>
+                            <p class="text-[8px] text-gray-500">Penjualan</p>
+                            <p class="text-xs font-bold">${seller.totalSales || 0}</p>
+                        </div>
+                        <div>
+                            <p class="text-[8px] text-gray-500">Rating</p>
+                            <p class="text-xs font-bold text-yellow-400">${(seller.rating || 0).toFixed(1)}</p>
+                        </div>
+                    </div>
+                    ${seller.status === "active" ? `
+                    <button onclick="banSeller('${child.key}')" class="w-full mt-3 bg-red-600/20 text-red-400 py-2 rounded-lg text-xs font-bold">
+                        BAN SELLER
+                    </button>` : ''}
+                </div>`;
+            });
         });
+    }
 
-        await showPaymentModal(orderRef.key, price, sellerAmounts);
-        closeModal('modal-detail');
-    };
+    function renderBuyers() {
+        onValue(ref(db, 'users'), (snap) => {
+            const list = document.getElementById('buyers-list');
+            if (!list) return;
+            list.innerHTML = "";
+            
+            snap.forEach(child => {
+                const user = child.val();
+                if (user.role !== 'admin' && user.role !== 'seller' && !user.role?.includes('seller')) {
+                    list.innerHTML += `
+                    <div class="glass p-4 rounded-2xl border border-slate-700">
+                        <div class="flex justify-between">
+                            <p class="font-bold text-blue-400">${user.username || 'No name'}</p>
+                            ${user.banned ? 
+                                '<span class="text-[8px] bg-red-600/20 text-red-400 px-2 py-1 rounded">BANNED</span>' : 
+                                '<span class="text-[8px] bg-green-600/20 text-green-400 px-2 py-1 rounded">ACTIVE</span>'}
+                        </div>
+                        <p class="text-[10px] text-gray-400">${user.email}</p>
+                        <p class="text-[8px] text-gray-500 mt-1">Bergabung: ${new Date(user.createdAt).toLocaleDateString()}</p>
+                        ${!user.banned ? `
+                        <button onclick="banUser('${child.key}')" class="w-full mt-3 bg-red-600/20 text-red-400 py-2 rounded-lg text-xs font-bold">
+                            BAN USER
+                        </button>` : `
+                        <button onclick="unbanUser('${child.key}')" class="w-full mt-3 bg-green-600/20 text-green-400 py-2 rounded-lg text-xs font-bold">
+                            UNBAN USER
+                        </button>`}
+                    </div>`;
+                }
+            });
+        });
+    }
 
-    // --- PRODUCT LOGIC (MODIFIED) ---
+    function renderWithdrawals() {
+        onValue(ref(db, 'withdrawals'), (snap) => {
+            const list = document.getElementById('withdrawals-list');
+            if (!list) return;
+            list.innerHTML = "";
+            
+            snap.forEach(child => {
+                const w = child.val();
+                let statusColor = "text-yellow-400";
+                if (w.status === "processed") statusColor = "text-green-400";
+                if (w.status === "rejected") statusColor = "text-red-400";
+                
+                const paymentInfo = w.bankAccount?.ewallet ? 
+                    `<p class="text-[8px] text-gray-400">E-Wallet: ${w.bankAccount.ewallet.type} - ${w.bankAccount.ewallet.number}</p>` :
+                    `<p class="text-[8px] text-gray-400">Bank: ${w.bankAccount?.bank?.name} - ${w.bankAccount?.bank?.number}</p>`;
+                
+                list.innerHTML += `
+                <div class="glass p-4 rounded-2xl border border-slate-700">
+                    <div class="flex justify-between">
+                        <p class="font-bold">${w.sellerName}</p>
+                        <span class="text-[8px] ${statusColor} px-2 py-1 rounded">${w.status.toUpperCase()}</span>
+                    </div>
+                    <p class="text-blue-400 font-bold text-lg my-1">Rp ${w.amount.toLocaleString()}</p>
+                    ${paymentInfo}
+                    <p class="text-[8px] text-gray-500 mt-1">${new Date(w.requestedAt).toLocaleString()}</p>
+                    
+                                        ${w.status === "pending" ? `
+                    <div class="flex gap-2 mt-3">
+                        <button onclick="processWithdraw('${child.key}', 'approve')" class="flex-1 bg-green-600 py-2 rounded-lg text-xs font-bold">PROSES</button>
+                        <button onclick="processWithdraw('${child.key}', 'reject')" class="flex-1 bg-red-600 py-2 rounded-lg text-xs font-bold">TOLAK</button>
+                    </div>` : ''}
+                    
+                    ${w.status === "processed" ? `<p class="text-[8px] text-green-400 mt-2">Diproses: ${new Date(w.processedAt).toLocaleString()}</p>` : ''}
+                    ${w.rejectReason ? `<p class="text-[8px] text-red-400 mt-2">Alasan: ${w.rejectReason}</p>` : ''}
+                </div>`;
+            });
+        });
+    }
+
+    function renderPayments() {
+        onValue(ref(db, 'payments'), (snap) => {
+            const list = document.getElementById('payments-list');
+            if (!list) return;
+            list.innerHTML = "";
+            
+            snap.forEach(child => {
+                const p = child.val();
+                let statusColor = "text-yellow-400";
+                if (p.status === "paid") statusColor = "text-green-400";
+                if (p.status === "expired") statusColor = "text-red-400";
+                if (p.status === "failed") statusColor = "text-red-400";
+                
+                list.innerHTML += `
+                <div class="glass p-4 rounded-2xl border border-slate-700">
+                    <div class="flex justify-between">
+                        <p class="font-bold text-blue-400">Payment #${child.key.slice(0,6)}</p>
+                        <span class="text-[8px] ${statusColor} px-2 py-1 rounded">${p.status.toUpperCase()}</span>
+                    </div>
+                    <p class="text-lg font-bold mt-1">Rp ${p.amount.toLocaleString()}</p>
+                    <p class="text-[8px] text-gray-400">Pembeli: ${p.buyerName}</p>
+                    <p class="text-[8px] text-gray-400">Metode: ${p.method}</p>
+                    <p class="text-[8px] text-gray-500">Dibuat: ${new Date(p.createdAt).toLocaleString()}</p>
+                    ${p.paidAt ? `<p class="text-[8px] text-green-400">Dibayar: ${new Date(p.paidAt).toLocaleString()}</p>` : ''}
+                    ${p.expiresAt ? `<p class="text-[8px] text-red-400">Exp: ${new Date(p.expiresAt).toLocaleString()}</p>` : ''}
+                </div>`;
+            });
+        });
+    }
+
+    // ==================== PRODUCT LOGIC ====================
     function listenProducts() {
         onValue(ref(db, 'products'), async (snap) => {
             const list = document.getElementById('product-list');
             list.innerHTML = ""; 
             globalProducts = [];
             
-            // Load sellers for product display
             const sellersSnap = await get(ref(db, 'sellers'));
             const sellers = {};
             sellersSnap.forEach(s => {
@@ -1086,7 +1300,6 @@ const pendingData = pendingSnap.val();
                 const p = child.val(); 
                 p.id = child.key;
                 
-                // Tambah info seller
                 if (p.sellerId && sellers[p.sellerId]) {
                     p.sellerName = sellers[p.sellerId].storeName;
                 }
@@ -1150,7 +1363,6 @@ const pendingData = pendingSnap.val();
         document.getElementById('m-price').innerText = "Rp " + Number(p.price).toLocaleString();
         document.getElementById('m-desc').innerText = p.description || "Tidak ada deskripsi.";
         
-        // Tampilkan seller badge jika ada
         if (p.sellerName) {
             document.getElementById('m-seller-badge').classList.remove('hidden');
             document.getElementById('m-seller-badge').innerText = p.sellerName;
@@ -1163,7 +1375,6 @@ const pendingData = pendingSnap.val();
         document.getElementById('btn-buy-now').disabled = isOut;
         document.getElementById('btn-add-cart').disabled = isOut;
 
-        // Rating & Reviews
         const reviews = p.reviews ? Object.values(p.reviews) : [];
         const avg = reviews.length ? (reviews.reduce((a, b) => a + Number(b.stars), 0) / reviews.length).toFixed(1) : 0;
         
@@ -1192,7 +1403,7 @@ const pendingData = pendingSnap.val();
         document.getElementById('modal-detail').classList.remove('hidden');
     };
 
-    // --- CART & ORDER LOGIC (MODIFIED) ---
+    // ==================== CART & ORDER LOGIC ====================
     window.addToCart = async (id) => {
         const user = auth.currentUser;
         if (!user) return alert("Silahkan login terlebih dahulu!");
@@ -1271,225 +1482,196 @@ const pendingData = pendingSnap.val();
         return true;
     };
 
-    // --- ADMIN SAVE PRODUCT (MODIFIED) ---
-    window.saveProduct = async () => {
-        const btn = document.getElementById('btn-save-prod');
-        const name = document.getElementById("p-name").value;
-        const price = Number(document.getElementById("p-price").value);
-        const desc = document.getElementById("p-desc").value;
-        const stock = Number(document.getElementById("p-stock").value);
-        const urls = getAllImages();
-        const sellerSelect = document.getElementById('product-seller');
-        const sellerId = sellerSelect ? sellerSelect.value : null;
+    window.checkoutCart = async () => {
+        const user = auth.currentUser;
+        if (!user) return showPage('page-auth');
+        if (!Object.keys(userCart).length) return alert("Keranjang kosong!");
+        if (!(await checkOrderLimit(user.uid))) return;
 
-        if (!name || !price || urls.length === 0) return alert("Lengkapi data produk!");
+        let total = 0;
+        const itemsToOrder = {};
+        const sellerAmounts = {};
 
-        btn.disabled = true;
-        btn.innerHTML = `<i class="fa fa-spinner animate-spin"></i> Saving...`;
-
-        const data = { 
-            name, 
-            price, 
-            description: desc, 
-            stock, 
-            images: urls, 
-            sellerId: sellerId || "admin",
-            updatedAt: Date.now() 
-        };
-
-        if (window.currentEditId) {
-            await update(ref(db, `products/${window.currentEditId}`), data);
-            alert("Produk diupdate!");
-        } else {
-            await push(ref(db, "products"), { ...data, createdAt: Date.now() });
-            alert("Produk ditambahkan!");
-        }
-
-        cancelEdit();
-        btn.disabled = false;
-        btn.innerText = "Upload Produk";
-    };
-
-    window.editProductFull = async (id) => {
-        const p = globalProducts.find(x => x.id === id);
-        if (!p) return;
-        window.currentEditId = id;
-        document.getElementById('p-name').value = p.name;
-        document.getElementById('p-price').value = p.price;
-        document.getElementById('p-desc').value = p.description || "";
-        document.getElementById('p-stock').value = p.stock || 0;
-        
-        // Set seller
-        const sellerSelect = document.getElementById('product-seller');
-        if (sellerSelect && p.sellerId) {
-            sellerSelect.value = p.sellerId;
+        for (const id in userCart) {
+            const item = userCart[id];
+            const product = globalProducts.find(p => p.id === id);
+            if (!product) continue;
+            
+            const sellerId = product.sellerId || "admin";
+            const price = item.price * item.qty;
+            const commission = price * PLATFORM_COMMISSION;
+            const sellerGets = price - commission;
+            
+            itemsToOrder[id] = { 
+                name: item.name, 
+                price: item.price, 
+                qty: item.qty, 
+                pid: id,
+                sellerId: sellerId
+            };
+            
+            total += price;
+            
+            if (!sellerAmounts[sellerId]) sellerAmounts[sellerId] = 0;
+            sellerAmounts[sellerId] += sellerGets;
         }
         
-        const cont = document.getElementById("image-input-container");
-        cont.innerHTML = "";
-        if (p.images) p.images.forEach(url => createImageInput(url));
-        createImageInput();
+        sellerAmounts["platform"] = total * PLATFORM_COMMISSION;
 
-        document.getElementById('edit-indicator').classList.remove('hidden');
-        document.getElementById('cancel-edit-btn').classList.remove('hidden');
-        document.getElementById('btn-save-prod').innerText = "Update Produk";
-        switchAdminTab('upload');
-    };
-
-    // Load sellers for dropdown
-    async function loadSellersForSelect() {
-        const snap = await get(ref(db, 'sellers'));
-        const select = document.getElementById('product-seller');
-        if (!select) return;
-        
-        select.innerHTML = '<option value="">Pilih Seller (untuk admin)</option>';
-        select.innerHTML += '<option value="admin">Admin (Platform)</option>';
-        
-        snap.forEach(child => {
-            const seller = child.val();
-            if (seller.status === "active") {
-                select.innerHTML += `<option value="${child.key}">${seller.storeName}</option>`;
+        for (const id in userCart) {
+            const fresh = (await get(ref(db, `products/${id}`))).val();
+            if (fresh.stock < userCart[id].qty) {
+                return alert(`Stok ${userCart[id].name} tidak cukup!`);
             }
-        });
-    }
+        }
 
-    // --- RENDER FUNCTIONS FOR ADMIN ---
-    function renderSellerVerification() {
-        onValue(ref(db, 'verificationRequests'), (snap) => {
-            const list = document.getElementById('seller-verification-list');
-            if (!list) return;
-            list.innerHTML = "";
-            
-            snap.forEach(child => {
-                const req = child.val();
-                if (req.status === "pending") {
-                    list.innerHTML += `
-                    <div class="glass p-4 rounded-2xl border border-yellow-500/30">
-                        <div class="flex justify-between">
-                            <p class="font-bold text-yellow-400">${req.storeName}</p>
-                            <span class="text-[8px] bg-yellow-600/20 px-2 py-1 rounded">PENDING</span>
-                        </div>
-                        <p class="text-[10px] text-gray-400">${req.username} (${req.userEmail})</p>
-                        <p class="text-[10px] mt-1">KTP: ${req.idCard}</p>
-                        <p class="text-[10px]">KK: ${req.familyCard}</p>
-                        <p class="text-[10px] mt-1">Bank: ${req.bankAccount.bank} - ${req.bankAccount.accountNumber}</p>
-                        <p class="text-[10px]">A/N: ${req.bankAccount.accountName}</p>
-                        <p class="text-[8px] text-gray-500">${new Date(req.submittedAt).toLocaleString()}</p>
-                        <div class="flex gap-2 mt-3">
-                            <button onclick="approveSeller('${child.key}', '${req.userId}')" class="flex-1 bg-green-600 py-2 rounded-lg text-xs font-bold">SETUJUI</button>
-                            <button onclick="rejectSeller('${child.key}')" class="flex-1 bg-red-600 py-2 rounded-lg text-xs font-bold">TOLAK</button>
-                        </div>
-                    </div>`;
-                }
+        for (const id in userCart) {
+            await update(ref(db, `products/${id}`), { 
+                stock: increment(-userCart[id].qty) 
             });
-        });
-    }
+        }
 
-    function renderActiveSellers() {
-        onValue(ref(db, 'sellers'), (snap) => {
-            const list = document.getElementById('seller-active-list');
-            if (!list) return;
-            list.innerHTML = "";
-            
-            snap.forEach(child => {
-                const seller = child.val();
-                list.innerHTML += `
-                <div class="glass p-4 rounded-2xl border border-slate-700">
-                    <div class="flex justify-between">
-                        <p class="font-bold text-blue-400">${seller.storeName}</p>
-                        <span class="text-[8px] bg-green-600/20 text-green-400 px-2 py-1 rounded">${seller.status}</span>
-                    </div>
-                    <p class="text-[10px] text-gray-400">${seller.username}</p>
-                    <div class="grid grid-cols-3 gap-2 mt-2 text-center">
-                        <div>
-                            <p class="text-[8px] text-gray-500">Saldo</p>
-                            <p class="text-xs font-bold">Rp ${(seller.balance || 0).toLocaleString()}</p>
-                        </div>
-                        <div>
-                            <p class="text-[8px] text-gray-500">Penjualan</p>
-                            <p class="text-xs font-bold">${seller.totalSales || 0}</p>
-                        </div>
-                        <div>
-                            <p class="text-[8px] text-gray-500">Rating</p>
-                            <p class="text-xs font-bold text-yellow-400">${(seller.rating || 0).toFixed(1)}</p>
-                        </div>
-                    </div>
-                    ${seller.status === "active" ? `
-                    <button onclick="banSeller('${child.key}')" class="w-full mt-3 bg-red-600/20 text-red-400 py-2 rounded-lg text-xs font-bold">
-                        BAN SELLER
-                    </button>` : ''}
-                </div>`;
-            });
+        const orderRef = push(ref(db, "orders"));
+        await set(orderRef, {
+            userId: user.uid,
+            username: document.getElementById('user-name-display').innerText,
+            email: user.email,
+            items: itemsToOrder,
+            status: "Pending",
+            total: total,
+            sellerAmounts: sellerAmounts,
+            createdAt: Date.now()
         });
-    }
 
-    function renderWithdrawals() {
-        onValue(ref(db, 'withdrawals'), (snap) => {
-            const list = document.getElementById('withdrawals-list');
-            if (!list) return;
-            list.innerHTML = "";
-            
-            snap.forEach(child => {
-                const w = child.val();
-                let statusColor = "text-yellow-400";
-                if (w.status === "processed") statusColor = "text-green-400";
-                if (w.status === "rejected") statusColor = "text-red-400";
+        await remove(ref(db, `carts/${user.uid}`));
+        await showPaymentModal(orderRef.key, total, sellerAmounts);
+        
+        closeModal('modal-cart');
+    };
+
+    window.instantBuy = async (id) => {
+        const user = auth.currentUser;
+        if (!user) return showPage('page-auth');
+        if (!(await checkOrderLimit(user.uid))) return;
+
+        const p = globalProducts.find(x => x.id === id);
+        const fresh = (await get(ref(db, `products/${id}`))).val();
+        if (!fresh || fresh.stock <= 0) return alert("Stok habis!");
+
+        const sellerId = p.sellerId || "admin";
+        const price = p.price;
+        const commission = price * PLATFORM_COMMISSION;
+        const sellerGets = price - commission;
+        
+        const sellerAmounts = {};
+        sellerAmounts[sellerId] = sellerGets;
+        sellerAmounts["platform"] = commission;
+
+        await update(ref(db, `products/${id}`), { stock: fresh.stock - 1 });
+        
+        const orderRef = push(ref(db, "orders"));
+        await set(orderRef, {
+            userId: user.uid,
+            username: document.getElementById('user-name-display').innerText,
+            email: user.email,
+            items: { [id]: { name: p.name, price: p.price, qty: 1, pid: id, sellerId: sellerId } },
+            status: "Pending",
+            total: price,
+            sellerAmounts: sellerAmounts,
+            createdAt: Date.now()
+        });
+
+        await showPaymentModal(orderRef.key, price, sellerAmounts);
+        closeModal('modal-detail');
+    };
+
+    // ==================== PAYMENT QR ====================
+    window.generatePaymentQR = async (orderId, amount, sellers) => {
+        const qrData = `xrezzky://pay/${orderId}/${amount}`;
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`;
+        
+        const paymentId = push(ref(db, "payments")).key;
+        
+        await set(ref(db, `payments/${paymentId}`), {
+            orderId,
+            amount,
+            qrCode: qrUrl,
+            qrString: qrData,
+            status: "pending",
+            method: "qris",
+            expiresAt: Date.now() + 30 * 60 * 1000,
+            sellers: sellers,
+            buyerId: auth.currentUser?.uid || "guest",
+            buyerName: document.getElementById('user-name-display').innerText,
+            createdAt: Date.now()
+        });
+        
+        return { paymentId, qrUrl };
+    };
+
+    window.showPaymentModal = async (orderId, amount, sellers) => {
+        const { qrUrl } = await generatePaymentQR(orderId, amount, sellers);
+        
+        document.getElementById('qr-image').src = qrUrl;
+        document.getElementById('payment-amount').innerText = 'Rp ' + amount.toLocaleString();
+        
+        const expiryTime = Date.now() + 30 * 60 * 1000;
+        const expiryDate = new Date(expiryTime);
+        document.getElementById('payment-expiry').innerText = `Berlaku sampai ${expiryDate.toLocaleTimeString()}`;
+        
+        document.getElementById('modal-payment').classList.remove('hidden');
+        
+        setTimeout(() => {
+            checkPayment(paymentId);
+        }, 5000);
+    };
+
+    window.checkPayment = async (paymentId) => {
+        const payment = (await get(ref(db, `payments/${paymentId}`))).val();
+        
+        if (!payment) return null;
+        
+        if (payment.status === "pending" && Date.now() > payment.expiresAt) {
+            await update(ref(db, `payments/${paymentId}`), { status: "expired" });
+            return { status: "expired" };
+        }
+        
+        return payment;
+    };
+
+    window.processPaidPayment = async (paymentId) => {
+        const payment = (await get(ref(db, `payments/${paymentId}`))).val();
+        
+        if (payment.status !== "pending") return;
+        
+        await update(ref(db, `payments/${paymentId}`), {
+            status: "paid",
+            paidAt: Date.now()
+        });
+        
+        await update(ref(db, `orders/${payment.orderId}`), {
+            status: "Diproses",
+            paymentId: paymentId,
+            paidAt: Date.now()
+        });
+        
+        for (const [sellerId, amount] of Object.entries(payment.sellers)) {
+            if (sellerId !== "platform") {
+                const sellerRef = ref(db, `sellers/${sellerId}`);
+                const seller = (await get(sellerRef)).val();
                 
-                list.innerHTML += `
-                <div class="glass p-4 rounded-2xl border border-slate-700">
-                    <div class="flex justify-between">
-                        <p class="font-bold">${w.sellerName}</p>
-                        <span class="text-[8px] ${statusColor} px-2 py-1 rounded">${w.status.toUpperCase()}</span>
-                    </div>
-                    <p class="text-blue-400 font-bold text-lg my-1">Rp ${w.amount.toLocaleString()}</p>
-                    <p class="text-[8px] text-gray-400">${w.bankAccount.bank} - ${w.bankAccount.accountNumber}</p>
-                    <p class="text-[8px] text-gray-400">A/N: ${w.bankAccount.accountName}</p>
-                    <p class="text-[8px] text-gray-500 mt-1">${new Date(w.requestedAt).toLocaleString()}</p>
-                    
-                    ${w.status === "pending" ? `
-                    <div class="flex gap-2 mt-3">
-                        <button onclick="processWithdraw('${child.key}', 'approve')" class="flex-1 bg-green-600 py-2 rounded-lg text-xs font-bold">PROSES</button>
-                        <button onclick="processWithdraw('${child.key}', 'reject')" class="flex-1 bg-red-600 py-2 rounded-lg text-xs font-bold">TOLAK</button>
-                    </div>` : ''}
-                    
-                    ${w.status === "processed" ? `<p class="text-[8px] text-green-400 mt-2">Diproses: ${new Date(w.processedAt).toLocaleString()}</p>` : ''}
-                    ${w.rejectReason ? `<p class="text-[8px] text-red-400 mt-2">Alasan: ${w.rejectReason}</p>` : ''}
-                </div>`;
-            });
-        });
-    }
+                await update(sellerRef, {
+                    balance: (seller.balance || 0) + amount,
+                    totalSales: (seller.totalSales || 0) + 1,
+                    totalRevenue: (seller.totalRevenue || 0) + amount
+                });
+            }
+        }
+        
+        alert("Pembayaran berhasil diproses!");
+    };
 
-    function renderPayments() {
-        onValue(ref(db, 'payments'), (snap) => {
-            const list = document.getElementById('payments-list');
-            if (!list) return;
-            list.innerHTML = "";
-            
-            snap.forEach(child => {
-                const p = child.val();
-                                let statusColor = "text-yellow-400";
-                if (p.status === "paid") statusColor = "text-green-400";
-                if (p.status === "expired") statusColor = "text-red-400";
-                if (p.status === "failed") statusColor = "text-red-400";
-                
-                list.innerHTML += `
-                <div class="glass p-4 rounded-2xl border border-slate-700">
-                    <div class="flex justify-between">
-                        <p class="font-bold text-blue-400">Payment #${child.key.slice(0,6)}</p>
-                        <span class="text-[8px] ${statusColor} px-2 py-1 rounded">${p.status.toUpperCase()}</span>
-                    </div>
-                    <p class="text-lg font-bold mt-1">Rp ${p.amount.toLocaleString()}</p>
-                    <p class="text-[8px] text-gray-400">Pembeli: ${p.buyerName}</p>
-                    <p class="text-[8px] text-gray-400">Metode: ${p.method}</p>
-                    <p class="text-[8px] text-gray-500">Dibuat: ${new Date(p.createdAt).toLocaleString()}</p>
-                    ${p.paidAt ? `<p class="text-[8px] text-green-400">Dibayar: ${new Date(p.paidAt).toLocaleString()}</p>` : ''}
-                    ${p.expiresAt ? `<p class="text-[8px] text-red-400">Exp: ${new Date(p.expiresAt).toLocaleString()}</p>` : ''}
-                </div>`;
-            });
-        });
-    }
-
-    // --- MODIFIED ADMIN ORDER LISTENER ---
+    // ==================== ADMIN ORDER LISTENER ====================
     function listenAdminOrders() {
         onValue(ref(db, 'orders'), (snap) => {
             const tabs = ['pending', 'process', 'done', 'reject'];
@@ -1537,7 +1719,7 @@ const pendingData = pendingSnap.val();
         });
     }
 
-    // --- USER HISTORY (MODIFIED) ---
+    // ==================== USER HISTORY ====================
     function listenUserHistory(uid) {
         onValue(ref(db, 'orders'), (snap) => {
             const cont = document.getElementById('user-history');
@@ -1606,24 +1788,34 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
         });
     }
 
-    window.showMyProducts = () => {
-        const user = auth.currentUser;
-        if (!user) return;
-        
-        // Filter produk milik seller ini
-        const myProducts = globalProducts.filter(p => p.sellerId === user.uid);
-        
-        if (myProducts.length === 0) {
-            alert("Kamu belum punya produk. Upload di Admin Panel (khusus admin) atau hubungi admin.");
-            return;
-        }
-        
-        // Tampilkan di modal atau console
-        console.log("Produk saya:", myProducts);
-        alert(`Kamu punya ${myProducts.length} produk. Cek di console untuk detail.`);
+    window.openReviewModal = (oid, pid, pname) => {
+        document.getElementById('review-product-name').innerText = pname;
+        document.getElementById('modal-review').classList.remove('hidden');
+        document.getElementById('btn-submit-review').onclick = () => submitReview(oid, pid);
     };
 
-    // --- UTILITY FUNCTIONS (SAME AS BEFORE) ---
+    window.submitReview = async (oid, pid) => {
+        const stars = document.getElementById('star-range').value;
+        const text = document.getElementById('review-text').value;
+        const user = auth.currentUser;
+
+        if(!text) return alert("Ulasan tidak boleh kosong!");
+
+        await push(ref(db, `products/${pid}/reviews`), {
+            user: document.getElementById('user-name-display').innerText,
+            email: user.email,
+            stars,
+            text,
+            time: Date.now()
+        });
+
+        await update(ref(db, `orders/${oid}`), { isRated: true });
+
+        closeModal('modal-review');
+        alert("Terima kasih atas ulasannya!");
+    };
+
+    // ==================== UTILITY FUNCTIONS ====================
     window.updateStat = async (id, stat) => {
         await update(ref(db, `orders/${id}`), { status: stat });
     };
@@ -1647,7 +1839,46 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
         if (confirm("Hapus produk ini?")) await remove(ref(db, `products/${id}`));
     };
 
-    // --- IMAGE MODAL LOGIC ---
+    window.changeUsername = async () => {
+        const n = prompt("Username baru:");
+        if (n) await update(ref(db, `users/${auth.currentUser.uid}`), { username: n });
+    };
+
+    window.changePasswordCustom = async () => {
+        const p = prompt("Password baru:");
+        if (p) {
+            try { await updatePassword(auth.currentUser, p); alert("Password diganti!"); }
+            catch (e) { alert("Login ulang diperlukan."); }
+        }
+    };
+
+    window.signOutUser = () => signOut(auth);
+
+    window.openVisiModal = () => {
+        document.getElementById('modal-visi').classList.remove('hidden');
+        document.querySelectorAll('.visi-item').forEach((it, i) => {
+            it.style.animation = `fadeUp 0.5s ease forwards ${i * 0.2}s`;
+        });
+    };
+
+    window.copyInvoice = (text) => {
+        navigator.clipboard.writeText(text).then(()=>{
+            alert("Detail transaksi berhasil dicopy!");
+        }).catch(()=>{
+            alert("Gagal copy!");
+        });
+    };
+
+    window.updateDetailMainImg = (src, idx) => {
+        const img = document.getElementById('m-img');
+        img.src = src;
+        img.onclick = () => {
+            const p = globalProducts.find(x => x.id === window.currentViewId);
+            openImageModal(p.images, idx);
+        };
+    };
+
+    // ==================== IMAGE MODAL LOGIC ====================
     window.openImageModal = (images, index = 0) => {
         currentImages = images;
         currentIndex = index;
@@ -1686,32 +1917,25 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
         }
     });
 
-    // --- UI UTILS ---
+    // ==================== UI UTILS ====================
     window.showPage = (id) => {
         document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
         document.getElementById(id).classList.remove('hidden');
         window.scrollTo(0,0);
         
-        // Refresh data sesuai page
         if (id === 'page-admin') {
             renderSellerVerification();
             renderActiveSellers();
+            renderBuyers();
             renderWithdrawals();
             renderPayments();
             loadSellersForSelect();
+            loadAdminStats();
         }
     };
     
     window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
     window.showCart = () => document.getElementById('modal-cart').classList.remove('hidden');
-    
-    window.toggleAuthMode = () => { 
-        isLoginMode = !isLoginMode; 
-        document.getElementById('reg-fields').classList.toggle('hidden', isLoginMode); 
-        document.getElementById('auth-toggle-text').innerText = isLoginMode ? "Belum punya akun? Daftar" : "Sudah punya akun? Login"; 
-    };
-    
-    window.signOutUser = () => signOut(auth);
     
     window.switchAdminTab = (t) => {
         document.querySelectorAll('.admin-tab').forEach(x => x.classList.add('hidden'));
@@ -1731,44 +1955,100 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
         document.getElementById('search-empty').classList.toggle('hidden', found);
     };
 
-    window.changeUsername = async () => {
-        const n = prompt("Username baru:");
-        if (n) await update(ref(db, `users/${auth.currentUser.uid}`), { username: n });
-    };
+    // ==================== ADMIN PRODUCT ====================
+    window.saveProduct = async () => {
+        const btn = document.getElementById('btn-save-prod');
+        const name = document.getElementById("p-name").value;
+        const price = Number(document.getElementById("p-price").value);
+        const desc = document.getElementById("p-desc").value;
+        const stock = Number(document.getElementById("p-stock").value);
+        const urls = getAllImages();
+        const sellerSelect = document.getElementById('product-seller');
+        const sellerId = sellerSelect ? sellerSelect.value : null;
 
-    window.changePasswordCustom = async () => {
-        const p = prompt("Password baru:");
-        if (p) {
-            try { await updatePassword(auth.currentUser, p); alert("Password diganti!"); }
-            catch (e) { alert("Login ulang diperlukan."); }
-        }
-    };
+        if (!name || !price || urls.length === 0) return alert("Lengkapi data produk!");
 
-    window.openVisiModal = () => {
-        document.getElementById('modal-visi').classList.remove('hidden');
-        document.querySelectorAll('.visi-item').forEach((it, i) => {
-            it.style.animation = `fadeUp 0.5s ease forwards ${i * 0.2}s`;
-        });
-    };
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa fa-spinner animate-spin"></i> Saving...`;
 
-    window.copyInvoice = (text) => {
-        navigator.clipboard.writeText(text).then(()=>{
-            alert("Detail transaksi berhasil dicopy!");
-        }).catch(()=>{
-            alert("Gagal copy!");
-        });
-    };
-
-    window.updateDetailMainImg = (src, idx) => {
-        const img = document.getElementById('m-img');
-        img.src = src;
-        img.onclick = () => {
-            const p = globalProducts.find(x => x.id === window.currentViewId);
-            openImageModal(p.images, idx);
+        const data = { 
+            name, 
+            price, 
+            description: desc, 
+            stock, 
+            images: urls, 
+            sellerId: sellerId || "admin",
+            updatedAt: Date.now() 
         };
+
+        if (window.currentEditId) {
+            await update(ref(db, `products/${window.currentEditId}`), data);
+            alert("Produk diupdate!");
+        } else {
+            await push(ref(db, "products"), { ...data, createdAt: Date.now() });
+            alert("Produk ditambahkan!");
+        }
+
+        cancelEdit();
+        btn.disabled = false;
+        btn.innerText = "Upload Produk";
     };
 
-    // --- IMAGE INPUT ---
+    window.editProductFull = async (id) => {
+        const p = globalProducts.find(x => x.id === id);
+        if (!p) return;
+        window.currentEditId = id;
+        document.getElementById('p-name').value = p.name;
+        document.getElementById('p-price').value = p.price;
+        document.getElementById('p-desc').value = p.description || "";
+        document.getElementById('p-stock').value = p.stock || 0;
+        
+        const sellerSelect = document.getElementById('product-seller');
+        if (sellerSelect && p.sellerId) {
+            sellerSelect.value = p.sellerId;
+        }
+        
+        const cont = document.getElementById("image-input-container");
+        cont.innerHTML = "";
+        if (p.images) p.images.forEach(url => createImageInput(url));
+        createImageInput();
+
+        document.getElementById('edit-indicator').classList.remove('hidden');
+        document.getElementById('cancel-edit-btn').classList.remove('hidden');
+        document.getElementById('btn-save-prod').innerText = "Update Produk";
+        switchAdminTab('upload');
+    };
+
+    window.cancelEdit = () => {
+        window.currentEditId = null;
+        document.getElementById("p-name").value = "";
+        document.getElementById("p-price").value = "";
+        document.getElementById("p-desc").value = "";
+        document.getElementById("p-stock").value = "";
+        document.getElementById("image-input-container").innerHTML = "";
+        createImageInput();
+                document.getElementById('edit-indicator').classList.add('hidden');
+        document.getElementById('cancel-edit-btn').classList.add('hidden');
+        document.getElementById('btn-save-prod').innerText = "Upload Produk";
+    };
+
+    async function loadSellersForSelect() {
+        const snap = await get(ref(db, 'sellers'));
+        const select = document.getElementById('product-seller');
+        if (!select) return;
+        
+        select.innerHTML = '<option value="">Pilih Seller</option>';
+        select.innerHTML += '<option value="admin">Admin (Platform)</option>';
+        
+        snap.forEach(child => {
+            const seller = child.val();
+            if (seller.status === "active") {
+                select.innerHTML += `<option value="${child.key}">${seller.storeName}</option>`;
+            }
+        });
+    }
+
+    // ==================== IMAGE INPUT ====================
     function createImageInput(val = "") {
         const cont = document.getElementById("image-input-container");
         if (!cont) return;
@@ -1805,20 +2085,7 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
         return Array.from(document.querySelectorAll("#image-input-container input")).map(i => i.value.trim()).filter(v => v !== "");
     }
 
-    window.cancelEdit = () => {
-        window.currentEditId = null;
-        document.getElementById("p-name").value = "";
-        document.getElementById("p-price").value = "";
-        document.getElementById("p-desc").value = "";
-        document.getElementById("p-stock").value = "";
-        document.getElementById("image-input-container").innerHTML = "";
-        createImageInput();
-        document.getElementById('edit-indicator').classList.add('hidden');
-        document.getElementById('cancel-edit-btn').classList.add('hidden');
-        document.getElementById('btn-save-prod').innerText = "Upload Produk";
-    };
-
-    // --- INIT ---
+    // ==================== INIT ====================
     createImageInput();
 
     // =========================
@@ -1836,8 +2103,8 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
         "Menyiapkan Marketplace...",
         "Menghubungkan Server...",
         "Mengambil Produk...",
-        "Memuat Seller...",
-        "Menampilkan Data...",
+        "Memuat Data Seller...",
+        "Menampilkan Marketplace...",
         "Hampir Selesai..."
     ];
 
@@ -1876,178 +2143,10 @@ Payment: ${o.paidAt ? 'Lunas' : 'Menunggu'}
             }, 500);
         }
     }
-    
-    // ==================== AUTH UI STATE ====================
-let currentRole = 'buyer'; // buyer atau seller
 
-window.setAuthMode = (mode) => {
-    if (mode === 'login') {
-        document.getElementById('login-form').classList.remove('hidden');
-        document.getElementById('register-form').classList.add('hidden');
-        document.getElementById('auth-login-btn').classList.add('bg-blue-600');
-        document.getElementById('auth-login-btn').classList.remove('bg-slate-700');
-        document.getElementById('auth-register-btn').classList.add('bg-slate-700');
-        document.getElementById('auth-register-btn').classList.remove('bg-blue-600');
-        document.getElementById('switch-to-register').classList.remove('hidden');
-        document.getElementById('switch-to-login').classList.add('hidden');
-    } else {
-        document.getElementById('login-form').classList.add('hidden');
-        document.getElementById('register-form').classList.remove('hidden');
-        document.getElementById('auth-login-btn').classList.add('bg-slate-700');
-        document.getElementById('auth-login-btn').classList.remove('bg-blue-600');
-        document.getElementById('auth-register-btn').classList.add('bg-blue-600');
-        document.getElementById('auth-register-btn').classList.remove('bg-slate-700');
-        document.getElementById('switch-to-register').classList.add('hidden');
-        document.getElementById('switch-to-login').classList.remove('hidden');
-    }
-};
-
-window.setRole = (role) => {
-    currentRole = role;
-    
-    if (role === 'seller') {
-        document.getElementById('role-seller-btn').classList.add('bg-green-600');
-        document.getElementById('role-seller-btn').classList.remove('bg-slate-700');
-        document.getElementById('role-buyer-btn').classList.add('bg-slate-700');
-        document.getElementById('role-buyer-btn').classList.remove('bg-green-600');
-        document.getElementById('seller-fields').classList.remove('hidden');
-    } else {
-        document.getElementById('role-buyer-btn').classList.add('bg-green-600');
-        document.getElementById('role-buyer-btn').classList.remove('bg-slate-700');
-        document.getElementById('role-seller-btn').classList.add('bg-slate-700');
-        document.getElementById('role-seller-btn').classList.remove('bg-green-600');
-        document.getElementById('seller-fields').classList.add('hidden');
-    }
-};
-
-window.switchToRegister = () => {
-    setAuthMode('register');
-};
-
-window.switchToLogin = () => {
+    // Set default auth mode
     setAuthMode('login');
-};
-
-window.showTerms = () => {
-    document.getElementById('modal-terms').classList.remove('hidden');
-};
-
-window.showPrivacy = () => {
-    document.getElementById('modal-privacy').classList.remove('hidden');
-};
-
-// ==================== HANDLE LOGIN ====================
-window.handleLogin = async () => {
-    const email = document.getElementById('login-email').value;
-    const pass = document.getElementById('login-pass').value;
-    
-    try {
-        await signInWithEmailAndPassword(auth, email, pass);
-    } catch (e) { 
-        alert(e.message); 
-    }
-};
-
-// ==================== HANDLE REGISTER ====================
-window.handleRegister = async () => {
-    // Validasi dasar
-    const username = document.getElementById('reg-username').value;
-    const email = document.getElementById('reg-email').value;
-    const pass = document.getElementById('reg-pass').value;
-    const wa = document.getElementById('reg-wa').value;
-    const agreeTerms = document.getElementById('agree-terms').checked;
-    const agreeAntiScam = document.getElementById('agree-anti-scam').checked;
-    
-    if (!username || !email || !pass || !wa) {
-        return alert("Semua field harus diisi!");
-    }
-    
-    if (!agreeTerms || !agreeAntiScam) {
-        return alert("Anda harus menyetujui Syarat & Ketentuan dan Anti Scam!");
-    }
-    
-    if (wa.length < 10 || !wa.startsWith('62')) {
-        return alert("Nomor WA harus dimulai dengan 62 (contoh: 628123456789)");
-    }
-    
-    // Validasi seller
-    if (currentRole === 'seller') {
-        const idCard = document.getElementById('seller-id-card').value;
-        const familyCard = document.getElementById('seller-family-card').value;
-        const storeName = document.getElementById('seller-store-name').value;
-        const accountNumber = document.getElementById('seller-account-number').value;
-        const accountName = document.getElementById('seller-account-name').value;
-        
-        if (!idCard || !familyCard || !storeName || !accountNumber || !accountName) {
-            return alert("Data seller harus diisi lengkap!");
-        }
-        
-        if (idCard.length < 16) {
-            return alert("Nomor KTP minimal 16 digit!");
-        }
-    }
-    
-    try {
-        // Buat user di Firebase Auth
-        const res = await createUserWithEmailAndPassword(auth, email, pass);
-        const userId = res.user.uid;
-        
-        // Data dasar user
-        const userData = {
-            username: username,
-            email: email,
-            wa: wa,
-            role: currentRole === 'seller' ? 'pending_seller' : 'user',
-            banned: false,
-            createdAt: Date.now(),
-            agreeTerms: true,
-            agreeAntiScam: true
-        };
-        
-        // Simpan user ke database
-        await set(ref(db, `users/${userId}`), userData);
-        
-        // Jika seller, buat verification request
-        if (currentRole === 'seller') {
-            const bank = document.getElementById('seller-bank').value;
-            const accountNumber = document.getElementById('seller-account-number').value;
-            const accountName = document.getElementById('seller-account-name').value;
-            const idCard = document.getElementById('seller-id-card').value;
-            const familyCard = document.getElementById('seller-family-card').value;
-            const storeName = document.getElementById('seller-store-name').value;
-            
-            await set(ref(db, `verificationRequests/${userId}`), {
-                userId: userId,
-                userEmail: email,
-                username: username,
-                wa: wa,
-                storeName: storeName,
-                idCard: idCard,
-                familyCard: familyCard,
-                bankAccount: {
-                    bank: bank,
-                    accountNumber: accountNumber,
-                    accountName: accountName
-                },
-                status: "pending",
-                submittedAt: Date.now()
-            });
-            
-            alert("Pendaftaran berhasil! Data seller Anda akan diverifikasi admin maksimal 1x24 jam.");
-        } else {
-            alert("Pendaftaran berhasil! Selamat berbelanja.");
-        }
-        
-        // Reset form
-        document.getElementById('reg-username').value = '';
-        document.getElementById('reg-email').value = '';
-        document.getElementById('reg-pass').value = '';
-        document.getElementById('reg-wa').value = '';
-        
-    } catch (e) { 
-        alert(e.message); 
-    }
-};
+    setRole('buyer');
 </script>
 </body>
-            </html>
+                    </html>

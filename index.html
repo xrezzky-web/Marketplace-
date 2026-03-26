@@ -2,1032 +2,1942 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XREZZKY STORE | Premium Marketplace</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>XREZZKY STORE - Marketplace</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: white; transition: background 0.3s; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .hidden { display: none; }
-        .tab-active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
-        input[type="range"] { accent-color: #3b82f6; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
-        
-        .animate-fade { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
-        
-        
-        #initial-loading {
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 99999;
-  transition: opacity 0.6s ease;
-}
-
-.loader-box {
-  text-align: center;
-  width: 300px;
-}
-
-#loading-text {
-  color: white;
-  margin-bottom: 20px;
-}
-
-.progress-container {
-  width: 100%;
-  height: 8px;
-  background: rgba(255,255,255,0.2);
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-#loading-bar {
-  width: 0%;
-  height: 100%;
-  background: #22c55e;
-  transition: width 0.3s ease;
-}
-
-        
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #0f172a;
+            color: #f1f5f9;
+            padding-bottom: 70px;
         }
-        .product-card:hover { transform: translateY(-5px); transition: all 0.3s; }
-
-.blur-in {
-    animation: blurIn .5s ease forwards;
-}
-
-@keyframes blurIn {
-    from { opacity:0; filter: blur(10px); }
-    to { opacity:1; filter: blur(0); }
-}
-
-
-
-
+        .glass {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 20px;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #475569;
+            color: #f1f5f9;
+            padding: 10px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+        .input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            color: white;
+            outline: none;
+        }
+        .input:focus { border-color: #3b82f6; }
+        .product-card {
+            background: #1e293b;
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .product-card:hover { transform: translateY(-4px); }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .badge-seller { background: #f59e0b; color: #000; }
+        .badge-user { background: #334155; color: #94a3b8; }
+        .badge-pending { background: #f59e0b20; color: #f59e0b; }
+        .hidden { display: none !important; }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #0f172a;
+            border-top: 1px solid #334155;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+        }
+        .nav-item {
+            text-align: center;
+            padding: 8px;
+            cursor: pointer;
+            color: #64748b;
+        }
+        .nav-item.active { color: #3b82f6; }
+        .loading {
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        @media (min-width: 768px) {
+            .product-grid { grid-template-columns: repeat(4, 1fr); }
+        }
     </style>
 </head>
-<body class="pb-24">
-  
-  
-  
-<!-- PRO LOADING SCREEN -->
-<div id="initial-loading" class="fixed inset-0 bg-gradient-to-br from-black via-slate-900 to-black flex flex-col items-center justify-center z-[9999] transition-all duration-700">
+<body>
 
-    <div class="text-4xl font-extrabold text-blue-500 mb-6 animate-pulse scale-110 transition-all duration-500">
-        XREZZKY STORE
+<!-- LOADING -->
+<div id="loading" class="loading">
+    <div class="text-center">
+        <div class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+        <p>Memuat XREZZKY STORE...</p>
     </div>
-
-    <div class="w-56 h-2 bg-slate-800 rounded-full overflow-hidden">
-        <div id="loading-bar" class="h-full bg-blue-500 w-0 transition-all duration-300"></div>
-    </div>
-
-    <p id="loading-text" class="text-gray-400 text-xs mt-4 opacity-80">
-        Menyiapkan Marketplace...
-    </p>
 </div>
 
-    <div id="imageModal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center z-[200] animate-fade" onclick="handleModalBgClick(event)">
-        <button onclick="closeImageModal()" class="absolute top-6 right-6 text-white text-3xl z-50"><i class="fa fa-times"></i></button>
-        <button onclick="prevImage()" class="absolute left-4 text-white text-4xl p-4"><i class="fa fa-chevron-left"></i></button>
-        <img id="modalImage" class="max-h-[85vh] max-w-[90vw] object-contain select-none">
-        <button onclick="nextImage()" class="absolute right-4 text-white text-4xl p-4"><i class="fa fa-chevron-right"></i></button>
-        <div id="imageCounter" class="absolute bottom-10 text-white font-bold bg-black/50 px-4 py-2 rounded-full"></div>
+<!-- MAIN CONTENT (HIDDEN DULU) -->
+<div id="app" class="hidden">
+    <!-- BOTTOM NAVIGATION -->
+    <div class="bottom-nav">
+        <div class="nav-item active" data-page="home" onclick="showPage('home')">
+            <i class="fas fa-home text-xl"></i>
+            <div class="text-xs">Beranda</div>
+        </div>
+        <div class="nav-item" data-page="profile" onclick="showPage('profile')">
+            <i class="fas fa-user text-xl"></i>
+            <div class="text-xs">Profil</div>
+        </div>
+        <div id="sellerNav" class="nav-item hidden" data-page="seller" onclick="showPage('seller')">
+            <i class="fas fa-store text-xl"></i>
+            <div class="text-xs">Toko</div>
+        </div>
     </div>
 
-    <div id="modal-visi" class="hidden fixed inset-0 z-[150] flex items-center justify-center bg-black/90 p-6 animate-fade">
-        <div class="glass p-8 rounded-3xl max-w-lg w-full border border-purple-500/30 relative">
-            <button onclick="closeModal('modal-visi')" class="absolute top-4 right-4 text-gray-400">✕</button>
-            <h2 class="text-xl font-bold text-purple-400 mb-6 text-center">Visi & Misi XREZZKY STORE</h2>
-            <div class="space-y-4 text-sm text-gray-300">
-                <div class="visi-item opacity-0">
-                    <h3 class="font-bold text-white mb-1">🎯 Visi</h3>
-                    <p>Menjadi toko digital terpercaya yang menghadirkan produk berkualitas dengan sistem cepat, aman, dan transparan.</p>
-                </div>
-                <div class="visi-item opacity-0">
-                    <h3 class="font-bold text-white mb-1">🚀 Misi</h3>
-                    <ul class="list-disc ml-5 space-y-1">
-                        <li>Pelayanan cepat & responsif.</li>
-                        <li>Harga kompetitif & kualitas terbaik.</li>
-                        <li>Transaksi aman & transparan.</li>
-                        <li>Terus upgrade fitur marketplace.</li>
-                    </ul>
-                </div>
+    <!-- PAGE HOME -->
+    <div id="page-home" class="p-4 pb-20">
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <h1 class="text-2xl font-bold">XREZZKY STORE</h1>
+                <p class="text-sm text-gray-400">Marketplace Terpercaya</p>
+            </div>
+            <div id="cartIcon" class="relative cursor-pointer" onclick="openCart()">
+                <i class="fas fa-shopping-cart text-2xl"></i>
+                <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
             </div>
         </div>
-    </div>
-
-    <div id="loader" class="fixed inset-0 flex items-center justify-center bg-slate-900 z-[999]">
-        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-blue-500"></div>
-    </div>
-
-    <div id="page-banned" class="hidden fixed inset-0 bg-red-950 flex items-center justify-center z-[1000] p-8 text-center">
-        <div>
-            <i class="fa fa-hand-paper text-6xl text-red-500 mb-4"></i>
-            <h1 class="text-3xl font-bold mb-2">AKUN DIBLOKIR</h1>
-            <p id="ban-reason" class="text-red-300 mb-6 text-sm"></p>
-        </div>
-    </div>
-
-    <section id="page-auth" class="hidden min-h-screen flex items-center justify-center p-6 animate-fade">
-        <div class="glass p-8 rounded-3xl w-full max-w-md">
-            <h2 id="auth-title" class="text-3xl font-bold mb-6 text-center text-blue-500">XREZZKY</h2>
-            <div class="space-y-4">
-                <div id="reg-fields" class="hidden">
-                    <input type="text" id="auth-user" placeholder="Username" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
-                </div>
-                <input type="email" id="auth-email" placeholder="Email" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
-                <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 outline-none">
-                <button onclick="handleAuth()" class="w-full bg-blue-600 py-4 rounded-xl font-bold hover:bg-blue-700 transition">Continue</button>
-                <p onclick="toggleAuthMode()" id="auth-toggle-text" class="text-center text-xs text-blue-400 cursor-pointer italic">Belum punya akun? Daftar</p>
-            </div>
-        </div>
-    </section>
-
-    <section id="page-marketplace" class="hidden min-h-screen p-4 animate-fade">
-        <header class="flex justify-between items-center mb-6 py-4">
-            <div onclick="showPage('page-profile')" class="flex items-center gap-3 cursor-pointer">
-                <img id="user-avatar" src="https://ui-avatars.com/api/?name=Guest&background=3b82f6&color=fff" class="w-10 h-10 rounded-full border-2 border-blue-500">
-                <p id="user-name-display" class="font-bold text-sm truncate w-24">Guest</p>
-            </div>
-            <button onclick="showCart()" class="relative p-3 bg-slate-800 rounded-full">
-                <i class="fa fa-shopping-basket"></i>
-                <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-[8px] px-1.5 rounded-full font-bold">0</span>
-            </button>
-        </header>
-
-        <div class="mb-6">
-            <h2 class="font-bold text-lg text-blue-400">Selamat Datang di XREZZKY STORE</h2>
-            <p class="text-xs text-gray-400 mt-1">Marketplace premium cepat & terpercaya</p>
-        </div>
-
-        <div class="mb-6">
-            <input type="text" id="search-input" onkeyup="searchProduct(this.value)" placeholder="Cari produk impianmu..." class="w-full p-4 rounded-2xl bg-slate-800 border border-slate-700 outline-none text-sm">
-        </div>
-
-        <div id="search-empty" class="hidden text-center py-10 opacity-50">
-            <i class="fa fa-search text-4xl mb-3"></i>
-            <p>Yah, yang kamu cari tidak ada</p>
-        </div>
-
-        <main id="product-list" class="grid grid-cols-2 md:grid-cols-4 gap-4"></main>
-    </section>
-
-    <section id="page-profile" class="hidden min-h-screen p-6 animate-fade">
-        <div class="flex items-center gap-4 mb-8">
-            <button onclick="showPage('page-marketplace')"><i class="fa fa-arrow-left"></i></button>
-            <h1 class="text-xl font-bold">Profil & Riwayat</h1>
-        </div>
-        <div id="profile-content"></div>
-        <div class="glass p-6 rounded-3xl mt-6">
-            <h3 class="font-bold mb-4">Pesanan Saya</h3>
-            <div id="user-history" class="space-y-4"></div>
-        </div>
-    </section>
-
-    <section id="page-admin" class="hidden min-h-screen p-6 animate-fade">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-blue-500">Admin Panel</h1>
-            <button onclick="showPage('page-marketplace')" class="text-xs bg-slate-700 px-3 py-1.5 rounded-lg">Back</button>
-        </div>
-        <div class="flex border-b border-slate-800 mb-4 text-[10px] font-bold overflow-x-auto">
-            <button onclick="switchAdminTab('pending')" id="tab-pending" class="flex-1 py-3 tab-active">KONFIRMASI</button>
-            <button onclick="switchAdminTab('process')" id="tab-process" class="flex-1 py-3">PROSES</button>
-            <button onclick="switchAdminTab('done')" id="tab-done" class="flex-1 py-3">SELESAI</button>
-            <button onclick="switchAdminTab('reject')" id="tab-reject" class="flex-1 py-3">DITOLAK</button>
-            <button onclick="switchAdminTab('upload')" id="tab-upload" class="flex-1 py-3">STOK/UPLOAD</button>
-        </div>
-
-        <div id="admin-pending" class="admin-tab"></div>
-        <div id="admin-process" class="admin-tab hidden"></div>
-        <div id="admin-done" class="admin-tab hidden"></div>
-        <div id="admin-reject" class="admin-tab hidden"></div>
         
-        <div id="admin-upload" class="admin-tab hidden glass p-6 rounded-2xl">
-            <div id="edit-indicator" class="hidden bg-yellow-600/20 text-yellow-400 p-3 rounded-xl text-xs font-bold mb-4 text-center">✏️ SEDANG EDIT PRODUK</div>
-            <h3 class="font-bold mb-3">Form Produk</h3>
-            <input type="text" id="p-name" placeholder="Nama Produk" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
-            <input type="number" id="p-price" placeholder="Harga" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
-            <textarea id="p-desc" placeholder="Deskripsi" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm h-24"></textarea>
-            <input type="number" id="p-stock" placeholder="Stok" class="w-full p-3 mb-3 bg-slate-800 rounded border border-slate-700 text-sm">
-            
-            <p class="text-[10px] text-blue-400 font-bold mb-2 uppercase tracking-widest">Gambar Produk (Max 20)</p>
-            <div id="image-input-container" class="space-y-2 mb-4"></div>
-            
-            <button onclick="saveProduct()" id="btn-save-prod" class="w-full bg-green-600 py-3 rounded-xl font-bold">Upload Produk</button>
-            <button id="cancel-edit-btn" onclick="cancelEdit()" class="hidden w-full bg-gray-600 py-3 rounded-xl font-bold mt-2">BATAL EDIT</button>
+        <!-- SEARCH -->
+        <div class="mb-4">
+            <input type="text" id="searchInput" placeholder="Cari produk..." class="input" onkeyup="searchProducts()">
         </div>
-    </section>
-
-    <div id="modal-detail" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 animate-fade">
-        <div class="bg-slate-900 w-full max-w-lg rounded-3xl overflow-hidden relative border border-slate-800 max-h-[90vh] overflow-y-auto">
-            <div class="relative">
-                <img id="m-img" src="" class="w-full h-64 object-contain bg-slate-900 cursor-pointer">
-                <div id="m-badge-out" class="absolute top-4 right-4 bg-red-600 text-white text-[10px] font-bold px-3 py-1 rounded-full hidden">STOK HABIS</div>
-            </div>
-            <div id="m-thumbs" class="flex gap-2 p-3 overflow-x-auto bg-slate-800/50"></div>
-            <div class="p-6">
-                <div class="flex justify-between items-start mb-2">
-                    <h2 id="m-title" class="text-xl font-bold"></h2>
-                    <p id="m-price" class="text-blue-500 font-bold text-lg"></p>
-                </div>
-                <div class="flex items-center gap-2 mb-4">
-                    <div id="m-rating-stars" class="text-yellow-400 text-sm"></div>
-                    <span id="m-rating-text" class="text-xs text-gray-400"></span>
-                </div>
-                <p id="m-desc" class="text-gray-400 text-xs mb-6"></p>
-                
-                <div class="mb-6">
-                    <h4 class="text-xs font-bold mb-3 text-blue-400 uppercase tracking-widest">Ulasan Pembeli</h4>
-                    <div id="m-reviews" class="space-y-3"></div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3 sticky bottom-0 bg-slate-900 py-2">
-                    <button id="btn-buy-now" class="bg-green-600 py-4 rounded-2xl font-bold text-xs disabled:opacity-50 disabled:grayscale">BELI SEKARANG</button>
-                    <button id="btn-add-cart" class="bg-blue-600 py-4 rounded-2xl font-bold text-xs disabled:opacity-50 disabled:grayscale">+ KERANJANG</button>
-                </div>
-                <button onclick="closeModal('modal-detail')" class="w-full mt-4 text-gray-500 text-[10px] uppercase">Tutup</button>
-            </div>
+        
+        <!-- CATEGORIES -->
+        <div id="categories" class="flex gap-2 overflow-x-auto pb-2 mb-4"></div>
+        
+        <!-- PRODUCTS -->
+        <div id="productsContainer" class="product-grid"></div>
+        
+        <!-- EMPTY STATE -->
+        <div id="emptyProducts" class="text-center py-10 hidden">
+            <i class="fas fa-box-open text-4xl text-gray-600 mb-2"></i>
+            <p class="text-gray-500">Belum ada produk</p>
         </div>
     </div>
 
-    <div id="modal-cart" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 animate-fade">
-        <div class="bg-slate-900 w-full max-w-md rounded-3xl p-6 border border-slate-700">
-            <h2 class="text-xl font-bold mb-4 text-blue-500">Keranjang Belanja</h2>
-            <div id="cart-items" class="space-y-4 max-h-80 overflow-y-auto mb-6"></div>
-            <div class="flex justify-between items-center mb-6 pt-4 border-t border-slate-800">
-                <p class="text-sm">Total Estimasi:</p>
-                <p id="cart-total" class="font-bold text-blue-400 text-lg">Rp 0</p>
-            </div>
-            <button onclick="checkoutCart()" class="w-full bg-green-600 py-4 rounded-2xl font-bold shadow-lg shadow-green-900/20">CHECKOUT VIA WHATSAPP</button>
-            <button onclick="closeModal('modal-cart')" class="w-full mt-2 text-gray-500 text-xs">Kembali Belanja</button>
+    <!-- PAGE PROFILE -->
+    <div id="page-profile" class="p-4 pb-20 hidden">
+        <div class="flex items-center gap-3 mb-4">
+            <button onclick="showPage('home')" class="text-gray-400"><i class="fas fa-arrow-left text-xl"></i></button>
+            <h1 class="text-xl font-bold">Profil Saya</h1>
+        </div>
+        <div id="profileContent" class="glass p-4 rounded-2xl"></div>
+        <div class="mt-4">
+            <h2 class="font-bold mb-2">📦 Riwayat Pesanan</h2>
+            <div id="orderHistory" class="space-y-3"></div>
         </div>
     </div>
 
-    <div id="modal-review" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/90">
-        <div class="glass p-6 rounded-3xl w-full max-w-sm border border-blue-500/30 text-center">
-            <h3 class="text-lg font-bold mb-4">Beri Penilaian</h3>
-            <p id="review-product-name" class="text-blue-400 text-sm mb-4 font-bold"></p>
-            <div class="mb-4">
-                <p id="star-value" class="text-yellow-400 font-bold text-xl mb-1">5 ★</p>
-                <input type="range" id="star-range" min="1" max="5" value="5" class="w-full" oninput="document.getElementById('star-value').innerText = this.value + ' ★'">
+    <!-- PAGE SELLER DASHBOARD -->
+    <div id="page-seller" class="p-4 pb-20 hidden">
+        <div class="flex items-center gap-3 mb-4">
+            <button onclick="showPage('home')" class="text-gray-400"><i class="fas fa-arrow-left text-xl"></i></button>
+            <h1 class="text-xl font-bold">Dashboard Seller</h1>
+        </div>
+        
+        <!-- STATS -->
+        <div class="grid grid-cols-3 gap-3 mb-4">
+            <div class="glass p-3 text-center rounded-xl">
+                <p class="text-2xl font-bold text-blue-500" id="sellerProductCount">0</p>
+                <p class="text-xs">Produk</p>
             </div>
-            <textarea id="review-text" placeholder="Tulis ulasan singkat..." class="w-full p-4 bg-slate-800 rounded-xl mb-4 text-sm outline-none border border-slate-700 h-24"></textarea>
-            <button id="btn-submit-review" class="w-full bg-blue-600 py-3 rounded-xl font-bold">Kirim Ulasan</button>
-            <button onclick="closeModal('modal-review')" class="mt-3 text-gray-500 text-xs">Batal</button>
+            <div class="glass p-3 text-center rounded-xl">
+                <p class="text-2xl font-bold text-green-500" id="sellerOrderCount">0</p>
+                <p class="text-xs">Pesanan</p>
+            </div>
+            <div class="glass p-3 text-center rounded-xl">
+                <p class="text-2xl font-bold text-yellow-500" id="sellerRating">0</p>
+                <p class="text-xs">Rating</p>
+            </div>
+        </div>
+        
+        <!-- TABS -->
+        <div class="flex gap-2 mb-4">
+            <button class="tab-btn active" data-tab="products" onclick="switchSellerTab('products')">📦 Produk</button>
+            <button class="tab-btn" data-tab="orders" onclick="switchSellerTab('orders')">📋 Pesanan</button>
+            <button class="tab-btn" data-tab="add" onclick="switchSellerTab('add')">➕ Tambah</button>
+            <button class="tab-btn" data-tab="store" onclick="switchSellerTab('store')">🏪 Toko</button>
+        </div>
+        
+        <!-- TAB PRODUCTS -->
+        <div id="sellerProductsTab" class="space-y-3"></div>
+        
+        <!-- TAB ORDERS -->
+        <div id="sellerOrdersTab" class="space-y-3 hidden"></div>
+        
+        <!-- TAB ADD PRODUCT -->
+        <div id="sellerAddTab" class="glass p-4 rounded-2xl hidden">
+            <div id="editBadge" class="hidden bg-yellow-500/20 p-2 rounded-lg text-yellow-500 text-sm mb-3">✏️ Mode Edit</div>
+            <input type="text" id="productName" placeholder="Nama Produk" class="input mb-3">
+            <input type="number" id="productPrice" placeholder="Harga" class="input mb-3">
+            <input type="number" id="productStock" placeholder="Stok" class="input mb-3">
+            <select id="productCategory" class="input mb-3">
+                <option value="">Pilih Kategori</option>
+                <option>Elektronik</option><option>Fashion</option><option>Makanan</option>
+                <option>Minuman</option><option>Olahraga</option><option>Kesehatan</option>
+            </select>
+            <textarea id="productDesc" placeholder="Deskripsi" rows="3" class="input mb-3"></textarea>
+            <div id="imageContainer" class="mb-3"></div>
+            <button onclick="addImageField()" class="btn-outline w-full py-2 mb-3">+ Tambah Gambar</button>
+            <button id="saveProductBtn" onclick="saveProduct()" class="btn-primary w-full py-3">Simpan Produk</button>
+            <button id="cancelEditBtn" onclick="cancelEditProduct()" class="btn-outline w-full py-3 mt-2 hidden">Batal Edit</button>
+        </div>
+        
+        <!-- TAB STORE INFO -->
+        <div id="sellerStoreTab" class="glass p-4 rounded-2xl hidden">
+            <div id="storeInfo"></div>
+            <button onclick="editStore()" class="btn-outline w-full mt-3">Edit Toko</button>
         </div>
     </div>
+</div>
 
-    <nav class="fixed bottom-0 left-0 right-0 glass h-16 flex justify-around items-center z-50 border-t border-slate-800">
-        <button onclick="showPage('page-marketplace')" class="text-gray-400 hover:text-blue-500 transition"><i class="fa fa-home text-xl"></i></button>
-        <button onclick="showPage('page-profile')" class="text-gray-400 hover:text-blue-500 transition"><i class="fa fa-receipt text-xl"></i></button>
-        <button id="nav-admin" onclick="showPage('page-admin')" class="hidden text-gray-400 hover:text-blue-500 transition"><i class="fa fa-shield-alt text-xl"></i></button>
-    </nav>
+<!-- MODAL LOGIN -->
+<div id="loginModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden p-4">
+    <div class="glass p-6 rounded-2xl w-full max-w-md">
+        <h2 class="text-xl font-bold mb-4 text-center">Masuk ke XREZZKY</h2>
+        <div id="loginForm">
+            <input type="email" id="loginEmail" placeholder="Email" class="input mb-3">
+            <input type="password" id="loginPassword" placeholder="Password" class="input mb-4">
+            <button onclick="doLogin()" class="btn-primary w-full py-3 mb-2">Login</button>
+            <p class="text-center text-sm text-gray-400">Belum punya akun? <button onclick="showRegister()" class="text-blue-500">Daftar</button></p>
+            <p class="text-center text-xs text-gray-500 mt-3"><button onclick="showForgotPassword()" class="hover:underline">Lupa password?</button></p>
+        </div>
+        <div id="registerForm" class="hidden">
+            <input type="text" id="regName" placeholder="Nama Lengkap" class="input mb-3">
+            <input type="text" id="regUsername" placeholder="Username" class="input mb-3">
+            <input type="email" id="regEmail" placeholder="Email" class="input mb-3">
+            <input type="password" id="regPassword" placeholder="Password" class="input mb-4">
+            <button onclick="doRegister()" class="btn-primary w-full py-3 mb-2">Daftar</button>
+            <p class="text-center text-sm text-gray-400">Sudah punya akun? <button onclick="showLogin()" class="text-blue-500">Login</button></p>
+        </div>
+        <button onclick="closeLoginModal()" class="btn-outline w-full py-2 mt-3">Tutup</button>
+    </div>
+</div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, set, get, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<!-- MODAL FORGOT PASSWORD -->
+<div id="forgotModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden p-4">
+    <div class="glass p-6 rounded-2xl w-full max-w-md">
+        <h2 class="text-xl font-bold mb-4">Reset Password</h2>
+        <input type="email" id="forgotEmail" placeholder="Email" class="input mb-4">
+        <button onclick="sendResetPassword()" class="btn-primary w-full py-3 mb-2">Kirim Link Reset</button>
+        <button onclick="closeForgotModal()" class="btn-outline w-full py-2">Batal</button>
+    </div>
+</div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyA75bdcfawOi957by8y_4-l4sJCCo6pF88",
-            authDomain: "xrezzkystore-marketplace-83bc0.firebaseapp.com",
-            databaseURL: "https://xrezzkystore-marketplace-83bc0-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "xrezzkystore-marketplace-83bc0",
-            storageBucket: "xrezzkystore-marketplace-83bc0.appspot.com",
-            messagingSenderId: "604900856944",
-            appId: "1:604900856944:web:c48c973da45214c68a10b5"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-
-        let globalProducts = [];
-        let userCart = {};
-        let isLoginMode = true;
-        let currentImages = [];
-        let currentIndex = 0;
-        const MAX_IMAGES = 20;
-
-        // --- AUTH LOGIC ---
-        onAuthStateChanged(auth, async (user) => {
-            document.getElementById('loader').classList.add('hidden');
-            const profileBox = document.getElementById('profile-content');
-
-            if (!user) {
-                profileBox.innerHTML = `<div class="glass p-6 rounded-3xl text-center"><p class="mb-4">Belum Login</p><button onclick="showPage('page-auth')" class="bg-blue-600 px-6 py-2 rounded-xl font-bold">Login / Daftar</button></div>`;
-                document.getElementById('nav-admin').classList.add('hidden');
-                showPage('page-marketplace');
-                listenProducts();
-                return;
-            }
-
-            const s = await get(ref(db, `users/${user.uid}`));
-            const data = s.val();
-
-            if (data?.banned) {
-                document.getElementById('page-banned').classList.remove('hidden');
-                document.getElementById('ban-reason').innerText = data.banReason;
-                return;
-            }
-
-            document.getElementById('user-name-display').innerText = data?.username || "User";
-            document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${data?.username}&background=3b82f6&color=fff`;
-
-            if (data?.role === 'admin') {
-                document.getElementById('nav-admin').classList.remove('hidden');
-                listenAdminOrders();
-            } else {
-                document.getElementById('nav-admin').classList.add('hidden');
-            }
-
-            profileBox.innerHTML = `
-                <div class="glass p-6 rounded-3xl text-center mb-4">
-                    <img src="https://ui-avatars.com/api/?name=${data?.username}&background=3b82f6&color=fff" class="w-20 h-20 rounded-full mx-auto border-4 border-blue-500 mb-3">
-                    <h2 class="text-xl font-bold">${data?.username}</h2>
-                    <p class="text-xs text-gray-400 mb-4">${user.email}</p>
-                    <div class="space-y-2">
-                        <button onclick="changeUsername()" class="w-full bg-blue-600/20 text-blue-400 py-2 rounded-lg font-bold">Ganti Username</button>
-                        <button onclick="changePasswordCustom()" class="w-full bg-green-600/20 text-green-400 py-2 rounded-lg font-bold">Ganti Password</button>
-                        <button onclick="signOutUser()" class="w-full bg-red-600/20 text-red-400 py-2 rounded-lg font-bold">Logout</button>
-                    </div>
-                </div>
-                <div class="glass p-4 rounded-3xl text-center">
-                    <button onclick="openVisiModal()" class="w-full bg-purple-600/20 text-purple-400 py-2 rounded-lg font-bold">Lihat Visi & Misi</button>
-                </div>
-            `;
-
-            listenProducts();
-            listenCart(user.uid);
-            listenUserHistory(user.uid);
-        });
-
-        window.handleAuth = async () => {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-pass').value;
-            try {
-                if (isLoginMode) {
-                    await signInWithEmailAndPassword(auth, email, pass);
-                } else {
-                    const res = await createUserWithEmailAndPassword(auth, email, pass);
-                    await set(ref(db, `users/${res.user.uid}`), {
-                        username: document.getElementById('auth-user').value || email.split('@')[0],
-                        email: email,
-                        role: email === 'xrezzkystore.id@gmail.com' ? "admin" : "user",
-                        banned: false,
-                        orderLimit: 5
-                    });
-                }
-            } catch (e) { alert(e.message); }
-        };
-
-        // --- PRODUCT LOGIC ---
-        function listenProducts() {
-            onValue(ref(db, 'products'), (snap) => {
-                const list = document.getElementById('product-list');
-                list.innerHTML = ""; globalProducts = [];
-                snap.forEach(child => {
-                    const p = child.val(); p.id = child.key;
-                    globalProducts.push(p);
-                    renderProductCard(p);
-                });
-            });
-        }
-
-        function renderProductCard(p) {
-            const list = document.getElementById('product-list');
-            const isAdmin = !document.getElementById('nav-admin').classList.contains('hidden');
-            const displayImg = (p.images && p.images.length > 0) ? p.images[0] : 'https://via.placeholder.com/300';
-            const isOut = (p.stock || 0) <= 0;
-
-            list.innerHTML += `
-                <div class="glass rounded-2xl overflow-hidden p-2 flex flex-col product-card relative animate-fade" data-name="${p.name.toLowerCase()}">
-                    ${isAdmin ? `
-                    <div class="absolute top-2 right-2 flex gap-1 z-10">
-                        <button onclick="editProductFull('${p.id}')" class="bg-yellow-600 text-[8px] p-1.5 rounded-lg"><i class="fa fa-edit"></i></button>
-                        <button onclick="deleteProduct('${p.id}')" class="bg-red-600 text-[8px] p-1.5 rounded-lg"><i class="fa fa-trash"></i></button>
-                    </div>` : ''}
-                    
-                    <div class="relative">
-                        <img src="${displayImg}" class="w-full h-36 object-contain bg-slate-900 rounded-xl mb-2 cursor-pointer p-2" onclick="viewDetail('${p.id}')">
-                        ${isOut ? `<div class="absolute inset-0 bg-black/60 flex items-center justify-center rounded-xl"><span class="text-[8px] bg-red-600 px-2 py-0.5 rounded font-bold">HABIS</span></div>` : ''}
-                    </div>
-
-                    <div class="px-1">
-                        <p class="text-[11px] font-bold truncate">${p.name}</p>
-                        <p class="text-blue-400 font-bold text-xs mt-1">Rp ${Number(p.price).toLocaleString()}</p>
-                        <div class="flex justify-between items-center mt-2">
-                            <span class="text-[9px] text-gray-500">Stok: ${p.stock || 0}</span>
-                            <button onclick="viewDetail('${p.id}')" class="text-[9px] bg-slate-800 px-2 py-1 rounded text-blue-400">Detail</button>
-                        </div>
-                    </div>
-                </div>`;
-        }
-
-        window.viewDetail = (id) => {
-            const p = globalProducts.find(x => x.id === id);
-            if (!p) return;
-
-            const images = p.images || ['https://via.placeholder.com/300'];
-            document.getElementById('m-img').src = images[0];
-            document.getElementById('m-img').onclick = () => openImageModal(images, 0);
-
-            const thumbContainer = document.getElementById("m-thumbs");
-            thumbContainer.innerHTML = "";
-            images.forEach((img, idx) => {
-                thumbContainer.innerHTML += `<img src="${img}" class="w-14 h-14 object-contain bg-slate-900 rounded-lg cursor-pointer border border-slate-700" onclick="updateDetailMainImg('${img}', ${idx})">`;
-            });
-
-            document.getElementById('m-title').innerText = p.name;
-            document.getElementById('m-price').innerText = "Rp " + Number(p.price).toLocaleString();
-            document.getElementById('m-desc').innerText = p.description || "Tidak ada deskripsi.";
-            
-            const isOut = (p.stock || 0) <= 0;
-            document.getElementById('m-badge-out').classList.toggle('hidden', !isOut);
-            document.getElementById('btn-buy-now').disabled = isOut;
-            document.getElementById('btn-add-cart').disabled = isOut;
-
-            // Rating & Reviews
-            const reviews = p.reviews ? Object.values(p.reviews) : [];
-            const avg = reviews.length ? (reviews.reduce((a, b) => a + Number(b.stars), 0) / reviews.length).toFixed(1) : 0;
-            
-            document.getElementById('m-rating-stars').innerHTML = '★'.repeat(Math.round(avg)) + '☆'.repeat(5 - Math.round(avg));
-            document.getElementById('m-rating-text').innerText = `(${avg}) • ${reviews.length} Ulasan`;
-
-            const revCont = document.getElementById('m-reviews');
-            revCont.innerHTML = reviews.length ? "" : `<p class="text-[10px] text-gray-600 italic">Belum ada ulasan untuk produk ini.</p>`;
-            reviews.sort((a,b) => b.time - a.time).forEach(r => {
-    revCont.innerHTML += `
-        <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-700">
-            <div class="flex justify-between items-center mb-1">
-                <div>
-                    <span class="font-bold text-[10px] text-blue-400">${r.user}</span>
-                    <p class="text-[8px] text-gray-500">${r.email || '-'}</p>
-                </div>
-                <span class="text-yellow-500 text-[10px]">${'★'.repeat(r.stars)}</span>
+<!-- MODAL PRODUCT DETAIL -->
+<div id="productModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden p-4 overflow-y-auto">
+    <div class="glass p-5 rounded-2xl w-full max-w-lg">
+        <img id="modalProductImage" src="" class="w-full h-48 object-contain rounded-xl mb-3">
+        <h2 id="modalProductName" class="text-xl font-bold mb-1"></h2>
+        <div id="modalProductSeller" class="flex items-center gap-2 text-sm text-gray-400 mb-2"></div>
+        <div id="modalProductRating" class="flex items-center gap-1 mb-2"></div>
+        <p id="modalProductPrice" class="text-2xl font-bold text-blue-500 mb-2"></p>
+        <p id="modalProductDesc" class="text-sm text-gray-400 mb-3"></p>
+        <p id="modalProductStock" class="text-xs text-gray-500 mb-4"></p>
+        <div class="flex gap-3">
+            <div class="flex items-center gap-2 bg-gray-800 rounded-full px-3 py-1">
+                <button onclick="changeQty(-1)" class="w-6 h-6 rounded-full bg-gray-700">-</button>
+                <span id="modalQty" class="w-8 text-center">1</span>
+                <button onclick="changeQty(1)" class="w-6 h-6 rounded-full bg-gray-700">+</button>
             </div>
-            <p class="text-[10px] text-gray-300">${r.text}</p>
-        </div>`;
-});
+            <button onclick="addToCartFromModal()" class="btn-outline flex-1">+ Keranjang</button>
+            <button onclick="buyNowFromModal()" class="btn-primary flex-1">Beli</button>
+        </div>
+        <button onclick="closeProductModal()" class="btn-outline w-full mt-4 py-2">Tutup</button>
+    </div>
+</div>
 
-            window.currentViewId = id;
-            document.getElementById('btn-buy-now').onclick = () => instantBuy(id);
-            document.getElementById('btn-add-cart').onclick = () => addToCart(id);
-            document.getElementById('modal-detail').classList.remove('hidden');
-        };
+<!-- MODAL CART -->
+<div id="cartModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden p-4">
+    <div class="glass p-5 rounded-2xl w-full max-w-md">
+        <h2 class="text-xl font-bold mb-3">🛒 Keranjang Belanja</h2>
+        <div id="cartItems" class="max-h-96 overflow-y-auto space-y-3 mb-4"></div>
+        <div class="border-t border-gray-700 pt-3 flex justify-between font-bold">
+            <span>Total:</span>
+            <span id="cartTotal" class="text-blue-500">Rp 0</span>
+        </div>
+        <button onclick="checkout()" class="btn-primary w-full py-3 mt-4 mb-2">Checkout via WhatsApp</button>
+        <button onclick="clearCart()" class="btn-outline w-full py-2">Kosongkan</button>
+        <button onclick="closeCartModal()" class="btn-outline w-full py-2 mt-2">Tutup</button>
+    </div>
+</div>
 
-        window.updateDetailMainImg = (src, idx) => {
-            const img = document.getElementById('m-img');
-            img.src = src;
-            img.onclick = () => {
-                const p = globalProducts.find(x => x.id === window.currentViewId);
-                openImageModal(p.images, idx);
-            };
-        };
+<!-- MODAL PAYMENT -->
+<div id="paymentModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden p-4">
+    <div class="glass p-5 rounded-2xl w-full max-w-md">
+        <h2 class="text-xl font-bold mb-3 text-center">💳 Konfirmasi Pembayaran</h2>
+        <p id="paymentOrderInfo" class="text-sm text-gray-400 mb-3 text-center"></p>
+        <input type="text" id="paymentProof" placeholder="Link Bukti Transfer" class="input mb-3">
+        <textarea id="paymentNote" placeholder="Catatan (opsional)" rows="2" class="input mb-4"></textarea>
+        <button onclick="sendPaymentConfirmation()" class="btn-primary w-full py-3 mb-2">Kirim Konfirmasi</button>
+        <button onclick="closePaymentModal()" class="btn-outline w-full py-2">Tutup</button>
+    </div>
+</div>
 
-        // --- CART & ORDER LOGIC ---
-        window.addToCart = async (id) => {
-            const user = auth.currentUser;
-            if (!user) return alert("Silahkan login terlebih dahulu!");
+<!-- MODAL REVIEW -->
+<div id="reviewModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden p-4">
+    <div class="glass p-5 rounded-2xl w-full max-w-md">
+        <h2 class="text-xl font-bold mb-3 text-center">⭐ Beri Ulasan</h2>
+        <p id="reviewProductName" class="text-sm text-center mb-3"></p>
+        <div class="flex justify-center gap-2 text-3xl mb-3" id="starRating">
+            <span onclick="setReviewRating(1)" class="cursor-pointer">☆</span>
+            <span onclick="setReviewRating(2)" class="cursor-pointer">☆</span>
+            <span onclick="setReviewRating(3)" class="cursor-pointer">☆</span>
+            <span onclick="setReviewRating(4)" class="cursor-pointer">☆</span>
+            <span onclick="setReviewRating(5)" class="cursor-pointer">☆</span>
+        </div>
+        <textarea id="reviewComment" placeholder="Tulis ulasan Anda..." rows="3" class="input mb-4"></textarea>
+        <button onclick="submitReview()" class="btn-primary w-full py-3 mb-2">Kirim Ulasan</button>
+        <button onclick="closeReviewModal()" class="btn-outline w-full py-2">Batal</button>
+    </div>
+</div>
 
-            const p = globalProducts.find(x => x.id === id);
-            if (p.stock <= 0) return alert("Stok habis!");
+<script type="module">
+// ==================== TAHAP 1: FIREBASE INIT ====================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getDatabase, ref, set, get, onValue, push, remove, update, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-            await update(ref(db, `carts/${user.uid}/${id}`), {
-                name: p.name,
-                price: p.price,
-                img: p.images[0],
-                qty: (userCart[id]?.qty || 0) + 1,
-                maxStock: p.stock
-            });
-            alert("Berhasil ditambah ke keranjang!");
-        };
+// Firebase Config
+const firebaseConfig = {
+    apiKey: "AIzaSyA75bdcfawOi957by8y_4-l4sJCCo6pF88",
+    authDomain: "xrezzkystore-marketplace-83bc0.firebaseapp.com",
+    databaseURL: "https://xrezzkystore-marketplace-83bc0-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "xrezzkystore-marketplace-83bc0",
+    storageBucket: "xrezzkystore-marketplace-83bc0.firebasestorage.app",
+    messagingSenderId: "604900856944",
+    appId: "1:604900856944:web:c48c973da45214c68a10b5"
+};
 
-        function listenCart(uid) {
-            onValue(ref(db, `carts/${uid}`), (snap) => {
-                const cont = document.getElementById('cart-items');
-                const totalEl = document.getElementById('cart-total');
-                const countEl = document.getElementById('cart-count');
-                cont.innerHTML = ""; userCart = {};
-                let total = 0, count = 0;
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-                if (!snap.exists()) {
-                    totalEl.innerText = "Rp 0"; countEl.innerText = "0";
-                    cont.innerHTML = `<p class="text-center text-gray-500 py-10">Keranjang kosong</p>`;
-                    return;
-                }
+console.log("✅ Firebase Connected!");
 
-                snap.forEach(child => {
-                    const item = child.val();
-                    userCart[child.key] = item;
-                    total += item.price * item.qty;
-                    count += item.qty;
-                    cont.innerHTML += `
-                        <div class="flex items-center gap-4 bg-slate-800 p-3 rounded-2xl">
-                            <img src="${item.img}" class="w-16 h-16 rounded-xl object-cover">
-                            <div class="flex-1">
-                                <p class="font-bold text-sm truncate">${item.name}</p>
-                                <p class="text-blue-400 text-xs font-bold">Rp ${item.price.toLocaleString()}</p>
-                                <div class="flex items-center gap-3 mt-2">
-                                    <button onclick="updateCartQty('${child.key}', -1)" class="bg-slate-700 w-6 h-6 rounded-lg">-</button>
-                                    <span class="text-xs font-bold">${item.qty}</span>
-                                    <button onclick="updateCartQty('${child.key}', 1)" class="bg-blue-600 w-6 h-6 rounded-lg">+</button>
-                                </div>
-                            </div>
-                        </div>`;
-                });
-                totalEl.innerText = "Rp " + total.toLocaleString();
-                countEl.innerText = count;
-            });
-        }
+// ==================== TAHAP 2: GLOBAL VARIABLES ====================
+let currentUser = null;
+let currentUserData = null;
+let allProducts = [];
+let allSellers = {};
+let userCart = {};
+let currentProduct = null;
+let currentOrderId = null;
+let currentReviewOrder = null;
+let selectedRating = 0;
+let editingProductId = null;
+let modalQty = 1;
 
-        window.updateCartQty = async (id, change) => {
-            const item = userCart[id];
-            const newQty = item.qty + change;
-            if (newQty <= 0) return remove(ref(db, `carts/${auth.currentUser.uid}/${id}`));
-            if (newQty > item.maxStock) return alert("Stok tidak mencukupi!");
-            await update(ref(db, `carts/${auth.currentUser.uid}/${id}`), { qty: newQty });
-        };
+// ==================== TAHAP 3: UTILITY FUNCTIONS ====================
+function showToast(msg, type = "info") {
+    Swal.fire({
+        text: msg,
+        icon: type,
+        toast: true,
+        timer: 3000,
+        showConfirmButton: false,
+        position: "top-end"
+    });
+}
 
-        window.checkOrderLimit = async (uid) => {
-            const snap = await get(ref(db, 'orders'));
-            let active = 0;
-            snap.forEach(c => {
-                const o = c.val();
-                if (o.userId === uid && (o.status === "Pending" || o.status === "Diproses")) active++;
-            });
-            if (active >= 5) {
-                alert("Kamu memiliki 5 order aktif. Selesaikan transaksi sebelumnya!");
-                return false;
-            }
-            return true;
-        };
+function formatRupiah(amount) {
+    return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(amount);
+}
 
-        window.instantBuy = async (id) => {
-            const user = auth.currentUser;
-            if (!user) return showPage('page-auth');
-            if (!(await checkOrderLimit(user.uid))) return;
+function formatDate(timestamp) {
+    return new Date(timestamp).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+}
 
-            const p = globalProducts.find(x => x.id === id);
-            const fresh = (await get(ref(db, `products/${id}`))).val();
-            if (!fresh || fresh.stock <= 0) return alert("Stok tiba-tiba habis!");
+function generateOrderId() {
+    const d = new Date();
+    return `XZ/${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}/${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}/${Math.floor(Math.random()*10000)}`;
+}
 
-            await update(ref(db, `products/${id}`), { stock: fresh.stock - 1 });
-            const orderRef = push(ref(db, "orders"));
-            await set(orderRef, {
-                userId: user.uid,
-                username: document.getElementById('user-name-display').innerText,
-                email: user.email,
-                items: { [id]: { name: p.name, price: p.price, qty: 1, pid: id } },
-                status: "Pending",
-                createdAt: Date.now()
-            });
+function sendToWA(phone, text) {
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, "_blank");
+}
 
-            const msg = `Halo Admin XREZZKY STORE,\n\nSaya ingin membeli:\n- ${p.name} (1x)\nTotal: Rp ${p.price.toLocaleString()}\n\nMohon diproses, terima kasih!`;
-            window.open(`https://wa.me/6288293064112?text=${encodeURIComponent(msg)}`);
-        };
+function renderStars(rating) {
+    let stars = "";
+    for (let i = 1; i <= 5; i++) {
+        stars += i <= rating ? '<i class="fas fa-star text-yellow-500"></i>' : '<i class="far fa-star text-gray-500"></i>';
+    }
+    return stars;
+}
 
-        window.checkoutCart = async () => {
-            const user = auth.currentUser;
-            if (!Object.keys(userCart).length) return alert("Keranjang kosong!");
-            if (!(await checkOrderLimit(user.uid))) return;
+function getStatusBadge(status) {
+    const map = {
+        pending: '<span class="badge bg-yellow-500/20 text-yellow-500">⏳ Menunggu Bayar</span>',
+        payment_confirmed: '<span class="badge bg-blue-500/20 text-blue-500">💰 Sudah Transfer</span>',
+        processed: '<span class="badge bg-purple-500/20 text-purple-500">⚙️ Diproses</span>',
+        shipped: '<span class="badge bg-indigo-500/20 text-indigo-500">📦 Dikirim</span>',
+        completed: '<span class="badge bg-green-500/20 text-green-500">✅ Selesai</span>',
+        rejected: '<span class="badge bg-red-500/20 text-red-500">❌ Ditolak</span>'
+    };
+    return map[status] || map.pending;
+}
 
-            let msg = "Halo Admin XREZZKY STORE,\n\nSaya ingin memesan:\n";
-            let total = 0;
-            const itemsToOrder = {};
+// ==================== TAHAP 4: LOAD DATA ====================
+function loadProducts() {
+    const productsRef = ref(db, "products");
+    onValue(productsRef, (snap) => {
+        allProducts = [];
+        snap.forEach(child => allProducts.push({ id: child.key, ...child.val() }));
+        renderProducts();
+        renderCategories();
+        updateStats();
+    });
+}
 
-            for (const id in userCart) {
-                const item = userCart[id];
-                const fresh = (await get(ref(db, `products/${id}`))).val();
-                if (fresh.stock < item.qty) return alert(`Stok ${item.name} tidak cukup!`);
-                
-                await update(ref(db, `products/${id}`), { stock: fresh.stock - item.qty });
-                itemsToOrder[id] = { name: item.name, price: item.price, qty: item.qty, pid: id };
-                msg += `- ${item.name} (${item.qty}x)\n`;
-                total += item.price * item.qty;
-            }
-
-            msg += `\nTotal: Rp ${total.toLocaleString()}\nMohon instruksi selanjutnya!`;
-            await push(ref(db, "orders"), {
-                userId: user.uid,
-                username: document.getElementById('user-name-display').innerText,
-                email: user.email,
-                items: itemsToOrder,
-                status: "Pending",
-                createdAt: Date.now()
-            });
-
-            await remove(ref(db, `carts/${user.uid}`));
-            window.open(`https://wa.me/6288293064112?text=${encodeURIComponent(msg)}`);
-            closeModal('modal-cart');
-        };
-
-        // --- IMAGE MODAL LOGIC ---
-        window.openImageModal = (images, index = 0) => {
-            currentImages = images;
-            currentIndex = index;
-            updateModalImage();
-            document.getElementById("imageModal").classList.remove("hidden");
-        };
-
-        window.closeImageModal = () => document.getElementById("imageModal").classList.add("hidden");
-
-        window.nextImage = () => {
-            currentIndex = (currentIndex + 1) % currentImages.length;
-            updateModalImage();
-        };
-
-        window.prevImage = () => {
-            currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
-            updateModalImage();
-        };
-
-        function updateModalImage() {
-            const img = document.getElementById("modalImage");
-            const counter = document.getElementById("imageCounter");
-            img.src = currentImages[currentIndex];
-            counter.innerText = `${currentIndex + 1} / ${currentImages.length}`;
-        }
-
-        window.handleModalBgClick = (e) => {
-            if (e.target.id === "imageModal") closeImageModal();
-        };
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === "Escape") closeImageModal();
-            if (!document.getElementById("imageModal").classList.contains("hidden")) {
-                if (e.key === "ArrowRight") nextImage();
-                if (e.key === "ArrowLeft") prevImage();
-            }
-        });
-
-        // --- ADMIN & STOCK LOGIC ---
-        window.saveProduct = async () => {
-            const btn = document.getElementById('btn-save-prod');
-            const name = document.getElementById("p-name").value;
-            const price = Number(document.getElementById("p-price").value);
-            const desc = document.getElementById("p-desc").value;
-            const stock = Number(document.getElementById("p-stock").value);
-            const urls = getAllImages();
-
-            if (!name || !price || urls.length === 0) return alert("Lengkapi data produk!");
-
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fa fa-spinner animate-spin"></i> Saving...`;
-
-            const data = { name, price, description: desc, stock, images: urls, updatedAt: Date.now() };
-
-            if (window.currentEditId) {
-                await update(ref(db, `products/${window.currentEditId}`), data);
-                alert("Produk diupdate!");
-            } else {
-                await push(ref(db, "products"), { ...data, createdAt: Date.now() });
-                alert("Produk ditambahkan!");
-            }
-
-            cancelEdit();
-            btn.disabled = false;
-            btn.innerText = "Upload Produk";
-        };
-
-        window.editProductFull = async (id) => {
-            const p = globalProducts.find(x => x.id === id);
-            if (!p) return;
-            window.currentEditId = id;
-            document.getElementById('p-name').value = p.name;
-            document.getElementById('p-price').value = p.price;
-            document.getElementById('p-desc').value = p.description || "";
-            document.getElementById('p-stock').value = p.stock || 0;
-            
-            const cont = document.getElementById("image-input-container");
-            cont.innerHTML = "";
-            if (p.images) p.images.forEach(url => createImageInput(url));
-            createImageInput();
-
-            document.getElementById('edit-indicator').classList.remove('hidden');
-            document.getElementById('cancel-edit-btn').classList.remove('hidden');
-            document.getElementById('btn-save-prod').innerText = "Update Produk";
-            switchAdminTab('upload');
-        };
-
-        window.cancelEdit = () => {
-            window.currentEditId = null;
-            document.getElementById("p-name").value = "";
-            document.getElementById("p-price").value = "";
-            document.getElementById("p-desc").value = "";
-            document.getElementById("p-stock").value = "";
-            document.getElementById("image-input-container").innerHTML = "";
-            createImageInput();
-            document.getElementById('edit-indicator').classList.add('hidden');
-            document.getElementById('cancel-edit-btn').classList.add('hidden');
-            document.getElementById('btn-save-prod').innerText = "Upload Produk";
-        };
-
-        function createImageInput(val = "") {
-            const cont = document.getElementById("image-input-container");
-            if (cont.querySelectorAll("input").length >= MAX_IMAGES) return;
-
-            const wrap = document.createElement("div");
-            wrap.className = "flex gap-2 items-center animate-fade";
-            const input = document.createElement("input");
-            input.type = "text"; input.placeholder = "URL Gambar..."; input.value = val;
-            input.className = "flex-1 p-2 bg-slate-800 border border-slate-700 rounded-lg text-[10px]";
-            
-            const prev = document.createElement("img");
-            prev.className = `w-10 h-10 object-contain bg-slate-900 rounded ${val ? '' : 'hidden'}`;
-            if (val) prev.src = val;
-
-            input.onchange = async () => {
-                const url = input.value.trim();
-                if (!url) return;
-                const img = new Image();
-                img.onload = () => {
-                    prev.src = url + "?t=" + Date.now();
-                    prev.classList.remove("hidden");
-                    const inputs = cont.querySelectorAll("input");
-                    if (input === inputs[inputs.length - 1]) createImageInput();
-                };
-                img.onerror = () => { alert("URL Gambar tidak valid!"); input.value = ""; prev.classList.add("hidden"); };
-                img.src = url;
-            };
-            wrap.append(input, prev);
-            cont.appendChild(wrap);
-        }
-
-        function getAllImages() {
-            return Array.from(document.querySelectorAll("#image-input-container input")).map(i => i.value.trim()).filter(v => v !== "");
-        }
-
-        window.updateStat = async (id, stat) => {
-            await update(ref(db, `orders/${id}`), { status: stat });
-        };
-
-        window.rejectOrder = async (id) => {
-            const reason = prompt("Alasan penolakan:");
-            if (!reason) return;
-            const o = (await get(ref(db, `orders/${id}`))).val();
-            for (const pid in o.items) {
-                const p = (await get(ref(db, `products/${pid}`))).val();
-                await update(ref(db, `products/${pid}`), { stock: (p.stock || 0) + o.items[pid].qty });
-            }
-            await update(ref(db, `orders/${id}`), { status: "Ditolak", rejectReason: reason });
-        };
-
-        window.delOrder = async (id) => {
-            if (confirm("Hapus permanen?")) await remove(ref(db, `orders/${id}`));
-        };
-
-        // --- UI UTILS ---
-        window.showPage = (id) => {
-            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-            window.scrollTo(0,0);
-        };
-        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
-        window.showCart = () => document.getElementById('modal-cart').classList.remove('hidden');
-        window.toggleAuthMode = () => { isLoginMode = !isLoginMode; document.getElementById('reg-fields').classList.toggle('hidden', isLoginMode); document.getElementById('auth-toggle-text').innerText = isLoginMode ? "Belum punya akun? Daftar" : "Sudah punya akun? Login"; };
-        window.signOutUser = () => signOut(auth);
-        window.switchAdminTab = (t) => {
-            document.querySelectorAll('.admin-tab').forEach(x => x.classList.add('hidden'));
-            document.getElementById('admin-' + t).classList.remove('hidden');
-            document.querySelectorAll('[id^="tab-"]').forEach(x => x.classList.remove('tab-active'));
-            document.getElementById('tab-' + t).classList.add('tab-active');
-        };
-        window.searchProduct = (v) => {
-            const q = v.toLowerCase();
-            let found = false;
-            document.querySelectorAll('.product-card').forEach(c => {
-                const match = c.getAttribute('data-name').includes(q);
-                c.classList.toggle('hidden', !match);
-                if (match) found = true;
-            });
-            document.getElementById('search-empty').classList.toggle('hidden', found);
-        };
-
-        function listenAdminOrders() {
-            onValue(ref(db, 'orders'), (snap) => {
-                const tabs = ['pending', 'process', 'done', 'reject'];
-                tabs.forEach(t => document.getElementById('admin-' + t).innerHTML = "");
-                snap.forEach(c => {
-                    const o = c.val(); const id = c.key;
-                    const items = Object.values(o.items || {}).map(i => `${i.name} (${i.qty}x)`).join(", ");
-                    const card = `<div class="glass p-4 rounded-2xl mb-3 text-[10px] border border-slate-700">
-                        <p class="font-bold text-blue-400">${o.username} <span class="text-gray-500 font-normal">(${o.email})</span></p>
-                        <p class="my-1">${items}</p>
-                        <p class="text-gray-500">${new Date(o.createdAt).toLocaleString()}</p>
-                        ${o.rejectReason ? `<p class="text-red-400 mt-1">Alasan: ${o.rejectReason}</p>` : ''}
-                        <div class="flex gap-2 mt-3">
-                            ${o.status === "Pending" ? `<button onclick="updateStat('${id}','Diproses')" class="bg-blue-600 px-3 py-1 rounded font-bold">PROSES</button>` : ''}
-                            ${o.status === "Diproses" ? `<button onclick="updateStat('${id}','Selesai')" class="bg-green-600 px-3 py-1 rounded font-bold">SELESAI</button>` : ''}
-                            ${(o.status === "Pending" || o.status === "Diproses") ? `<button onclick="rejectOrder('${id}')" class="bg-red-600 px-3 py-1 rounded font-bold">REJECT</button>` : ''}
-                            <button onclick="delOrder('${id}')" class="text-gray-500 ml-auto"><i class="fa fa-trash"></i></button>
-                        </div>
-                    </div>`;
-                    if (o.status === "Pending") document.getElementById('admin-pending').innerHTML += card;
-                    else if (o.status === "Diproses") document.getElementById('admin-process').innerHTML += card;
-                    else if (o.status === "Selesai") document.getElementById('admin-done').innerHTML += card;
-                    else if (o.status === "Ditolak") document.getElementById('admin-reject').innerHTML += card;
-                });
-            });
-        }
-
-        function listenUserHistory(uid) {
-    onValue(ref(db, 'orders'), (snap) => {
-        const cont = document.getElementById('user-history');
-        cont.innerHTML = "";
-
-        snap.forEach(c => {
-            const o = c.val();
-            if (o.userId === uid) {
-                const items = Object.values(o.items || {});
-                const total = items.reduce((a,b)=>a + (b.price * b.qty),0);
-
-                const detailText =
-`INVOICE XREZZKY STORE
-========================
-Nama   : ${o.username}
-Email  : ${o.email}
-Tanggal: ${new Date(o.createdAt).toLocaleString()}
-
-Detail Pesanan:
-${items.map(i=>`- ${i.name}
-  Qty   : ${i.qty}
-  Harga : Rp ${i.price.toLocaleString()}
-  Subtotal : Rp ${(i.price*i.qty).toLocaleString()}
-`).join("\n")}
-
-TOTAL : Rp ${total.toLocaleString()}
-Status: ${o.status}
-========================`;
-
-                cont.innerHTML += `
-                <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 text-[10px] animate-fade">
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-500">${new Date(o.createdAt).toLocaleDateString()}</span>
-                        <span class="font-bold ${
-                            o.status === 'Selesai' ? 'text-green-500' :
-                            o.status === 'Ditolak' ? 'text-red-500' :
-                            'text-yellow-500'
-                        }">${o.status.toUpperCase()}</span>
-                    </div>
-
-                    <p class="font-bold text-sm mb-2">${items.map(i => i.name).join(", ")}</p>
-                    <p class="text-gray-400 text-[9px] mb-2">Total: Rp ${total.toLocaleString()}</p>
-
-                    <div class="flex gap-2">
-                        <button onclick="copyInvoice(\`${detailText}\`)"
-                            class="flex-1 bg-blue-600/20 text-blue-400 py-2 rounded-lg font-bold">
-                            COPY DETAIL
-                        </button>
-
-                        ${
-                            o.status === 'Selesai' && !o.isRated ?
-                            `<button onclick="openReviewModal('${c.key}', '${items[0].pid}', '${items[0].name}')"
-                                class="flex-1 bg-green-600/20 text-green-400 py-2 rounded-lg font-bold">
-                                BERI NILAI
-                            </button>` : ''
-                        }
-                    </div>
-                </div>`;
-            }
+function loadSellers() {
+    const sellersRef = ref(db, "sellers");
+    onValue(sellersRef, (snap) => {
+        allSellers = {};
+        snap.forEach(child => {
+            const seller = child.val();
+            if (seller.status === "approved") allSellers[child.key] = seller;
         });
     });
 }
 
-        window.openReviewModal = (oid, pid, pname) => {
-            document.getElementById('review-product-name').innerText = pname;
-            document.getElementById('modal-review').classList.remove('hidden');
-            document.getElementById('btn-submit-review').onclick = () => submitReview(oid, pid);
-        };
+function updateStats() {
+    const totalSold = allProducts.reduce((s, p) => s + (p.soldCount || 0), 0);
+    document.getElementById("stat-products")?.setAttribute("data-value", allProducts.length);
+}
 
-        window.submitReview = async (oid, pid) => {
-    const stars = document.getElementById('star-range').value;
-    const text = document.getElementById('review-text').value;
-    const user = auth.currentUser;
+function renderCategories() {
+    const categories = ["Semua", "Elektronik", "Fashion", "Makanan", "Minuman", "Olahraga", "Kesehatan"];
+    const container = document.getElementById("categories");
+    if (!container) return;
+    container.innerHTML = categories.map(cat => `
+        <button onclick="filterByCategory('${cat}')" class="px-4 py-2 rounded-full text-xs bg-gray-800 hover:bg-blue-600 transition whitespace-nowrap">
+            ${cat}
+        </button>
+    `).join("");
+}
 
-    if(!text) return alert("Ulasan tidak boleh kosong!");
-
-    await push(ref(db, `products/${pid}/reviews`), {
-        user: document.getElementById('user-name-display').innerText,
-        email: user.email,
-        stars,
-        text,
-        time: Date.now()
-    });
-
-    await update(ref(db, `orders/${oid}`), { isRated: true });
-
-    closeModal('modal-review');
-    alert("Terima kasih atas ulasannya!");
+window.filterByCategory = function(cat) {
+    if (cat === "Semua") renderProducts();
+    else renderProducts(allProducts.filter(p => p.category === cat));
 };
 
-        window.changeUsername = async () => {
-            const n = prompt("Username baru:");
-            if (n) await update(ref(db, `users/${auth.currentUser.uid}`), { username: n });
-        };
+function renderProducts(products = null) {
+    const container = document.getElementById("productsContainer");
+    const empty = document.getElementById("emptyProducts");
+    let data = products || allProducts;
+    
+    const searchTerm = document.getElementById("searchInput")?.value.toLowerCase() || "";
+    if (searchTerm) {
+        data = data.filter(p => p.name.toLowerCase().includes(searchTerm));
+    }
+    
+    if (!container) return;
+    
+    if (data.length === 0) {
+        container.innerHTML = "";
+        empty.classList.remove("hidden");
+        return;
+    }
+    empty.classList.add("hidden");
+    
+    container.innerHTML = data.map(p => {
+        const seller = allSellers[p.sellerId];
+        const rating = p.reviews ? Object.values(p.reviews).reduce((s,r)=>s+r.rating,0) / Object.values(p.reviews).length : 0;
+        return `
+            <div class="product-card p-3" onclick="viewProduct('${p.id}')">
+                <img src="${p.images?.[0] || 'https://placehold.co/300x300/1e293b/475569?text=No+Image'}" class="w-full h-32 object-cover rounded-lg mb-2">
+                <p class="font-bold text-sm truncate">${p.name}</p>
+                <div class="flex items-center gap-1 text-xs my-1">${renderStars(rating)}</div>
+                <p class="text-blue-500 font-bold">${formatRupiah(p.price)}</p>
+                <p class="text-xs text-gray-500">Stok: ${p.stock || 0}</p>
+                ${seller ? `<p class="text-xs text-yellow-500 mt-1"><i class="fas fa-store"></i> ${seller.storeName}</p>` : ""}
+            </div>
+        `;
+    }).join("");
+}
 
-        window.changePasswordCustom = async () => {
-            const p = prompt("Password baru:");
-            if (p) {
-                try { await updatePassword(auth.currentUser, p); alert("Password diganti!"); }
-                catch (e) { alert("Login ulang diperlukan."); }
-            }
-        };
+window.searchProducts = function() {
+    renderProducts();
+};
 
-        window.openVisiModal = () => {
-            document.getElementById('modal-visi').classList.remove('hidden');
-            document.querySelectorAll('.visi-item').forEach((it, i) => {
-                it.style.animation = `fadeUp 0.5s ease forwards ${i * 0.2}s`;
-            });
-        };
+// ==================== TAHAP 5: AUTH FUNCTIONS ====================
+window.showLoginModal = function() {
+    document.getElementById("loginModal").classList.remove("hidden");
+    showLogin();
+};
 
-        window.deleteProduct = async (id) => {
-            if (confirm("Hapus produk ini?")) await remove(ref(db, `products/${id}`));
-        };
+function closeLoginModal() {
+    document.getElementById("loginModal").classList.add("hidden");
+}
 
-        // Init First Input
-        createImageInput();
+function showRegister() {
+    document.getElementById("loginForm").classList.add("hidden");
+    document.getElementById("registerForm").classList.remove("hidden");
+}
+
+function showLogin() {
+    document.getElementById("loginForm").classList.remove("hidden");
+    document.getElementById("registerForm").classList.add("hidden");
+}
+
+window.doLogin = async function() {
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
+    if (!email || !password) return showToast("Email dan password wajib diisi!", "error");
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+        showToast("Login berhasil!", "success");
+        closeLoginModal();
+    } catch (error) {
+        showToast(error.message, "error");
+    }
+};
+
+window.doRegister = async function() {
+    const name = document.getElementById("regName").value;
+    const username = document.getElementById("regUsername").value;
+    const email = document.getElementById("regEmail").value;
+    const password = document.getElementById("regPassword").value;
+    if (!name || !username || !email || !password) return showToast("Semua field wajib diisi!", "error");
+    if (password.length < 6) return showToast("Password minimal 6 karakter!", "error");
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await set(ref(db, `users/${userCredential.user.uid}`), {
+            name: name,
+            username: username,
+            email: email,
+            role: "user",
+            createdAt: Date.now()
+        });
+        showToast("Registrasi berhasil!", "success");
+        closeLoginModal();
+    } catch (error) {
+        showToast(error.message, "error");
+    }
+};
+
+window.showForgotPassword = function() {
+    closeLoginModal();
+    document.getElementById("forgotModal").classList.remove("hidden");
+};
+
+function closeForgotModal() {
+    document.getElementById("forgotModal").classList.add("hidden");
+}
+
+window.sendResetPassword = async function() {
+    const email = document.getElementById("forgotEmail").value;
+    if (!email) return showToast("Masukkan email!", "error");
+    try {
+        await sendPasswordResetEmail(auth, email);
+        showToast("Link reset password telah dikirim!", "success");
+        closeForgotModal();
+    } catch (error) {
+        showToast(error.message, "error");
+    }
+};
+
+window.logoutUser = async function() {
+    await signOut(auth);
+    showToast("Logout berhasil!", "success");
+    showPage("home");
+};
+
+// ==================== TAHAP 6: AUTH STATE ====================
+onAuthStateChanged(auth, async (user) => {
+    currentUser = user;
+    
+    if (user) {
+        const userSnap = await get(ref(db, `users/${user.uid}`));
+        currentUserData = userSnap.val();
         
-        window.copyInvoice = (text) => {
-    navigator.clipboard.writeText(text).then(()=>{
-        alert("Detail transaksi berhasil dicopy!");
-    }).catch(()=>{
-        alert("Gagal copy!");
-    });
-};
-
- // =========================
-// SMART LOADING SYSTEM FINAL
-// =========================
-
-const loader = document.getElementById("initial-loading");
-const bar = document.getElementById("loading-bar");
-const textLoading = document.getElementById("loading-text");
-
-let progress = 0;
-let firebaseReady = false;
-let minimumTimePassed = false;
-
-const loadingMessages = [
-    "Menyiapkan Marketplace...",
-    "Menghubungkan Server...",
-    "Mengambil Produk...",
-    "Menampilkan Data...",
-    "Hampir Selesai..."
-];
-
-let msgIndex = 0;
-
-const interval = setInterval(() => {
-    progress += Math.random() * 7;
-    if (progress > 90) progress = 90;
-
-    bar.style.width = progress + "%";
-
-    msgIndex = (msgIndex + 1) % loadingMessages.length;
-    textLoading.innerText = loadingMessages[msgIndex];
-
-}, 400);
-
-// Minimal loading 2.5 detik
-setTimeout(() => {
-    minimumTimePassed = true;
-    tryFinishLoading();
-}, 2500);
-
-// Tunggu produk pertama load
-onValue(ref(db, "products"), () => {
-    firebaseReady = true;
-    tryFinishLoading();
-}, { onlyOnce: true });
-
-function tryFinishLoading() {
-    if (firebaseReady && minimumTimePassed) {
-        clearInterval(interval);
-        bar.style.width = "100%";
-        textLoading.innerText = "Marketplace Siap 🚀";
-
+        // Check seller status
+        const sellerSnap = await get(ref(db, `sellers/${user.uid}`));
+        if (sellerSnap.exists()) {
+            const seller = sellerSnap.val();
+            currentUserData.isSeller = seller.status === "approved";
+            currentUserData.sellerPending = seller.status === "pending";
+            currentUserData.sellerData = seller;
+        } else {
+            currentUserData.isSeller = false;
+            currentUserData.sellerPending = false;
+        }
+        
+        // Load cart
+        const cartRef = ref(db, `carts/${user.uid}`);
+        onValue(cartRef, (snap) => {
+            userCart = snap.val() || {};
+            updateCartBadge();
+        });
+        
+        // Load orders
+        loadUserOrders();
+        
+        // Show seller nav if seller
+        const sellerNav = document.getElementById("sellerNav");
+        if (currentUserData.isSeller) {
+            sellerNav.classList.remove("hidden");
+        } else {
+            sellerNav.classList.add("hidden");
+        }
+        
+        // Update profile button in home
+        const profileBtn = document.querySelector("#page-home .flex .text-2xl");
+        if (profileBtn) {
+            profileBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUserData?.username || user.email.split("@")[0]}`;
+        }
+        
+        // Hide login modal if open
+        closeLoginModal();
+        
+        // Load seller dashboard if seller
+        if (currentUserData.isSeller) {
+            loadSellerDashboard();
+        }
+        
+    } else {
+        currentUserData = null;
+        userCart = {};
+        updateCartBadge();
+        
+        // Show login modal after loading
         setTimeout(() => {
-            loader.style.opacity = "0";
-            setTimeout(() => {
-                loader.remove();
-                document.getElementById("page-marketplace").classList.remove("hidden");
-            }, 600);
+            if (!currentUser) showLoginModal();
         }, 500);
     }
+    
+    // Hide loading
+    document.getElementById("loading").classList.add("hidden");
+    document.getElementById("app").classList.remove("hidden");
+});
+
+// ==================== TAHAP 7: CART FUNCTIONS ====================
+function updateCartBadge() {
+    const badge = document.getElementById("cartCount");
+    const count = Object.values(userCart).reduce((s, i) => s + (i.qty || 0), 0);
+    if (count > 0) {
+        badge.textContent = count;
+        badge.classList.remove("hidden");
+    } else {
+        badge.classList.add("hidden");
+    }
 }
-    </script>
+
+window.openCart = function() {
+    if (!currentUser) return showLoginModal();
+    renderCartModal();
+    document.getElementById("cartModal").classList.remove("hidden");
+};
+
+function closeCartModal() {
+    document.getElementById("cartModal").classList.add("hidden");
+}
+
+function renderCartModal() {
+    const container = document.getElementById("cartItems");
+    const totalEl = document.getElementById("cartTotal");
+    
+    if (Object.keys(userCart).length === 0) {
+        container.innerHTML = '<p class="text-center py-8 text-gray-500">Keranjang kosong</p>';
+        totalEl.textContent = "Rp 0";
+        return;
+    }
+    
+    let total = 0;
+    container.innerHTML = Object.entries(userCart).map(([id, item]) => {
+        const itemTotal = item.price * item.qty;
+        total += itemTotal;
+        return `
+            <div class="flex gap-3 bg-gray-800 p-3 rounded-xl">
+                <img src="${item.image || 'https://placehold.co/60x60/1e293b/475569'}" class="w-14 h-14 object-cover rounded">
+                <div class="flex-1">
+                    <p class="font-bold text-sm">${item.name}</p>
+                    <p class="text-xs text-gray-400">${item.sellerName}</p>
+                    <p class="text-blue-500 text-sm">${formatRupiah(itemTotal)}</p>
+                    <div class="flex gap-2 mt-1">
+                        <button onclick="updateCartItem('${id}', -1)" class="w-6 h-6 rounded bg-gray-700">-</button>
+                        <span class="text-sm">${item.qty}</span>
+                        <button onclick="updateCartItem('${id}', 1)" class="w-6 h-6 rounded bg-blue-600">+</button>
+                        <button onclick="removeCartItem('${id}')" class="text-red-500 text-sm ml-2">Hapus</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join("");
+    totalEl.textContent = formatRupiah(total);
+}
+
+window.updateCartItem = async function(id, delta) {
+    const current = userCart[id]?.qty || 0;
+        const newQty = current + delta;
+    if (newQty <= 0) {
+        await remove(ref(db, `carts/${currentUser.uid}/${id}`));
+    } else {
+        const product = allProducts.find(p => p.id === id);
+        if (product && newQty > (product.stock || 0)) {
+            showToast("Stok tidak cukup!", "error");
+            return;
+        }
+        await update(ref(db, `carts/${currentUser.uid}/${id}`), { qty: newQty });
+    }
+    renderCartModal();
+};
+
+window.removeCartItem = async function(id) {
+    await remove(ref(db, `carts/${currentUser.uid}/${id}`));
+    renderCartModal();
+};
+
+window.clearCart = async function() {
+    await remove(ref(db, `carts/${currentUser.uid}`));
+    closeCartModal();
+    showToast("Keranjang dikosongkan", "success");
+};
+
+// ==================== TAHAP 8: CHECKOUT & PAYMENT ====================
+window.checkout = async function() {
+    if (!currentUser) return showLoginModal();
+    if (Object.keys(userCart).length === 0) return showToast("Keranjang kosong!", "error");
+    
+    // Group by seller
+    const groups = {};
+    for (const [id, item] of Object.entries(userCart)) {
+        const product = allProducts.find(p => p.id === id);
+        if (!product || (product.stock || 0) < item.qty) {
+            showToast(`Stok ${item.name} tidak cukup!`, "error");
+            return;
+        }
+        const sellerId = item.sellerId || "admin";
+        if (!groups[sellerId]) {
+            groups[sellerId] = {
+                sellerId: sellerId,
+                sellerName: item.sellerName,
+                sellerWA: item.sellerWA || allSellers[sellerId]?.whatsapp || "628123456789",
+                items: [],
+                total: 0
+            };
+        }
+        groups[sellerId].items.push({
+            productId: id,
+            name: item.name,
+            price: item.price,
+            qty: item.qty,
+            image: item.image
+        });
+        groups[sellerId].total += item.price * item.qty;
+    }
+    
+    // Process each group
+    for (const group of Object.values(groups)) {
+        const orderId = generateOrderId();
+        
+        // Update stock
+        for (const item of group.items) {
+            const product = allProducts.find(p => p.id === item.productId);
+            if (product) {
+                await update(ref(db, `products/${item.productId}`), {
+                    stock: (product.stock || 0) - item.qty,
+                    soldCount: (product.soldCount || 0) + item.qty
+                });
+            }
+        }
+        
+        // Create order
+        const orderData = {
+            orderId: orderId,
+            userId: currentUser.uid,
+            userName: currentUserData?.name || "User",
+            userEmail: currentUser.email,
+            userPhone: currentUserData?.phone || "",
+            sellerId: group.sellerId,
+            sellerName: group.sellerName,
+            sellerWA: group.sellerWA,
+            items: group.items,
+            total: group.total,
+            status: "pending",
+            createdAt: Date.now(),
+            paymentProof: null,
+            paymentNote: null
+        };
+        
+        await push(ref(db, "orders"), orderData);
+        
+        // Send WhatsApp to seller
+        const itemsList = group.items.map(i => `• ${i.name} (${i.qty}x) = ${formatRupiah(i.price * i.qty)}`).join("\n");
+        const message = `*PESANAN BARU - XREZZKY STORE*\n\n` +
+            `🆔 Order ID: ${orderId}\n` +
+            `👤 Pembeli: ${currentUserData?.name}\n` +
+            `📧 Email: ${currentUser.email}\n\n` +
+            `*DETAIL PESANAN:*\n${itemsList}\n\n` +
+            `*TOTAL: ${formatRupiah(group.total)}*\n\n` +
+            `Status: Menunggu Pembayaran\n\n` +
+            `Mohon info rekening pembayaran. Terima kasih! 🙏`;
+        
+        sendToWA(group.sellerWA, message);
+        currentOrderId = orderId;
+    }
+    
+    // Clear cart
+    await remove(ref(db, `carts/${currentUser.uid}`));
+    closeCartModal();
+    showToast("Pesanan berhasil dibuat! Cek WhatsApp untuk info pembayaran.", "success");
+    
+    // Show payment modal
+    setTimeout(() => {
+        document.getElementById("paymentOrderInfo").innerHTML = `Pesanan telah dibuat. Silakan transfer ke rekening seller dan upload bukti transfer.`;
+        document.getElementById("paymentModal").classList.remove("hidden");
+    }, 1000);
+};
+
+window.sendPaymentConfirmation = async function() {
+    const proof = document.getElementById("paymentProof").value.trim();
+    const note = document.getElementById("paymentNote").value.trim();
+    
+    if (!proof) {
+        showToast("Link bukti transfer wajib diisi!", "error");
+        return;
+    }
+    
+    // Find latest pending order for this user
+    const ordersRef = query(ref(db, "orders"), orderByChild("userId"), equalTo(currentUser.uid));
+    const snap = await get(ordersRef);
+    let foundOrder = null;
+    let foundKey = null;
+    
+    snap.forEach(child => {
+        const order = child.val();
+        if (order.status === "pending" && !foundOrder) {
+            foundOrder = order;
+            foundKey = child.key;
+        }
+    });
+    
+    if (!foundOrder) {
+        showToast("Tidak ada pesanan yang menunggu pembayaran!", "error");
+        return;
+    }
+    
+    await update(ref(db, `orders/${foundKey}`), {
+        paymentProof: proof,
+        paymentNote: note,
+        paymentTime: Date.now(),
+        status: "payment_confirmed"
+    });
+    
+    // Send to seller
+    const message = `*KONFIRMASI PEMBAYARAN - XREZZKY STORE*\n\n` +
+        `🆔 Order ID: ${foundOrder.orderId}\n` +
+        `👤 Pembeli: ${foundOrder.userName}\n\n` +
+        `📎 Bukti Transfer: ${proof}\n` +
+        `📝 Catatan: ${note || "-"}\n\n` +
+        `Mohon segera diproses. Terima kasih! 🙏`;
+    
+    sendToWA(foundOrder.sellerWA, message);
+    
+    closePaymentModal();
+    showToast("Bukti transfer terkirim! Menunggu konfirmasi seller.", "success");
+    
+    document.getElementById("paymentProof").value = "";
+    document.getElementById("paymentNote").value = "";
+};
+
+function closePaymentModal() {
+    document.getElementById("paymentModal").classList.add("hidden");
+}
+
+// ==================== TAHAP 9: USER ORDERS ====================
+async function loadUserOrders() {
+    if (!currentUser) return;
+    
+    const ordersRef = query(ref(db, "orders"), orderByChild("userId"), equalTo(currentUser.uid));
+    onValue(ordersRef, (snap) => {
+        const container = document.getElementById("orderHistory");
+        if (!container) return;
+        
+        container.innerHTML = "";
+        let hasOrders = false;
+        const orders = [];
+        
+        snap.forEach(child => orders.push({ id: child.key, ...child.val() }));
+        orders.sort((a, b) => b.createdAt - a.createdAt);
+        
+        orders.forEach(order => {
+            hasOrders = true;
+            const itemsList = order.items.map(i => `${i.name} x${i.qty}`).join(", ");
+            
+            container.innerHTML += `
+                <div class="glass p-3 rounded-lg">
+                    <div class="flex justify-between items-start">
+                        <span class="font-mono text-xs">${order.orderId}</span>
+                        ${getStatusBadge(order.status)}
+                    </div>
+                    <p class="text-sm mt-1">${itemsList}</p>
+                    <p class="text-blue-500 font-bold mt-1">${formatRupiah(order.total)}</p>
+                    <p class="text-xs text-gray-500 mt-1">${formatDate(order.createdAt)}</p>
+                    ${order.paymentProof ? `<p class="text-xs text-green-500 mt-1"><i class="fas fa-check-circle"></i> Bukti terkirim</p>` : ""}
+                    ${order.status === "completed" && !order.reviewed ? `
+                        <button onclick="openReviewModal('${order.id}', '${order.items[0]?.name || "Produk"}')" 
+                                class="btn-outline w-full mt-2 py-1 text-sm">
+                            ⭐ Beri Ulasan
+                        </button>
+                    ` : ""}
+                </div>
+            `;
+        });
+        
+        if (!hasOrders) {
+            container.innerHTML = '<p class="text-center py-4 text-gray-500">Belum ada pesanan</p>';
+        }
+    });
+}
+
+// ==================== TAHAP 10: REVIEW SYSTEM ====================
+window.openReviewModal = function(orderId, productName) {
+    currentReviewOrder = orderId;
+    selectedRating = 0;
+    document.getElementById("reviewProductName").textContent = productName;
+    document.getElementById("reviewComment").value = "";
+    
+    const stars = document.getElementById("starRating").children;
+    for (let i = 0; i < 5; i++) stars[i].textContent = "☆";
+    
+    document.getElementById("reviewModal").classList.remove("hidden");
+};
+
+window.setReviewRating = function(rating) {
+    selectedRating = rating;
+    const stars = document.getElementById("starRating").children;
+    for (let i = 0; i < 5; i++) {
+        stars[i].textContent = i < rating ? "★" : "☆";
+    }
+};
+
+function closeReviewModal() {
+    document.getElementById("reviewModal").classList.add("hidden");
+}
+
+window.submitReview = async function() {
+    if (!currentReviewOrder || selectedRating === 0) {
+        showToast("Pilih rating terlebih dahulu!", "error");
+        return;
+    }
+    
+    const comment = document.getElementById("reviewComment").value.trim();
+    if (!comment) {
+        showToast("Tulis ulasan Anda!", "error");
+        return;
+    }
+    
+    const orderSnap = await get(ref(db, `orders/${currentReviewOrder}`));
+    const order = orderSnap.val();
+    if (!order || !order.items || !order.items[0]) return;
+    
+    const productId = order.items[0].productId;
+    
+    // Save review
+    await push(ref(db, `products/${productId}/reviews`), {
+        userId: currentUser.uid,
+        userName: currentUserData?.name || "User",
+        rating: selectedRating,
+        comment: comment,
+        time: Date.now()
+    });
+    
+    // Mark order as reviewed
+    await update(ref(db, `orders/${currentReviewOrder}`), { reviewed: true });
+    
+    closeReviewModal();
+    showToast("Terima kasih atas ulasannya!", "success");
+};
+
+// ==================== TAHAP 11: PRODUCT DETAIL MODAL ====================
+window.viewProduct = async function(productId) {
+    const product = allProducts.find(p => p.id === productId);
+    if (!product) return;
+    
+    currentProduct = product;
+    modalQty = 1;
+    document.getElementById("modalQty").textContent = "1";
+    
+    const seller = allSellers[product.sellerId];
+    const rating = product.reviews ? Object.values(product.reviews).reduce((s,r)=>s+r.rating,0) / Object.values(product.reviews).length : 0;
+    
+    document.getElementById("modalProductImage").src = product.images?.[0] || "https://placehold.co/400x400/1e293b/475569?text=No+Image";
+    document.getElementById("modalProductName").textContent = product.name;
+    document.getElementById("modalProductPrice").textContent = formatRupiah(product.price);
+    document.getElementById("modalProductDesc").textContent = product.description || "Tidak ada deskripsi";
+    document.getElementById("modalProductStock").textContent = `Stok: ${product.stock || 0}`;
+    document.getElementById("modalProductRating").innerHTML = renderStars(rating);
+    document.getElementById("modalProductSeller").innerHTML = seller ? `
+        <i class="fas fa-store"></i> ${seller.storeName} (${seller.city})
+    ` : '<i class="fas fa-store"></i> XREZZKY STORE';
+    
+    document.getElementById("productModal").classList.remove("hidden");
+};
+
+window.changeQty = function(delta) {
+    const newQty = modalQty + delta;
+    if (newQty >= 1 && newQty <= (currentProduct?.stock || 99)) {
+        modalQty = newQty;
+        document.getElementById("modalQty").textContent = modalQty;
+    }
+};
+
+window.addToCartFromModal = async function() {
+    if (!currentUser) {
+        closeProductModal();
+        showLoginModal();
+        return;
+    }
+    if (!currentProduct) return;
+    
+    const currentQty = userCart[currentProduct.id]?.qty || 0;
+    const newQty = currentQty + modalQty;
+    
+    if (newQty > (currentProduct.stock || 0)) {
+        showToast("Stok tidak cukup!", "error");
+        return;
+    }
+    
+    await set(ref(db, `carts/${currentUser.uid}/${currentProduct.id}`), {
+        id: currentProduct.id,
+        name: currentProduct.name,
+        price: currentProduct.price,
+        image: currentProduct.images?.[0] || "",
+        qty: newQty,
+        sellerId: currentProduct.sellerId,
+        sellerName: allSellers[currentProduct.sellerId]?.storeName || "XREZZKY STORE",
+        sellerWA: allSellers[currentProduct.sellerId]?.whatsapp || "628123456789"
+    });
+    
+    showToast(`${modalQty} item ditambahkan ke keranjang!`, "success");
+    closeProductModal();
+};
+
+window.buyNowFromModal = async function() {
+    if (!currentUser) {
+        closeProductModal();
+        showLoginModal();
+        return;
+    }
+    if (!currentProduct) return;
+    
+    if (modalQty > (currentProduct.stock || 0)) {
+        showToast("Stok tidak cukup!", "error");
+        return;
+    }
+    
+    const seller = allSellers[currentProduct.sellerId];
+    const orderId = generateOrderId();
+    const totalPrice = currentProduct.price * modalQty;
+    
+    // Update stock
+    await update(ref(db, `products/${currentProduct.id}`), {
+        stock: (currentProduct.stock || 0) - modalQty,
+        soldCount: (currentProduct.soldCount || 0) + modalQty
+    });
+    
+    // Create order
+    const orderData = {
+        orderId: orderId,
+        userId: currentUser.uid,
+        userName: currentUserData?.name || "User",
+        userEmail: currentUser.email,
+        userPhone: currentUserData?.phone || "",
+        sellerId: currentProduct.sellerId,
+        sellerName: seller?.storeName || "XREZZKY STORE",
+        sellerWA: seller?.whatsapp || "628123456789",
+        items: [{
+            productId: currentProduct.id,
+            name: currentProduct.name,
+            price: currentProduct.price,
+            qty: modalQty,
+            image: currentProduct.images?.[0] || ""
+        }],
+        total: totalPrice,
+        status: "pending",
+        createdAt: Date.now()
+    };
+    
+    await push(ref(db, "orders"), orderData);
+    
+    // Send WhatsApp
+    const message = `*PESANAN BARU - XREZZKY STORE*\n\n` +
+        `🆔 Order ID: ${orderId}\n` +
+        `👤 Pembeli: ${currentUserData?.name}\n` +
+        `📧 Email: ${currentUser.email}\n\n` +
+        `*DETAIL PESANAN:*\n• ${currentProduct.name} (${modalQty}x) = ${formatRupiah(totalPrice)}\n\n` +
+        `*TOTAL: ${formatRupiah(totalPrice)}*\n\n` +
+        `Status: Menunggu Pembayaran\n\n` +
+        `Mohon info rekening pembayaran. Terima kasih! 🙏`;
+    
+    sendToWA(seller?.whatsapp || "628123456789", message);
+    
+    closeProductModal();
+    showToast("Pesanan berhasil dibuat!", "success");
+    
+    currentOrderId = orderId;
+    setTimeout(() => {
+        document.getElementById("paymentOrderInfo").innerHTML = `Order ID: ${orderId}<br>Silakan transfer ke rekening seller dan upload bukti transfer.`;
+        document.getElementById("paymentModal").classList.remove("hidden");
+    }, 1000);
+};
+
+function closeProductModal() {
+    document.getElementById("productModal").classList.add("hidden");
+}
+
+// ==================== TAHAP 12: SELLER REGISTRATION ====================
+window.registerSeller = async function() {
+    if (!currentUser) {
+        showLoginModal();
+        return;
+    }
+    
+    const name = document.getElementById("storeName").value.trim();
+    const city = document.getElementById("storeCity").value.trim();
+    const wa = document.getElementById("storeWa").value.trim();
+    const desc = document.getElementById("storeDesc").value.trim();
+    const logo = document.getElementById("storeLogo").value.trim();
+    
+    if (!name || !city || !wa) {
+        showToast("Nama toko, kota, dan WA wajib diisi!", "error");
+        return;
+    }
+    
+    if (!wa.startsWith("62") || wa.length < 10) {
+        showToast("Format WA: 628xxx (tanpa 0)", "error");
+        return;
+    }
+    
+    const sellerData = {
+        storeName: name,
+        city: city,
+        whatsapp: wa,
+        description: desc || "",
+        logo: logo || `https://ui-avatars.com/api/?name=${name[0]}&background=f59e0b&color=000&size=128`,
+        ownerId: currentUser.uid,
+        ownerEmail: currentUser.email,
+        ownerName: currentUserData?.name,
+        status: "pending",
+        appliedAt: Date.now()
+    };
+    
+    await set(ref(db, `sellers/${currentUser.uid}`), sellerData);
+    await update(ref(db, `users/${currentUser.uid}`), { sellerPending: true });
+    
+    // Send notification to admin
+    const adminMessage = `*PENDAFTARAN SELLER BARU - XREZZKY STORE*\n\n` +
+        `Nama: ${currentUserData?.name}\n` +
+        `Email: ${currentUser.email}\n` +
+        `Toko: ${name}\n` +
+        `Kota: ${city}\n` +
+        `WA: ${wa}\n\n` +
+        `Segera verifikasi di dashboard admin.`;
+    
+    sendToWA("6288293064112", adminMessage);
+    
+    showToast("Pendaftaran seller berhasil dikirim! Menunggu verifikasi admin.", "success");
+    showPage("home");
+    
+    // Clear form
+    document.getElementById("storeName").value = "";
+    document.getElementById("storeCity").value = "";
+    document.getElementById("storeWa").value = "";
+    document.getElementById("storeDesc").value = "";
+    document.getElementById("storeLogo").value = "";
+};
+
+// ==================== TAHAP 13: SELLER DASHBOARD ====================
+let sellerProducts = [];
+let sellerOrders = [];
+
+async function loadSellerDashboard() {
+    if (!currentUser || !currentUserData?.isSeller) return;
+    
+    // Load seller products
+    const productsRef = query(ref(db, "products"), orderByChild("sellerId"), equalTo(currentUser.uid));
+    onValue(productsRef, (snap) => {
+        sellerProducts = [];
+        snap.forEach(child => sellerProducts.push({ id: child.key, ...child.val() }));
+        
+        document.getElementById("sellerProductCount").textContent = sellerProducts.length;
+        
+        // Calculate total rating
+        let totalRating = 0;
+        let ratingCount = 0;
+        sellerProducts.forEach(p => {
+            if (p.reviews) {
+                Object.values(p.reviews).forEach(r => {
+                    totalRating += r.rating;
+                    ratingCount++;
+                });
+            }
+        });
+        document.getElementById("sellerRating").textContent = ratingCount ? (totalRating / ratingCount).toFixed(1) : "0";
+        
+        renderSellerProducts();
+    });
+    
+    // Load seller orders
+    const ordersRef = query(ref(db, "orders"), orderByChild("sellerId"), equalTo(currentUser.uid));
+    onValue(ordersRef, (snap) => {
+        sellerOrders = [];
+        snap.forEach(child => sellerOrders.push({ id: child.key, ...child.val() }));
+        
+        document.getElementById("sellerOrderCount").textContent = sellerOrders.length;
+        renderSellerOrders();
+    });
+    
+    // Load store info
+    const sellerSnap = await get(ref(db, `sellers/${currentUser.uid}`));
+    const seller = sellerSnap.val();
+    if (seller) {
+        document.getElementById("storeInfo").innerHTML = `
+            <div class="flex items-center gap-3 mb-3">
+                <img src="${seller.logo}" class="w-12 h-12 rounded-full">
+                <div>
+                    <h3 class="font-bold">${seller.storeName}</h3>
+                    <p class="text-sm text-gray-400">📍 ${seller.city}</p>
+                </div>
+            </div>
+            <p class="text-sm">📞 ${seller.whatsapp}</p>
+            <p class="text-sm text-gray-400 mt-2">${seller.description || "Tidak ada deskripsi"}</p>
+            <p class="text-xs text-gray-500 mt-2">Bergabung: ${formatDate(seller.appliedAt)}</p>
+        `;
+    }
+}
+
+function renderSellerProducts() {
+    const container = document.getElementById("sellerProductsTab");
+    if (!container) return;
+    
+    if (sellerProducts.length === 0) {
+        container.innerHTML = '<p class="text-center py-8 text-gray-500">Belum ada produk. Klik "Tambah" untuk menambahkan.</p>';
+        return;
+    }
+    
+    container.innerHTML = sellerProducts.map(p => {
+        const rating = p.reviews ? Object.values(p.reviews).reduce((s,r)=>s+r.rating,0) / Object.values(p.reviews).length : 0;
+        return `
+            <div class="glass p-3 rounded-lg flex gap-3">
+                <img src="${p.images?.[0] || 'https://placehold.co/80x80/1e293b/475569'}" class="w-16 h-16 object-cover rounded">
+                <div class="flex-1">
+                    <p class="font-bold">${p.name}</p>
+                    <p class="text-blue-500 text-sm">${formatRupiah(p.price)}</p>
+                    <p class="text-xs text-gray-500">Stok: ${p.stock || 0} | Terjual: ${p.soldCount || 0}</p>
+                    <div class="flex items-center gap-1 text-xs">${renderStars(rating)}</div>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <button onclick="editSellerProduct('${p.id}')" class="px-3 py-1 rounded-lg bg-yellow-500/20 text-yellow-500">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="deleteSellerProduct('${p.id}')" class="px-3 py-1 rounded-lg bg-red-500/20 text-red-500">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join("");
+}
+
+function renderSellerOrders() {
+    const container = document.getElementById("sellerOrdersTab");
+    if (!container) return;
+    
+    if (sellerOrders.length === 0) {
+        container.innerHTML = '<p class="text-center py-8 text-gray-500">Belum ada pesanan masuk</p>';
+        return;
+    }
+    
+    container.innerHTML = sellerOrders.map(o => {
+        const itemsList = o.items.map(i => `${i.name} x${i.qty}`).join(", ");
+        return `
+            <div class="glass p-3 rounded-lg">
+                <div class="flex justify-between items-start">
+                    <span class="font-mono text-xs">${o.orderId}</span>
+                    ${getStatusBadge(o.status)}
+                </div>
+                <p class="font-bold text-sm mt-1">${o.userName}</p>
+                <p class="text-xs text-gray-500">${o.userEmail}</p>
+                <p class="text-sm mt-2">${itemsList}</p>
+                <p class="text-blue-500 font-bold mt-1">${formatRupiah(o.total)}</p>
+                ${o.paymentProof ? `
+                    <p class="text-xs text-green-500 mt-1">
+                        <i class="fas fa-check-circle"></i> 
+                        <a href="${o.paymentProof}" target="_blank" class="underline">Bukti Transfer</a>
+                        ${o.paymentNote ? `<br>📝 ${o.paymentNote}` : ""}
+                    </p>
+                ` : ""}
+                <div class="mt-3">
+                    <select onchange="updateOrderStatus('${o.id}', this.value)" class="text-xs bg-gray-800 rounded p-2 w-full">
+                        <option value="pending" ${o.status === "pending" ? "selected" : ""}>⏳ Menunggu Bayar</option>
+                        <option value="payment_confirmed" ${o.status === "payment_confirmed" ? "selected" : ""}>💰 Sudah Transfer</option>
+                        <option value="processed" ${o.status === "processed" ? "selected" : ""}>⚙️ Diproses</option>
+                        <option value="shipped" ${o.status === "shipped" ? "selected" : ""}>📦 Dikirim</option>
+                        <option value="completed" ${o.status === "completed" ? "selected" : ""}>✅ Selesai</option>
+                        <option value="rejected" ${o.status === "rejected" ? "selected" : ""}>❌ Ditolak</option>
+                    </select>
+                </div>
+                ${o.rejectReason ? `<p class="text-xs text-red-500 mt-2">Alasan: ${o.rejectReason}</p>` : ""}
+            </div>
+        `;
+    }).join("");
+}
+
+window.updateOrderStatus = async function(orderId, newStatus) {
+    const orderRef = ref(db, `orders/${orderId}`);
+    const snap = await get(orderRef);
+    const order = snap.val();
+    if (!order) return;
+    
+    if (newStatus === "rejected") {
+        const { value: reason } = await Swal.fire({
+            title: "Alasan Penolakan",
+            input: "textarea",
+            inputPlaceholder: "Tulis alasan penolakan...",
+            showCancelButton: true,
+            confirmButtonText: "Tolak Pesanan"
+        });
+        if (!reason) return;
+        
+        // Return stock
+        for (const item of order.items) {
+            const prodRef = ref(db, `products/${item.productId}`);
+            const prodSnap = await get(prodRef);
+            const prod = prodSnap.val();
+            if (prod) {
+                await update(prodRef, {
+                    stock: (prod.stock || 0) + item.qty,
+                    soldCount: Math.max(0, (prod.soldCount || 0) - item.qty)
+                });
+            }
+        }
+        
+        await update(orderRef, {
+            status: "rejected",
+            rejectReason: reason,
+            updatedAt: Date.now()
+        });
+        
+        // Notify buyer
+        sendToWA(order.sellerWA, `*PESANAN DITOLAK - XREZZKY STORE*\n\nOrder: ${order.orderId}\nAlasan: ${reason}`);
+        showToast("Pesanan ditolak, stok dikembalikan", "success");
+    } else {
+        await update(orderRef, { status: newStatus, updatedAt: Date.now() });
+        
+        let statusText = {
+            payment_confirmed: "Pembayaran telah dikonfirmasi",
+            processed: "Pesanan sedang diproses",
+            shipped: "Pesanan telah dikirim",
+            completed: "Pesanan selesai"
+        }[newStatus];
+        
+        if (statusText) {
+            sendToWA(order.sellerWA, `*UPDATE PESANAN - XREZZKY STORE*\n\nOrder: ${order.orderId}\nStatus: ${statusText}`);
+        }
+        showToast(`Status diubah ke ${newStatus}`, "success");
+    }
+};
+
+// ==================== TAHAP 14: SELLER PRODUCT MANAGEMENT ====================
+let editingProduct = null;
+
+window.addImageField = function() {
+    const container = document.getElementById("imageContainer");
+    const div = document.createElement("div");
+    div.className = "flex gap-2 mb-2";
+    div.innerHTML = `
+        <input type="text" class="input flex-1 product-image" placeholder="URL Gambar">
+        <button onclick="this.parentElement.remove()" class="px-3 rounded-lg bg-red-500/20 text-red-500">✕</button>
+    `;
+    container.appendChild(div);
+};
+
+function getProductImages() {
+    const images = [];
+    document.querySelectorAll("#imageContainer .product-image").forEach(inp => {
+        const url = inp.value.trim();
+        if (url) images.push(url);
+    });
+    return images;
+}
+
+window.switchSellerTab = function(tab) {
+    document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+    document.querySelectorAll(`.tab-btn[data-tab="${tab}"]`).forEach(btn => btn.classList.add("active"));
+    
+    document.getElementById("sellerProductsTab").classList.add("hidden");
+    document.getElementById("sellerOrdersTab").classList.add("hidden");
+    document.getElementById("sellerAddTab").classList.add("hidden");
+    document.getElementById("sellerStoreTab").classList.add("hidden");
+    
+    document.getElementById(`seller${tab === "products" ? "ProductsTab" : tab === "orders" ? "OrdersTab" : tab === "add" ? "AddTab" : "StoreTab"}`).classList.remove("hidden");
+};
+
+window.editSellerProduct = async function(productId) {
+    const product = sellerProducts.find(p => p.id === productId);
+    if (!product) return;
+    
+    editingProduct = productId;
+    
+    document.getElementById("productName").value = product.name;
+    document.getElementById("productPrice").value = product.price;
+    document.getElementById("productStock").value = product.stock;
+    document.getElementById("productCategory").value = product.category || "";
+    document.getElementById("productDesc").value = product.description || "";
+    
+    const container = document.getElementById("imageContainer");
+    container.innerHTML = "";
+    if (product.images && product.images.length) {
+        product.images.forEach(img => {
+            const div = document.createElement("div");
+            div.className = "flex gap-2 mb-2";
+            div.innerHTML = `
+                <input type="text" class="input flex-1 product-image" value="${img}" placeholder="URL Gambar">
+                <button onclick="this.parentElement.remove()" class="px-3 rounded-lg bg-red-500/20 text-red-500">✕</button>
+            `;
+            container.appendChild(div);
+        });
+    }
+    addImageField();
+    
+    document.getElementById("editBadge").classList.remove("hidden");
+    document.getElementById("cancelEditBtn").classList.remove("hidden");
+    document.getElementById("saveProductBtn").innerHTML = '<i class="fas fa-save"></i> Update Produk';
+    
+    switchSellerTab("add");
+};
+
+window.cancelEditProduct = function() {
+    editingProduct = null;
+    document.getElementById("productName").value = "";
+    document.getElementById("productPrice").value = "";
+    document.getElementById("productStock").value = "";
+    document.getElementById("productCategory").value = "";
+    document.getElementById("productDesc").value = "";
+    document.getElementById("imageContainer").innerHTML = "";
+    addImageField();
+    
+    document.getElementById("editBadge").classList.add("hidden");
+    document.getElementById("cancelEditBtn").classList.add("hidden");
+    document.getElementById("saveProductBtn").innerHTML = '<i class="fas fa-save"></i> Simpan Produk';
+};
+
+window.saveProduct = async function() {
+    const name = document.getElementById("productName").value.trim();
+    const price = parseFloat(document.getElementById("productPrice").value);
+    const stock = parseInt(document.getElementById("productStock").value) || 0;
+    const category = document.getElementById("productCategory").value || "Umum";
+    const description = document.getElementById("productDesc").value.trim() || "Tidak ada deskripsi";
+    const images = getProductImages();
+    
+    if (!name) return showToast("Nama produk wajib diisi!", "error");
+    if (!price || price < 1000) return showToast("Harga minimal Rp 1.000!", "error");
+    if (images.length === 0) return showToast("Minimal 1 gambar produk!", "error");
+    
+    const sellerSnap = await get(ref(db, `sellers/${currentUser.uid}`));
+    const seller = sellerSnap.val();
+    
+    const productData = {
+        name: name,
+        price: price,
+        stock: stock,
+        category: category,
+        description: description,
+        images: images,
+        sellerId: currentUser.uid,
+        sellerName: seller?.storeName || "Toko Saya",
+        updatedAt: Date.now()
+    };
+    
+    if (editingProduct) {
+        await update(ref(db, `products/${editingProduct}`), productData);
+        showToast("Produk berhasil diperbarui!", "success");
+        cancelEditProduct();
+    } else {
+        productData.createdAt = Date.now();
+        productData.soldCount = 0;
+        await push(ref(db, "products"), productData);
+        showToast("Produk berhasil ditambahkan!", "success");
+        
+        document.getElementById("productName").value = "";
+        document.getElementById("productPrice").value = "";
+        document.getElementById("productStock").value = "";
+        document.getElementById("productCategory").value = "";
+        document.getElementById("productDesc").value = "";
+        document.getElementById("imageContainer").innerHTML = "";
+        addImageField();
+    }
+    
+    switchSellerTab("products");
+};
+
+window.deleteSellerProduct = async function(productId) {
+    const confirm = await Swal.fire({
+        title: "Hapus Produk?",
+        text: "Produk yang dihapus tidak dapat dikembalikan!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Ya, Hapus!",
+        cancelButtonText: "Batal"
+    });
+    
+    if (confirm.isConfirmed) {
+        await remove(ref(db, `products/${productId}`));
+        showToast("Produk berhasil dihapus", "success");
+    }
+};
+
+window.editStore = async function() {
+    const sellerSnap = await get(ref(db, `sellers/${currentUser.uid}`));
+    const seller = sellerSnap.val();
+    if (!seller) return;
+    
+    const { value: form } = await Swal.fire({
+        title: "Edit Informasi Toko",
+        html: `
+            <input id="editStoreName" class="swal2-input" value="${seller.storeName}" placeholder="Nama Toko">
+            <input id="editStoreCity" class="swal2-input" value="${seller.city}" placeholder="Kota">
+            <input id="editStoreWa" class="swal2-input" value="${seller.whatsapp}" placeholder="No. WhatsApp">
+            <textarea id="editStoreDesc" class="swal2-textarea" placeholder="Deskripsi">${seller.description || ""}</textarea>
+            <input id="editStoreLogo" class="swal2-input" value="${seller.logo || ""}" placeholder="URL Logo">
+        `,
+        showCancelButton: true,
+        confirmButtonText: "Simpan",
+        preConfirm: () => {
+            const name = document.getElementById("editStoreName").value;
+            const city = document.getElementById("editStoreCity").value;
+            const wa = document.getElementById("editStoreWa").value;
+            const desc = document.getElementById("editStoreDesc").value;
+            const logo = document.getElementById("editStoreLogo").value;
+                        if (!name || !city || !wa) Swal.showValidationMessage("Semua field wajib diisi!");
+            return { name, city, wa, desc, logo };
+        }
+    });
+    
+    if (form) {
+        await update(ref(db, `sellers/${currentUser.uid}`), {
+            storeName: form.name,
+            city: form.city,
+            whatsapp: form.wa,
+            description: form.desc,
+            logo: form.logo || `https://ui-avatars.com/api/?name=${form.name[0]}&background=f59e0b&color=000&size=128`,
+            updatedAt: Date.now()
+        });
+        showToast("Informasi toko diperbarui!", "success");
+        loadSellerDashboard();
+    }
+};
+
+// ==================== TAHAP 15: ADMIN PANEL (untuk verifikasi seller) ====================
+// Data admin akan disimpan di Firebase dan bisa diakses via web admin terpisah
+// Tapi kita tambahkan fitur admin sederhana di sini untuk user dengan role admin
+
+async function checkAndSetupAdmin() {
+    // Cek apakah admin sudah ada, jika belum buat admin default
+    const adminEmail = "admin@xrezzky.com";
+    const adminSnap = await get(ref(db, "users"));
+    let adminExists = false;
+    
+    adminSnap.forEach(child => {
+        const user = child.val();
+        if (user.email === adminEmail && user.role === "admin") {
+            adminExists = true;
+        }
+    });
+    
+    if (!adminExists) {
+        // Buat admin default (bisa diubah nanti)
+        const adminData = {
+            name: "Admin XREZZKY",
+            username: "admin",
+            email: adminEmail,
+            role: "admin",
+            createdAt: Date.now(),
+            isActive: true
+        };
+        
+        // Cari user dengan email admin di auth
+        // Untuk keperluan demo, kita simpan data admin di database
+        const usersRef = ref(db, "users");
+        const snapshot = await get(usersRef);
+        let adminUid = null;
+        
+        snapshot.forEach(child => {
+            if (child.val().email === adminEmail) {
+                adminUid = child.key;
+            }
+        });
+        
+        if (adminUid) {
+            await update(ref(db, `users/${adminUid}`), adminData);
+        } else {
+            // Admin akan dibuat saat login pertama kali
+            console.log("Admin belum login, akan dibuat saat admin login pertama kali");
+        }
+    }
+}
+
+// Fungsi untuk menampilkan panel admin (hanya untuk user dengan role admin)
+window.showAdminPanel = async function() {
+    if (!currentUser || currentUserData?.role !== "admin") {
+        showToast("Akses ditolak! Hanya admin yang dapat mengakses panel ini.", "error");
+        return;
+    }
+    
+    // Load semua seller yang pending
+    const sellersRef = ref(db, "sellers");
+    const snap = await get(sellersRef);
+    const pendingSellers = [];
+    const approvedSellers = [];
+    
+    snap.forEach(child => {
+        const seller = child.val();
+        if (seller.status === "pending") {
+            pendingSellers.push({ id: child.key, ...seller });
+        } else if (seller.status === "approved") {
+            approvedSellers.push({ id: child.key, ...seller });
+        }
+    });
+    
+    Swal.fire({
+        title: "👑 Admin Panel - XREZZKY STORE",
+        html: `
+            <div class="text-left">
+                <h3 class="font-bold mb-2">📋 Seller Menunggu Verifikasi (${pendingSellers.length})</h3>
+                <div class="max-h-64 overflow-y-auto mb-4">
+                    ${pendingSellers.length === 0 ? '<p class="text-gray-500 text-sm">Tidak ada seller menunggu verifikasi</p>' : 
+                        pendingSellers.map(s => `
+                            <div class="border-b border-gray-700 py-2">
+                                <p class="font-bold">${s.storeName}</p>
+                                <p class="text-xs">Pemilik: ${s.ownerName} (${s.ownerEmail})</p>
+                                <p class="text-xs">Kota: ${s.city} | WA: ${s.whatsapp}</p>
+                                <p class="text-xs text-gray-500">Daftar: ${formatDate(s.appliedAt)}</p>
+                                <div class="flex gap-2 mt-2">
+                                    <button onclick="approveSeller('${s.id}')" class="bg-green-600 text-white px-3 py-1 rounded text-xs">✅ Approve</button>
+                                    <button onclick="rejectSeller('${s.id}')" class="bg-red-600 text-white px-3 py-1 rounded text-xs">❌ Reject</button>
+                                </div>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+                
+                <h3 class="font-bold mb-2 mt-4">✅ Seller Terverifikasi (${approvedSellers.length})</h3>
+                <div class="max-h-48 overflow-y-auto">
+                    ${approvedSellers.length === 0 ? '<p class="text-gray-500 text-sm">Belum ada seller terverifikasi</p>' :
+                        approvedSellers.map(s => `
+                            <div class="border-b border-gray-700 py-1 text-sm">
+                                <span class="font-bold">${s.storeName}</span> - ${s.ownerName}
+                            </div>
+                        `).join('')
+                    }
+                </div>
+                
+                <hr class="my-3">
+                <h3 class="font-bold mb-2">📊 Statistik</h3>
+                <p>Total Produk: ${allProducts.length}</p>
+                <p>Total Pesanan: <span id="adminTotalOrders">0</span></p>
+            </div>
+        `,
+        width: "500px",
+        confirmButtonText: "Tutup",
+        showCancelButton: false
+    });
+    
+    // Hitung total orders
+    const ordersRef = ref(db, "orders");
+    const ordersSnap = await get(ordersRef);
+    let orderCount = 0;
+    ordersSnap.forEach(() => orderCount++);
+    document.getElementById("adminTotalOrders")?.setAttribute("data-count", orderCount);
+};
+
+// Fungsi approve seller
+window.approveSeller = async function(sellerId) {
+    await update(ref(db, `sellers/${sellerId}`), {
+        status: "approved",
+        approvedAt: Date.now()
+    });
+    
+    // Update user role menjadi seller
+    const sellerSnap = await get(ref(db, `sellers/${sellerId}`));
+    const seller = sellerSnap.val();
+    if (seller) {
+        await update(ref(db, `users/${sellerId}`), {
+            role: "seller",
+            sellerStatus: "approved",
+            sellerData: seller
+        });
+        
+        // Kirim notifikasi WA ke seller
+        const message = `*SELAMAT! - XREZZKY STORE*\n\n` +
+            `Pendaftaran toko "${seller.storeName}" telah DISETUJUI!\n\n` +
+            `Sekarang Anda dapat mengelola produk dan pesanan di dashboard seller.\n\n` +
+            `Terima kasih telah bergabung di XREZZKY STORE! 🎉`;
+        
+        sendToWA(seller.whatsapp, message);
+    }
+    
+    showToast("Seller berhasil diapprove!", "success");
+    showAdminPanel();
+};
+
+// Fungsi reject seller
+window.rejectSeller = async function(sellerId) {
+    const { value: reason } = await Swal.fire({
+        title: "Alasan Penolakan",
+        input: "textarea",
+        inputPlaceholder: "Tulis alasan penolakan...",
+        showCancelButton: true,
+        confirmButtonText: "Reject"
+    });
+    
+    if (reason) {
+        await update(ref(db, `sellers/${sellerId}`), {
+            status: "rejected",
+            rejectReason: reason,
+            rejectedAt: Date.now()
+        });
+        
+        // Kirim notifikasi WA ke seller
+        const sellerSnap = await get(ref(db, `sellers/${sellerId}`));
+        const seller = sellerSnap.val();
+        if (seller) {
+            const message = `*INFORMASI - XREZZKY STORE*\n\n` +
+                `Pendaftaran toko "${seller.storeName}" telah DITOLAK.\n\n` +
+                `Alasan: ${reason}\n\n` +
+                `Silakan perbaiki data dan daftar ulang. Terima kasih.`;
+            
+            sendToWA(seller.whatsapp, message);
+        }
+        
+        showToast("Seller ditolak!", "warning");
+        showAdminPanel();
+    }
+};
+
+// Tambahkan tombol admin di profil jika user adalah admin
+async function addAdminButtonToProfile() {
+    if (currentUser && currentUserData?.role === "admin") {
+        const profileContent = document.getElementById("profileContent");
+        if (profileContent && !document.getElementById("adminPanelBtn")) {
+            const adminBtn = document.createElement("button");
+            adminBtn.id = "adminPanelBtn";
+            adminBtn.className = "btn-primary w-full py-2 mt-3";
+            adminBtn.innerHTML = '<i class="fas fa-shield-alt mr-2"></i> Panel Admin';
+            adminBtn.onclick = () => showAdminPanel();
+            profileContent.appendChild(adminBtn);
+        }
+    }
+}
+
+// ==================== TAHAP 16: PROFILE PAGE ====================
+async function loadProfile() {
+    const container = document.getElementById("profileContent");
+    if (!container) return;
+    
+    if (!currentUser) {
+        container.innerHTML = `
+            <div class="text-center py-8">
+                <i class="fas fa-user-lock text-4xl text-gray-600 mb-3"></i>
+                <p class="text-gray-500 mb-4">Silakan login untuk mengakses profil</p>
+                <button onclick="showLoginModal()" class="btn-primary">Login / Daftar</button>
+            </div>
+        `;
+        return;
+    }
+    
+    const isSeller = currentUserData?.isSeller;
+    const isPending = currentUserData?.sellerPending;
+    const isAdmin = currentUserData?.role === "admin";
+    const sellerData = currentUserData?.sellerData;
+    
+    container.innerHTML = `
+        <div class="flex items-center gap-4 mb-4">
+            <img src="${currentUserData?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUserData?.username || "User")}&background=3b82f6&color=fff&size=128`}" 
+                 class="w-16 h-16 rounded-full border-2 border-blue-500">
+            <div>
+                <h2 class="font-bold text-lg">${currentUserData?.name || currentUserData?.username}</h2>
+                <p class="text-sm text-gray-500">@${currentUserData?.username}</p>
+                <p class="text-sm text-gray-500">${currentUser.email}</p>
+                ${currentUserData?.phone ? `<p class="text-xs text-gray-500"><i class="fab fa-whatsapp"></i> ${currentUserData.phone}</p>` : ""}
+                <span class="badge ${isSeller ? "badge-seller" : isPending ? "badge-pending" : "badge-user"} mt-1">
+                    ${isSeller ? "⭐ Seller Aktif" : isPending ? "⏳ Menunggu Verifikasi" : isAdmin ? "👑 Admin" : "👤 Pembeli"}
+                </span>
+            </div>
+        </div>
+        
+        ${!isSeller && !isPending && !isAdmin ? `
+            <div class="glass p-3 rounded-lg mb-3">
+                <p class="text-sm text-gray-400 mb-2">Ingin menjual produk? Daftar menjadi seller!</p>
+                <button onclick="showPage('seller-reg')" class="btn-outline w-full py-2">Daftar Seller</button>
+            </div>
+        ` : ""}
+        
+        ${sellerData && isSeller ? `
+            <div class="glass p-3 rounded-lg mb-3">
+                <p class="font-bold text-sm">🏪 ${sellerData.storeName}</p>
+                <p class="text-xs text-gray-500">📍 ${sellerData.city}</p>
+                <p class="text-xs text-gray-500">📞 ${sellerData.whatsapp}</p>
+                <button onclick="showPage('seller-dashboard')" class="btn-outline w-full mt-2 py-1 text-sm">Kelola Toko</button>
+            </div>
+        ` : ""}
+        
+        ${isAdmin ? `
+            <div class="glass p-3 rounded-lg mb-3 bg-purple-500/20">
+                <p class="font-bold text-sm"><i class="fas fa-crown mr-1"></i> Hak Akses Admin</p>
+                <p class="text-xs text-gray-400">Anda memiliki akses penuh ke panel admin</p>
+                <button onclick="showAdminPanel()" class="btn-primary w-full mt-2 py-2">Panel Admin</button>
+            </div>
+        ` : ""}
+        
+        <button onclick="logoutUser()" class="btn-danger w-full py-2 mt-2">Logout</button>
+    `;
+    
+    // Tambahkan tombol admin jika belum ada
+    if (isAdmin && !document.getElementById("adminPanelBtn")) {
+        addAdminButtonToProfile();
+    }
+}
+
+// ==================== TAHAP 17: PAGE NAVIGATION ====================
+window.showPage = function(page) {
+    document.querySelectorAll("#app > div[id^='page-']").forEach(p => p.classList.add("hidden"));
+    document.getElementById(`page-${page}`).classList.remove("hidden");
+    
+    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+    if (page === "home") document.querySelector(".nav-item:first-child").classList.add("active");
+    if (page === "profile") document.querySelector(".nav-item:nth-child(2)").classList.add("active");
+    if (page === "seller-dashboard") document.getElementById("sellerNav")?.classList.add("active");
+    
+    if (page === "profile") loadProfile();
+    if (page === "seller-dashboard" && currentUserData?.isSeller) loadSellerDashboard();
+    if (page === "home") {
+        renderProducts();
+        loadProducts();
+    }
+    
+    window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+// ==================== TAHAP 18: INITIALIZATION ====================
+// Add initial image field
+addImageField();
+
+// Initialize AOS
+AOS.init({ duration: 600, once: true });
+
+// Check and setup admin
+setTimeout(() => {
+    checkAndSetupAdmin();
+}, 2000);
+
+// Make all functions global
+window.showPage = showPage;
+window.showLoginModal = showLoginModal;
+window.closeLoginModal = closeLoginModal;
+window.showRegister = showRegister;
+window.showLogin = showLogin;
+window.doLogin = doLogin;
+window.doRegister = doRegister;
+window.showForgotPassword = showForgotPassword;
+window.closeForgotModal = closeForgotModal;
+window.sendResetPassword = sendResetPassword;
+window.logoutUser = logoutUser;
+window.viewProduct = viewProduct;
+window.changeQty = changeQty;
+window.addToCartFromModal = addToCartFromModal;
+window.buyNowFromModal = buyNowFromModal;
+window.closeProductModal = closeProductModal;
+window.openCart = openCart;
+window.closeCartModal = closeCartModal;
+window.updateCartItem = updateCartItem;
+window.removeCartItem = removeCartItem;
+window.clearCart = clearCart;
+window.checkout = checkout;
+window.sendPaymentConfirmation = sendPaymentConfirmation;
+window.closePaymentModal = closePaymentModal;
+window.openReviewModal = openReviewModal;
+window.setReviewRating = setReviewRating;
+window.closeReviewModal = closeReviewModal;
+window.submitReview = submitReview;
+window.registerSeller = registerSeller;
+window.switchSellerTab = switchSellerTab;
+window.addImageField = addImageField;
+window.editSellerProduct = editSellerProduct;
+window.cancelEditProduct = cancelEditProduct;
+window.saveProduct = saveProduct;
+window.deleteSellerProduct = deleteSellerProduct;
+window.editStore = editStore;
+window.updateOrderStatus = updateOrderStatus;
+window.filterByCategory = filterByCategory;
+window.searchProducts = searchProducts;
+window.showAdminPanel = showAdminPanel;
+window.approveSeller = approveSeller;
+window.rejectSeller = rejectSeller;
+
+console.log("✅ XREZZKY STORE ULTIMATE v9.0 - FULLY LOADED");
+console.log("📦 Firebase Connected | Realtime Database | Auth Ready");
+console.log("🔥 Features: Auth, Products, Cart, Orders, Reviews, Seller Dashboard, Admin Panel, WhatsApp Integration");
+console.log("👑 Admin: login dengan email admin@xrezzky.com (perlu registrasi terlebih dahulu)");
+</script>
 </body>
-</html>
+    </html>

@@ -183,46 +183,19 @@
         <!-- HOME PAGE -->
         <section id="page-home" class="page-view fade-in">
 
-            <!-- HERO BANNER -->
+            <!-- HERO BANNER — dynamic dari Firebase config -->
             <div class="relative rounded-[32px] overflow-hidden mb-6" style="min-height:260px;">
-                <!-- BG gradient layer -->
                 <div class="absolute inset-0 bg-gradient-to-br from-[#0a1628] via-[#0d1f3c] to-[#05080f]"></div>
-                <!-- Decorative blobs -->
                 <div class="absolute top-[-30%] right-[-10%] w-[55%] h-[200%] bg-blue-600/20 blur-[80px] rounded-full"></div>
                 <div class="absolute bottom-[-40%] left-[20%] w-[40%] h-[150%] bg-purple-600/15 blur-[80px] rounded-full"></div>
-                <!-- Grid pattern overlay -->
                 <div class="absolute inset-0 opacity-[0.04]" style="background-image: linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px); background-size: 32px 32px;"></div>
 
                 <div class="relative z-10 px-8 py-10 md:px-14 md:py-14 flex flex-col md:flex-row items-center justify-between gap-8">
                     <div class="flex-1">
-                        <!-- TRUST BADGES -->
-                        <div class="flex items-center gap-3 mb-4 flex-wrap">
-                            <span class="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-blue-300 bg-blue-500/15 border border-blue-500/30 px-3 py-1.5 rounded-full">
-                                <i class="fas fa-shield-alt text-blue-400"></i> TERJAMIN
-                            </span>
-                            <span class="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-green-300 bg-green-500/15 border border-green-500/30 px-3 py-1.5 rounded-full">
-                                <i class="fas fa-check-circle text-green-400"></i> TRUSTED
-                            </span>
-                            <span class="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-yellow-300 bg-yellow-500/15 border border-yellow-500/30 px-3 py-1.5 rounded-full">
-                                <i class="fas fa-star text-yellow-400"></i> #1 MARKETPLACE
-                            </span>
-                        </div>
-
-                        <!-- STORE NAME -->
-                        <h1 class="text-3xl md:text-5xl font-extrabold font-syne leading-tight mb-1">
-                            XREZZKY
-                        </h1>
-                        <h2 class="text-xl md:text-3xl font-extrabold font-syne text-blue-400 mb-4">
-                            OFFICIAL STORE
-                        </h2>
-
-                        <!-- TAGLINE -->
-                        <p class="text-gray-300 text-sm md:text-base mb-6 max-w-md leading-relaxed">
-                            Platform jual-beli produk digital paling aman & terpercaya.<br>
-                            <span class="text-blue-300 font-semibold">Transaksi dijamin aman</span> · <span class="text-green-300 font-semibold">Respon cepat 24/7</span> · <span class="text-yellow-300 font-semibold">100% anti-tipu</span>
-                        </p>
-
-                        <!-- CTA BUTTONS -->
+                        <div id="heroBadges" class="flex items-center gap-3 mb-4 flex-wrap"></div>
+                        <h1 id="heroTitle1" class="text-3xl md:text-5xl font-extrabold font-syne leading-tight mb-1"></h1>
+                        <h2 id="heroTitle2" class="text-xl md:text-3xl font-extrabold font-syne text-blue-400 mb-4"></h2>
+                        <p id="heroTagline" class="text-gray-300 text-sm md:text-base mb-6 max-w-md leading-relaxed"></p>
                         <div class="flex gap-3 flex-wrap">
                             <button onclick="document.getElementById('mainProductGrid').scrollIntoView({behavior:'smooth'})"
                                 class="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold text-sm transition shadow-lg shadow-blue-900/40">
@@ -234,79 +207,26 @@
                             </button>
                         </div>
                     </div>
-
-                    <!-- RIGHT: STATS -->
-                    <div class="flex flex-row md:flex-col gap-3 shrink-0">
-                        <div class="bg-white/5 border border-white/10 backdrop-blur px-5 py-4 rounded-2xl text-center min-w-[100px]">
-                            <p class="text-2xl font-extrabold text-blue-400">500+</p>
-                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Produk</p>
-                        </div>
-                        <div class="bg-white/5 border border-white/10 backdrop-blur px-5 py-4 rounded-2xl text-center min-w-[100px]">
-                            <p class="text-2xl font-extrabold text-green-400">2K+</p>
-                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Pembeli</p>
-                        </div>
-                        <div class="bg-white/5 border border-white/10 backdrop-blur px-5 py-4 rounded-2xl text-center min-w-[100px]">
-                            <p class="text-2xl font-extrabold text-yellow-400">4.9★</p>
-                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Rating</p>
-                        </div>
-                    </div>
+                    <div class="flex flex-row md:flex-col gap-3 shrink-0" id="heroStats"></div>
                 </div>
             </div>
 
-            <!-- PROMO TICKER -->
-            <div class="relative overflow-hidden rounded-2xl mb-6 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-blue-600/20 border border-white/10 py-3 px-4">
+            <!-- PROMO TICKER — dynamic -->
+            <div id="promoTickerWrap" class="relative overflow-hidden rounded-2xl mb-6 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-blue-600/20 border border-white/10 py-3 px-4 hidden">
                 <div class="flex items-center gap-3">
                     <span class="shrink-0 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg">🔥 PROMO</span>
                     <div class="overflow-hidden flex-1">
-                        <div class="promo-ticker flex gap-10 whitespace-nowrap animate-[ticker_18s_linear_infinite]">
-                            <span class="text-sm font-semibold text-gray-200">✨ Flash Sale skin Mobile Legends hingga 50% OFF setiap Jumat</span>
-                            <span class="text-sm font-semibold text-gray-200">🎮 Gratis ongkir untuk pembelian pertama kamu</span>
-                            <span class="text-sm font-semibold text-gray-200">🔐 Semua transaksi dijamin aman & bergaransi</span>
-                            <span class="text-sm font-semibold text-gray-200">💎 Member Premium dapat akses early bird produk baru</span>
-                            <span class="text-sm font-semibold text-gray-200">✨ Flash Sale skin Mobile Legends hingga 50% OFF setiap Jumat</span>
-                        </div>
+                        <div id="promoTickerInner" class="promo-ticker flex gap-10 whitespace-nowrap"></div>
                     </div>
                 </div>
             </div>
 
             <!-- FITUR UNGGULAN -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-                <div class="glass-card p-4 flex items-center gap-3">
-                    <div class="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center shrink-0">
-                        <i class="fas fa-shield-alt text-blue-400"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs font-extrabold">Transaksi Aman</p>
-                        <p class="text-[10px] text-gray-500">Sistem escrow & garansi</p>
-                    </div>
-                </div>
-                <div class="glass-card p-4 flex items-center gap-3">
-                    <div class="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center shrink-0">
-                        <i class="fas fa-bolt text-green-400"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs font-extrabold">Proses Cepat</p>
-                        <p class="text-[10px] text-gray-500">Pengiriman instan</p>
-                    </div>
-                </div>
-                <div class="glass-card p-4 flex items-center gap-3">
-                    <div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center shrink-0">
-                        <i class="fas fa-headset text-purple-400"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs font-extrabold">CS 24/7</p>
-                        <p class="text-[10px] text-gray-500">Siap bantu kapanpun</p>
-                    </div>
-                </div>
-                <div class="glass-card p-4 flex items-center gap-3">
-                    <div class="w-10 h-10 bg-yellow-500/20 rounded-xl flex items-center justify-center shrink-0">
-                        <i class="fas fa-star text-yellow-400"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs font-extrabold">Produk Premium</p>
-                        <p class="text-[10px] text-gray-500">Kualitas terjamin</p>
-                    </div>
-                </div>
+            <div id="featuresGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+                <div class="glass-card p-4 flex items-center gap-3"><div class="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center shrink-0"><i class="fas fa-shield-alt text-blue-400"></i></div><div><p class="text-xs font-extrabold">Transaksi Aman</p><p class="text-[10px] text-gray-500">Sistem escrow & garansi</p></div></div>
+                <div class="glass-card p-4 flex items-center gap-3"><div class="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center shrink-0"><i class="fas fa-bolt text-green-400"></i></div><div><p class="text-xs font-extrabold">Proses Cepat</p><p class="text-[10px] text-gray-500">Pengiriman instan</p></div></div>
+                <div class="glass-card p-4 flex items-center gap-3"><div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center shrink-0"><i class="fas fa-headset text-purple-400"></i></div><div><p class="text-xs font-extrabold">CS 24/7</p><p class="text-[10px] text-gray-500">Siap bantu kapanpun</p></div></div>
+                <div class="glass-card p-4 flex items-center gap-3"><div class="w-10 h-10 bg-yellow-500/20 rounded-xl flex items-center justify-center shrink-0"><i class="fas fa-star text-yellow-400"></i></div><div><p class="text-xs font-extrabold">Produk Premium</p><p class="text-[10px] text-gray-500">Kualitas terjamin</p></div></div>
             </div>
 
             <!-- TOKO SECTION -->
@@ -575,13 +495,30 @@
                     </div>
 
                     <!-- REVIEWS SECTION -->
-                    <div id="detReviews" class="mb-6"></div>
+                    <div id="detReviews" class="mb-5"></div>
 
-                    <div class="flex gap-4">
-                        <button onclick="copyLink()" class="flex-none w-14 h-14 glass-card flex items-center justify-center hover:bg-white/10 transition" title="Salin Link">
-                            <i class="fas fa-share-alt"></i>
+                    <!-- QUANTITY SELECTOR -->
+                    <div id="qtySection" class="mb-4 p-4 glass-card rounded-2xl">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Jumlah Beli</p>
+                            <p class="text-xs text-gray-500">Maks: <span id="detMaxBuy" class="text-yellow-400 font-bold">-</span></p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button onclick="changeQty(-1)" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center font-bold transition text-lg">−</button>
+                            <input id="buyQty" type="number" value="1" min="1" class="custom-input !py-2 !px-3 text-center font-bold text-base" style="width:80px" onchange="clampQty()">
+                            <button onclick="changeQty(1)" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center font-bold transition text-lg">+</button>
+                            <div class="ml-auto text-right">
+                                <p class="text-[10px] text-gray-500">Total</p>
+                                <p id="totalPrice" class="font-extrabold text-blue-400">Rp 0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button onclick="copyLink()" class="flex-none w-12 h-12 glass-card flex items-center justify-center hover:bg-white/10 transition" title="Salin Link">
+                            <i class="fas fa-share-alt text-sm"></i>
                         </button>
-                        <button onclick="handleBuyNow()" class="flex-1 btn-primary !rounded-2xl flex items-center justify-center gap-3">
+                        <button onclick="handleBuyNow()" class="flex-1 btn-primary !rounded-2xl flex items-center justify-center gap-2 !py-3">
                             <i class="fas fa-shopping-cart"></i> Beli Sekarang
                         </button>
                     </div>
@@ -607,7 +544,8 @@
                 <div class="input-group">
                     <input type="password" id="authPass" class="custom-input" placeholder="Password">
                 </div>
-                <button onclick="processLogin()" class="btn-primary w-full mb-6">Masuk Sekarang</button>
+                <button onclick="processLogin()" class="btn-primary w-full mb-3">Masuk Sekarang</button>
+                <button onclick="processForgotPassword()" class="w-full text-center text-xs text-gray-500 hover:text-blue-400 transition py-2 cursor-pointer mb-3">Lupa password? Kirim reset via email</button>
                 <p class="text-center text-sm text-gray-500">
                     Belum punya akun? <span onclick="toggleAuthForm()" class="text-blue-400 font-bold cursor-pointer hover:underline">Daftar</span>
                 </p>
@@ -1201,40 +1139,31 @@
 </div>
 
 <script type="module">
-  // Import SDK yang lu butuhin dari CDN (Versi Modular/v10+)
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
-  import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-  import { getStorage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+        getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, 
+        onAuthStateChanged, signOut, updateProfile,
+        EmailAuthProvider, reauthenticateWithCredential, updatePassword,
+        sendPasswordResetEmail
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+        getDatabase, ref, onValue, set, get, push, update
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 
-  // Konfigurasi Firebase lu
-  const firebaseConfig = {
-    apiKey: "AIzaSyBDvrP9QU8ygAiyvYrjU3NrptjSIWvGjyg",
-    authDomain: "marketplace-c35db.firebaseapp.com",
-    databaseURL: "https://marketplace-c35db-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "marketplace-c35db",
-    storageBucket: "marketplace-c35db.firebasestorage.app",
-    messagingSenderId: "64170975843",
-    appId: "1:64170975843:web:12df9853f75dd68fe14e56",
-    measurementId: "G-NQLR7YDGLW"
-  };
+    const firebaseConfig = {
+        apiKey: "AIzaSyBDvrP9QU8ygAiyvYrjU3NrptjSIWvGjyg",
+        authDomain: "marketplace-c35db.firebaseapp.com",
+        databaseURL: "https://marketplace-c35db-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "marketplace-c35db",
+        storageBucket: "marketplace-c35db.firebasestorage.app",
+        messagingSenderId: "64170975843",
+        appId: "1:64170975843:web:12df9853f75dd68fe14e56"
+    };
 
-  // Inisialisasi Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  
-  // Inisialisasi Service lainnya (Database, Auth, dll)
-  const auth = getAuth(app);
-  const db = getDatabase(app);
-  const storage = getStorage(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
-  // Expose ke window biar fungsi lain di luar module tetap bisa akses (Opsional)
-  window.db = db;
-  window.auth = auth;
-  window.storage = storage;
-
-  console.log("Firebase Berhasil Terhubung! 🔥");
     // =========================================================
     //  GLOBAL STATE
     // =========================================================
@@ -1358,9 +1287,90 @@
         });
     };
 
+    window.processForgotPassword = async () => {
+        const email = document.getElementById('authEmail').value.trim();
+        if (!email) return showToast('Info', 'Isi email dulu sebelum reset password!', 'info');
+        try {
+            await sendPasswordResetEmail(auth, email);
+            showToast('Email Terkirim! 📧', 'Cek inbox kamu untuk link reset password', 'success');
+            closeModal('modalAuth');
+        } catch(e) {
+            showToast('Gagal', 'Email tidak ditemukan atau tidak valid', 'error');
+        }
+    };
+
     // =========================================================
-    //  PROFILE PAGE
+    //  SITE CONFIG — load dari Firebase → apply ke halaman
     // =========================================================
+    const applySiteConfig = (cfg) => {
+        if (!cfg) return;
+        // Hero Title
+        const t1 = document.getElementById('heroTitle1');
+        const t2 = document.getElementById('heroTitle2');
+        const tg = document.getElementById('heroTagline');
+        const bs = document.getElementById('heroBadges');
+        const hs = document.getElementById('heroStats');
+        const tw = document.getElementById('promoTickerWrap');
+        const ti = document.getElementById('promoTickerInner');
+
+        if (t1) t1.textContent = cfg.heroTitle1 || '';
+        if (t2) t2.textContent = cfg.heroTitle2 || '';
+        if (tg) tg.textContent = cfg.tagline || '';
+
+        // Badges
+        if (bs) {
+            const badgeColors = ['text-blue-300 bg-blue-500/15 border-blue-500/30','text-green-300 bg-green-500/15 border-green-500/30','text-yellow-300 bg-yellow-500/15 border-yellow-500/30'];
+            const icons = ['fa-shield-alt','fa-check-circle','fa-star'];
+            const badges = cfg.trustBadges || [];
+            bs.innerHTML = badges.map((b,i) => `<span class="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest ${badgeColors[i%3]} border px-3 py-1.5 rounded-full"><i class="fas ${icons[i%3]}"></i> ${b}</span>`).join('');
+        }
+
+        // Stats
+        const stats = [
+            {n:cfg.stat1n, l:cfg.stat1l, c:'text-blue-400'},
+            {n:cfg.stat2n, l:cfg.stat2l, c:'text-green-400'},
+            {n:cfg.stat3n, l:cfg.stat3l, c:'text-yellow-400'},
+        ];
+        if (hs) hs.innerHTML = stats.filter(s=>s.n).map(s=>`<div class="bg-white/5 border border-white/10 backdrop-blur px-5 py-4 rounded-2xl text-center min-w-[100px]"><p class="text-2xl font-extrabold ${s.c}">${s.n}</p><p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">${s.l||''}</p></div>`).join('');
+
+        // Ticker
+        const items = cfg.tickerItems || [];
+        if (ti && items.length > 0) {
+            // Duplicate for seamless loop
+            const doubled = [...items, ...items];
+            ti.innerHTML = doubled.map(t => `<span class="text-sm font-semibold text-gray-200">${t}</span>`).join('');
+            tw?.classList.remove('hidden');
+        } else {
+            tw?.classList.add('hidden');
+        }
+
+        // Features
+        const features = cfg.features || [];
+        const featEl = document.getElementById('featuresGrid');
+        if (featEl && features.length > 0) {
+            featEl.innerHTML = features.map(f => `
+                <div class="glass-card p-4 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-${f.color||'blue'}-500/20 rounded-xl flex items-center justify-center shrink-0"><i class="fas ${f.icon||'fa-star'} text-${f.color||'blue'}-400"></i></div>
+                    <div><p class="text-xs font-extrabold">${f.title||''}</p><p class="text-[10px] text-gray-500">${f.desc||''}</p></div>
+                </div>`).join('');
+        }
+
+        // Categories filter
+        const catData = cfg.categories || [];
+        const catFilter = document.getElementById('categoryFilter');
+        if (catFilter && catData.length > 0) {
+            const existing = catFilter.querySelector('.category-btn[data-cat="all"]');
+            // Remove non-all buttons
+            catFilter.querySelectorAll('.category-btn:not([data-cat="all"])').forEach(b=>b.remove());
+            catData.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'flex-none px-6 py-3 glass-card text-sm font-bold cursor-pointer category-btn';
+                div.dataset.cat = c;
+                div.textContent = c;
+                catFilter.appendChild(div);
+            });
+        }
+    };
     const refreshProfilePage = () => {
         const notLogged = document.getElementById('profileNotLoggedIn');
         const logged    = document.getElementById('profileLoggedIn');
@@ -1560,7 +1570,7 @@
         document.getElementById('detStock').textContent  = product.stock ?? '-';
         document.getElementById('detRatingDisplay').innerHTML = makeStarsHtml(product.rating, product.ratingCount);
 
-        // Seller info — cari dari allSellers
+        // Seller info
         const seller = allSellers.find(s => s.uid === product.sellerId);
         const sellerName = seller?.ownerName || product.sellerName || 'XREZZKY Official';
         const storeName  = seller?.storeName  || product.storeName  || '';
@@ -1568,10 +1578,48 @@
         document.getElementById('detStoreName').textContent    = storeName ? `🏪 ${storeName}` : '';
         document.getElementById('detSellerAvatar').textContent = (storeName || sellerName).charAt(0).toUpperCase();
 
+        // Quantity controls
+        const stock   = Number(product.stock || 0);
+        const maxBuy  = product.maxBuy ? Math.min(Number(product.maxBuy), stock) : stock;
+        const qtyEl   = document.getElementById('buyQty');
+        const maxEl   = document.getElementById('detMaxBuy');
+        const totEl   = document.getElementById('totalPrice');
+        if (qtyEl)  { qtyEl.value = stock > 0 ? 1 : 0; qtyEl.max = maxBuy; }
+        if (maxEl)  maxEl.textContent = maxBuy > 0 ? maxBuy : 'Habis';
+        if (totEl)  totEl.textContent = `Rp ${Number(product.price||0).toLocaleString('id-ID')}`;
+
+        // Hide qty section if out of stock
+        const qtySection = document.getElementById('qtySection');
+        if (qtySection) qtySection.style.opacity = stock <= 0 ? '0.5' : '1';
+
         document.getElementById('detReviews').innerHTML = `<p class="text-xs text-gray-500">Memuat ulasan...</p>`;
         loadProductReviews(product.id);
 
         openModal('modalDetail');
+    };
+
+    window.changeQty = (delta) => {
+        const el = document.getElementById('buyQty');
+        if (!el || !selectedProduct) return;
+        const stock  = Number(selectedProduct.stock || 0);
+        const maxBuy = selectedProduct.maxBuy ? Math.min(Number(selectedProduct.maxBuy), stock) : stock;
+        let val = parseInt(el.value) + delta;
+        val = Math.max(1, Math.min(val, maxBuy));
+        el.value = val;
+        const tot = document.getElementById('totalPrice');
+        if (tot) tot.textContent = `Rp ${(Number(selectedProduct.price||0) * val).toLocaleString('id-ID')}`;
+    };
+
+    window.clampQty = () => {
+        const el = document.getElementById('buyQty');
+        if (!el || !selectedProduct) return;
+        const stock  = Number(selectedProduct.stock || 0);
+        const maxBuy = selectedProduct.maxBuy ? Math.min(Number(selectedProduct.maxBuy), stock) : stock;
+        let val = parseInt(el.value) || 1;
+        val = Math.max(1, Math.min(val, maxBuy));
+        el.value = val;
+        const tot = document.getElementById('totalPrice');
+        if (tot) tot.textContent = `Rp ${(Number(selectedProduct.price||0) * val).toLocaleString('id-ID')}`;
     };
 
     // Buka toko dari detail produk
@@ -1582,9 +1630,9 @@
     };
 
     // =========================================================
-    //  BUY NOW (WhatsApp redirect)
+    //  BUY NOW — quantity + stock reduce + order create
     // =========================================================
-    window.handleBuyNow = () => {
+    window.handleBuyNow = async () => {
         if (!currentUser) {
             closeModal('modalDetail');
             openModal('modalAuth');
@@ -1593,22 +1641,75 @@
         }
         if (!selectedProduct) return;
 
-        // Ambil nomor WA dari seller jika ada, fallback ke admin
-        const seller = allSellers.find(s => s.uid === selectedProduct.sellerId);
-        const waNumber = (seller?.whatsapp || '6281234567890').replace(/\D/g, '');
-        const buyerWa  = currentUserData?.waNumber || '-';
+        const stock = Number(selectedProduct.stock || 0);
+        if (stock <= 0) return showToast('Stok Habis', 'Produk ini sedang tidak tersedia', 'error');
 
-        const msg = encodeURIComponent(
-            `Halo ${seller?.storeName || 'XREZZKY STORE'}, saya ingin membeli:\n\n` +
-            `*Produk:* ${selectedProduct.name}\n` +
-            `*Harga:* Rp ${Number(selectedProduct.price || 0).toLocaleString('id-ID')}\n` +
-            `*ID Produk:* ${selectedProduct.id}\n\n` +
-            `*Pembeli:* ${currentUser.displayName}\n` +
-            `*Email:* ${currentUser.email}\n` +
-            `*No WA Pembeli:* ${buyerWa}\n\n` +
-            `Mohon instruksi selanjutnya untuk pembayaran.`
-        );
-        window.open(`https://wa.me/${waNumber}?text=${msg}`, '_blank');
+        const qty     = parseInt(document.getElementById('buyQty')?.value || 1);
+        const maxBuy  = selectedProduct.maxBuy ? Math.min(Number(selectedProduct.maxBuy), stock) : stock;
+
+        if (qty < 1)       return showToast('Error', 'Jumlah minimal 1!', 'error');
+        if (qty > maxBuy)  return showToast('Error', `Maksimal beli ${maxBuy} unit!`, 'error');
+        if (qty > stock)   return showToast('Error', 'Stok tidak cukup!', 'error');
+
+        const totalHarga = Number(selectedProduct.price || 0) * qty;
+        const seller     = allSellers.find(s => s.uid === selectedProduct.sellerId);
+        const waNumber   = (seller?.whatsapp || currentUserData?.adminWa || '6281234567890').replace(/\D/g, '');
+        const buyerWa    = currentUserData?.waNumber || '-';
+
+        try {
+            // 1. Buat order di Firebase status 'confirm'
+            const newOrderRef = await push(ref(db, `orders/${currentUser.uid}`), {
+                productId:   selectedProduct.id,
+                productName: selectedProduct.name,
+                productDesc: selectedProduct.description || '-',
+                category:    selectedProduct.category || '-',
+                qty,
+                unitPrice:   Number(selectedProduct.price || 0),
+                totalPrice:  totalHarga,
+                storeName:   seller?.storeName || 'XREZZKY Store',
+                sellerId:    selectedProduct.sellerId || '',
+                buyerName:   currentUser.displayName,
+                buyerEmail:  currentUser.email,
+                buyerWa,
+                status:      'confirm',
+                rated:       false,
+                createdAt:   Date.now()
+            });
+            const orderId = newOrderRef.key;
+
+            // 2. Kurangi stok produk
+            const newStock = Math.max(0, stock - qty);
+            await update(ref(db, `products/${selectedProduct.id}`), { stock: newStock });
+
+            // 3. WA message ke seller
+            const msg = encodeURIComponent(
+                `Halo ${seller?.storeName || 'XREZZKY STORE'},\n\n` +
+                `📦 *PESANAN BARU MASUK!*\n\n` +
+                `🆔 ID Pesanan: *${orderId.slice(-8).toUpperCase()}*\n` +
+                `📦 Nama Produk: *${selectedProduct.name}*\n` +
+                `📝 Deskripsi: ${selectedProduct.description || '-'}\n` +
+                `🏷️ Kategori: ${selectedProduct.category || '-'}\n` +
+                `💰 Harga Satuan: Rp ${Number(selectedProduct.price || 0).toLocaleString('id-ID')}\n` +
+                `🔢 Jumlah: ${qty} unit\n` +
+                `💳 Total: *Rp ${totalHarga.toLocaleString('id-ID')}*\n` +
+                `🆔 ID Produk: ${selectedProduct.id}\n\n` +
+                `👤 *Data Pembeli*\n` +
+                `Nama: ${currentUser.displayName}\n` +
+                `Email: ${currentUser.email}\n` +
+                `No WA: ${buyerWa}\n\n` +
+                `Silakan konfirmasi pesanan ini di Seller Dashboard kamu.`
+            );
+            window.open(`https://wa.me/${waNumber}?text=${msg}`, '_blank');
+
+            closeModal('modalDetail');
+            showToast('Pesanan Dibuat! 🎉', `${qty}x ${selectedProduct.name} — tunggu konfirmasi seller`, 'success');
+
+            // Update local stock display
+            selectedProduct.stock = newStock;
+
+        } catch(e) {
+            showToast('Gagal', e.message, 'error');
+        }
     };
 
     // =========================================================
@@ -1871,59 +1972,89 @@
     // =========================================================
     //  ORDERS
     // =========================================================
-    const drawOrders = async () => {
+    let ordersUnsubscribe = null;
+    const drawOrders = () => {
         const el = document.getElementById('ordersList');
         if (!el) return;
         if (!currentUser) {
             el.innerHTML = `<div class="glass-card p-12 text-center text-gray-500"><i class="fas fa-lock text-4xl mb-4 opacity-30"></i><p class="font-bold">Login dulu untuk lihat pesanan</p><button onclick="openModal('modalAuth')" class="btn-primary !inline-block mt-4">Login</button></div>`;
             return;
         }
-        el.innerHTML = `<div class="text-center py-12"><div class="spinner w-10 h-10 mx-auto mb-3"></div><p class="text-sm text-gray-500">Memuat pesanan...</p></div>`;
-        try {
-            const snap = await get(ref(db, `orders/${currentUser.uid}`));
+        if (ordersUnsubscribe) { ordersUnsubscribe(); ordersUnsubscribe = null; }
+        el.innerHTML = `<div class="text-center py-8"><div class="spinner w-8 h-8 mx-auto mb-2"></div><p class="text-sm text-gray-500">Memuat pesanan...</p></div>`;
+        ordersUnsubscribe = onValue(ref(db, `orders/${currentUser.uid}`), (snap) => {
             if (!snap.exists()) {
-                el.innerHTML = `<div class="glass-card p-12 text-center text-gray-500"><i class="fas fa-shopping-bag text-4xl mb-4 opacity-30"></i><p class="font-bold">Belum ada pesanan</p><p class="text-sm mt-1">Pesanan muncul di sini setelah admin konfirmasi transaksimu.</p><button onclick="navigate('home')" class="btn-primary !inline-block mt-4">Mulai Belanja</button></div>`;
+                el.innerHTML = `<div class="glass-card p-12 text-center text-gray-500"><i class="fas fa-shopping-bag text-4xl mb-4 opacity-30"></i><p class="font-bold">Belum ada pesanan</p><p class="text-sm mt-1">Pesanan muncul realtime setelah kamu beli.</p><button onclick="navigate('home')" class="btn-primary !inline-block mt-4">Mulai Belanja</button></div>`;
                 return;
             }
             const orders = snap.val();
             el.innerHTML = '';
             const statusMap = {
-                pending:    { l:'Menunggu Konfirmasi', c:'text-yellow-400 bg-yellow-500/10 border-yellow-500/30' },
-                processing: { l:'Sedang Diproses',     c:'text-blue-400 bg-blue-500/10 border-blue-500/30' },
-                completed:  { l:'Selesai',              c:'text-green-400 bg-green-500/10 border-green-500/30' },
-                cancelled:  { l:'Dibatalkan',           c:'text-red-400 bg-red-500/10 border-red-500/30' },
+                confirm:    { l:'Menunggu Konfirmasi Seller', c:'text-yellow-400 bg-yellow-500/10 border-yellow-500/30', icon:'fa-clock' },
+                pending:    { l:'Pending Pembayaran',         c:'text-purple-400 bg-purple-500/10 border-purple-500/30', icon:'fa-credit-card' },
+                processing: { l:'Sedang Diproses',            c:'text-blue-400 bg-blue-500/10 border-blue-500/30',       icon:'fa-spinner' },
+                completed:  { l:'Selesai',                    c:'text-green-400 bg-green-500/10 border-green-500/30',    icon:'fa-check-circle' },
+                cancelled:  { l:'Ditolak / Batal',            c:'text-red-400 bg-red-500/10 border-red-500/30',          icon:'fa-times-circle' },
             };
             Object.keys(orders).sort((a,b) => orders[b].createdAt - orders[a].createdAt).forEach(oid => {
                 const o = orders[oid];
-                const st = statusMap[o.status] || statusMap.pending;
-                const dt = new Date(o.createdAt).toLocaleDateString('id-ID', {day:'numeric',month:'short',year:'numeric'});
+                const st = statusMap[o.status] || statusMap.confirm;
+                const dt = o.createdAt ? new Date(o.createdAt).toLocaleString('id-ID',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '-';
+                const fullId = oid.slice(-8).toUpperCase();
                 const div = document.createElement('div');
                 div.className = 'glass-card p-5 mb-3 rounded-2xl';
                 div.innerHTML = `
                     <div class="flex items-start justify-between mb-3 gap-3">
                         <div class="flex-1 min-w-0">
                             <p class="font-extrabold font-syne text-sm line-clamp-1">${o.productName || '-'}</p>
-                            <p class="text-[10px] text-gray-500">${dt} · ID: ${oid.slice(-6).toUpperCase()}</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <p class="text-[10px] text-gray-500">${dt}</p>
+                                <button onclick="copyOrderId('${fullId}')" class="text-[10px] text-blue-400 font-bold flex items-center gap-1 hover:text-blue-300 transition">
+                                    <i class="fas fa-copy"></i> ${fullId}
+                                </button>
+                            </div>
                         </div>
-                        <span class="text-[10px] font-black px-2.5 py-1 rounded-full border shrink-0 ${st.c}">${st.l}</span>
+                        <span class="text-[10px] font-black px-2.5 py-1 rounded-full border shrink-0 ${st.c} flex items-center gap-1">
+                            <i class="fas ${st.icon} text-[9px]"></i> ${st.l}
+                        </span>
+                    </div>
+                    ${o.cancelReason ? `<div class="bg-red-500/10 border border-red-500/20 rounded-xl p-3 mb-3"><p class="text-[10px] text-red-400 font-bold uppercase mb-1">Alasan Penolakan</p><p class="text-xs text-gray-300">${o.cancelReason}</p></div>` : ''}
+                    <div class="bg-white/3 rounded-xl p-3 mb-3 space-y-1.5">
+                        <div class="flex justify-between text-xs"><span class="text-gray-500">Produk</span><span class="font-semibold line-clamp-1 text-right">${o.productName||'-'} ${o.qty>1?`(${o.qty}x)`:''}</span></div>
+                        <div class="flex justify-between text-xs"><span class="text-gray-500">Toko</span><span class="font-semibold">${o.storeName||'-'}</span></div>
+                        <div class="flex justify-between text-xs"><span class="text-gray-500">Total</span><span class="font-bold text-blue-400">Rp ${Number(o.totalPrice||0).toLocaleString('id-ID')}</span></div>
+                        ${o.adminNote?`<div class="flex justify-between text-xs"><span class="text-gray-500">Catatan Admin</span><span class="text-yellow-400">${o.adminNote}</span></div>`:''}
                     </div>
                     <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-bold text-blue-400">Rp ${Number(o.totalPrice||0).toLocaleString('id-ID')}</p>
-                            <p class="text-[10px] text-gray-500">${o.storeName || 'XREZZKY Store'}</p>
-                        </div>
+                        <button onclick="copyOrderDetail('${oid}')" class="text-xs text-gray-500 hover:text-white transition flex items-center gap-1"><i class="fas fa-copy"></i> Salin Detail</button>
                         ${o.status === 'completed' && !o.rated
                             ? `<button onclick="openRatingModal('${oid}','${o.productId}','${(o.productName||'').replace(/'/g,"\\'")}');" class="btn-primary !py-2 !px-4 !text-xs !rounded-xl flex items-center gap-1 !w-auto"><i class="fas fa-star"></i> Beri Rating</button>`
                             : o.status === 'completed' && o.rated
                             ? `<div class="flex items-center gap-1 text-yellow-400 text-xs font-bold"><i class="fas fa-star"></i> Sudah Dirating</div>`
+                            : o.status === 'confirm'
+                            ? `<p class="text-[10px] text-yellow-400 italic">Menunggu konfirmasi seller...</p>`
                             : ''
                         }
                     </div>`;
                 el.appendChild(div);
             });
-        } catch (e) {
-            el.innerHTML = `<div class="glass-card p-12 text-center text-gray-500"><p class="font-bold">Gagal memuat pesanan</p></div>`;
-        }
+        }, (err) => {
+            el.innerHTML = `<div class="glass-card p-10 text-center text-gray-500"><p class="font-bold">Gagal memuat</p><p class="text-xs mt-1">${err?.message||''}</p></div>`;
+        });
+    };
+
+    window.copyOrderId = (id) => {
+        navigator.clipboard?.writeText(id).then(()=>showToast('Disalin! 🔗', `ID Pesanan ${id} disalin`,'success'));
+    };
+
+    window.copyOrderDetail = (oid) => {
+        get(ref(db,`orders/${currentUser.uid}/${oid}`)).then(snap=>{
+            if(!snap.exists()) return;
+            const o=snap.val();
+            const dtFull=o.createdAt?new Date(o.createdAt).toLocaleString('id-ID',{weekday:'long',day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}):'-';
+            const text=`=== DETAIL PESANAN ===\nID Pesanan: ${oid.slice(-8).toUpperCase()}\nWaktu: ${dtFull}\nProduk: ${o.productName||'-'} ${o.qty>1?`(${o.qty}x)`:''}\nToko: ${o.storeName||'-'}\nUnit Price: Rp ${Number(o.unitPrice||o.totalPrice||0).toLocaleString('id-ID')}\nTotal: Rp ${Number(o.totalPrice||0).toLocaleString('id-ID')}\nStatus: ${o.status||'-'}\nID Produk: ${o.productId||'-'}\n====================`;
+            navigator.clipboard?.writeText(text).then(()=>showToast('Disalin!','Detail pesanan berhasil disalin','success'));
+        });
     };
 
     // =========================================================
@@ -1948,6 +2079,57 @@
         } else {
             authHeader.innerHTML = `<button onclick="openModal('modalAuth')" class="btn-primary !py-2 !px-6 !text-sm"><i class="fas fa-sign-in-alt mr-2"></i>Masuk</button>`;
         }
+    };
+
+    // =========================================================
+    //  BANNED USER SCREEN
+    // =========================================================
+    const showBannedScreen = (reason) => {
+        // Hide all content
+        document.querySelector('header')?.style.setProperty('display','none');
+        document.querySelector('main')?.style.setProperty('display','none');
+        document.querySelector('nav.fixed')?.style.setProperty('display','none');
+        document.getElementById('loader')?.remove();
+
+        // Inject banned overlay
+        const bannedEl = document.createElement('div');
+        bannedEl.id = 'bannedScreen';
+        bannedEl.style.cssText = 'position:fixed;inset:0;background:#05080f;z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;';
+        bannedEl.innerHTML = `
+            <div style="max-width:400px;width:100%">
+                <!-- ICON -->
+                <div style="width:80px;height:80px;background:rgba(239,68,68,.15);border:2px solid rgba(239,68,68,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px">
+                    <i class="fas fa-ban" style="font-size:2rem;color:#ef4444"></i>
+                </div>
+                <!-- TITLE -->
+                <h1 style="font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:800;color:#f1f5f9;margin-bottom:8px">Akun Dibanned</h1>
+                <p style="color:#64748b;font-size:.875rem;margin-bottom:24px">Akun kamu telah dibanned oleh admin XREZZKY OFFICIAL STORE.</p>
+                <!-- REASON CARD -->
+                <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:16px;padding:20px;margin-bottom:24px;text-align:left">
+                    <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#ef4444;margin-bottom:8px">⚠️ Alasan Banned</p>
+                    <p style="font-size:.875rem;color:#fca5a5;line-height:1.6">${reason}</p>
+                </div>
+                <!-- INFO -->
+                <div style="background:rgba(15,23,42,.8);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:16px;margin-bottom:24px;text-align:left">
+                    <p style="font-size:11px;color:#475569;line-height:1.6">
+                        Jika kamu merasa ini adalah kesalahan, silakan hubungi admin:<br>
+                        <strong style="color:#93c5fd">📧 xrezzkystore.idn@gmail.com</strong><br>
+                        <strong style="color:#93c5fd">📱 088293064112</strong>
+                    </p>
+                </div>
+                <!-- LOGOUT BUTTON -->
+                <button onclick="import('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js').then(m=>m.getAuth&&m.signOut(m.getAuth())).catch(()=>{}).finally(()=>location.reload())"
+                    style="width:100%;padding:14px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;border:none;border-radius:12px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:.875rem;display:flex;align-items:center;justify-content:center;gap:8px">
+                    <i class="fas fa-sign-out-alt"></i> Keluar dari Akun
+                </button>
+                <p style="font-size:11px;color:#334155;margin-top:12px">XREZZKY OFFICIAL STORE</p>
+            </div>`;
+        document.body.appendChild(bannedEl);
+
+        // Override logout button to use proper signOut
+        bannedEl.querySelector('button').onclick = () => {
+            signOut(auth).then(() => location.reload());
+        };
     };
 
     // =========================================================
@@ -2002,6 +2184,13 @@
                     currentUserData = snapU.exists() ? snapU.val() : { role: 'buyer' };
                 } catch { currentUserData = { role: 'buyer' }; }
 
+                // ─── BANNED CHECK ───────────────────────────────────
+                if (currentUserData?.banned === true) {
+                    showBannedScreen(currentUserData.bannedReason || 'Tidak ada keterangan.');
+                    return;
+                }
+                // ────────────────────────────────────────────────────
+
                 const role = currentUserData?.role || 'buyer';
                 const isAdmin = role === 'admin';
                 const isSeller = role === 'seller';
@@ -2021,20 +2210,73 @@
                     badgeContainer.innerHTML = `<span class="px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${badgeStyle}">${roleLabel} Tier</span>`;
                 }
 
-                // Seller banner / Admin dashboard button
+                // Seller banner / Admin dashboard — support dual role
                 if (isAdmin && sellerBanner) {
-                    sellerBanner.className = 'w-full bg-gradient-to-r from-blue-700 to-indigo-900 p-5 rounded-[24px] flex items-center justify-between cursor-pointer hover:scale-[1.01] transition shadow-xl border border-white/10 mb-5';
-                    sellerBanner.onclick = () => window.location.href = 'admin-panel.html';
-                    sellerBanner.innerHTML = `
-                        <div class="flex items-center gap-4">
-                            <div class="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center"><i class="fas fa-user-shield text-white text-lg"></i></div>
-                            <div>
-                                <p class="text-[10px] font-bold text-blue-200 uppercase tracking-widest">Owner Access</p>
-                                <h3 class="text-base font-black text-white">DASHBOARD ADMIN</h3>
+                    // Cek apakah admin sudah daftar seller
+                    const sellerSnap = await get(ref(db, `seller_applications/${user.uid}`));
+                    const adminHasStore = sellerSnap.exists() && sellerSnap.val().status === 'approved';
+                    const adminPending  = sellerSnap.exists() && sellerSnap.val().status === 'pending';
+                    const adminStoreName= sellerSnap.exists() ? sellerSnap.val().storeName : null;
+
+                    sellerBanner.className = 'space-y-3 mb-5';
+
+                    // Selalu tampilkan admin panel button
+                    let bannerHTML = `
+                        <div class="w-full bg-gradient-to-r from-blue-700 to-indigo-900 p-5 rounded-[24px] flex items-center justify-between cursor-pointer hover:scale-[1.01] transition shadow-xl border border-white/10"
+                             onclick="window.location.href='admin-panel.html'">
+                            <div class="flex items-center gap-4">
+                                <div class="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center"><i class="fas fa-user-shield text-white text-lg"></i></div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-blue-200 uppercase tracking-widest">Owner Access</p>
+                                    <h3 class="text-base font-black text-white">DASHBOARD ADMIN</h3>
+                                </div>
                             </div>
-                        </div>
-                        <div class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center border border-white/20"><i class="fas fa-chevron-right text-white text-sm"></i></div>`;
-                    if (homeSellerCta) homeSellerCta.classList.add('hidden');
+                            <div class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center border border-white/20"><i class="fas fa-chevron-right text-white text-sm"></i></div>
+                        </div>`;
+
+                    // Kalau sudah punya toko — tampilkan seller dashboard juga
+                    if (adminHasStore) {
+                        bannerHTML += `
+                        <div class="w-full bg-gradient-to-r from-green-800/60 to-blue-800/40 p-5 rounded-[24px] flex items-center justify-between cursor-pointer hover:scale-[1.01] transition border border-green-500/30"
+                             onclick="window.location.href='seller-dashboard.html'">
+                            <div class="flex items-center gap-4">
+                                <div class="w-11 h-11 bg-green-500/30 rounded-xl flex items-center justify-center"><i class="fas fa-store text-green-300 text-lg"></i></div>
+                                <div>
+                                    <p class="text-[10px] font-black uppercase text-green-300">✅ Toko Aktif</p>
+                                    <h3 class="text-base font-black text-white">${adminStoreName || 'Toko Admin'}</h3>
+                                </div>
+                            </div>
+                            <span class="bg-green-600 text-white px-4 py-2 rounded-xl text-xs font-bold">Kelola →</span>
+                        </div>`;
+                        if (homeSellerCta) homeSellerCta.classList.add('hidden');
+                    } else if (adminPending) {
+                        // Admin sudah daftar tapi belum disetujui
+                        bannerHTML += `
+                        <div class="w-full bg-gradient-to-r from-yellow-900/40 to-orange-900/30 p-4 rounded-[20px] flex items-center gap-4 border border-yellow-500/30">
+                            <div class="w-10 h-10 bg-yellow-500/20 rounded-xl flex items-center justify-center shrink-0"><i class="fas fa-clock text-yellow-300 animate-pulse"></i></div>
+                            <div><p class="text-[10px] font-black uppercase text-yellow-300">⏳ Toko Pending Verifikasi</p><p class="text-sm font-bold text-white">Aplikasi sedang direview admin lain</p></div>
+                        </div>`;
+                        if (homeSellerCta) homeSellerCta.classList.add('hidden');
+                    } else {
+                        // Admin BELUM daftar seller — tampilkan promosi untuk daftar
+                        bannerHTML += `
+                        <div class="w-full bg-gradient-to-r from-purple-900/50 to-blue-900/40 p-5 rounded-[24px] flex items-center justify-between cursor-pointer hover:scale-[1.01] transition border border-purple-500/30 group"
+                             onclick="openModal('modalBecomeSeller')">
+                            <div class="flex items-center gap-4">
+                                <div class="w-11 h-11 bg-purple-500/30 rounded-xl flex items-center justify-center group-hover:bg-purple-500/40 transition"><i class="fas fa-store-alt text-purple-300 text-lg"></i></div>
+                                <div>
+                                    <p class="text-[10px] font-black uppercase text-purple-300 mb-0.5">🎉 Buka Toko Kamu</p>
+                                    <h3 class="text-sm font-black text-white">Admin bisa punya toko sendiri!</h3>
+                                    <p class="text-[10px] text-gray-400">Daftar seller → punya seller dashboard + tetap jadi admin</p>
+                                </div>
+                            </div>
+                            <span class="bg-purple-600 text-white px-3 py-2 rounded-xl text-xs font-bold shrink-0">Daftar →</span>
+                        </div>`;
+                        // Juga tampilkan home seller CTA
+                        if (homeSellerCta) homeSellerCta.classList.remove('hidden');
+                    }
+                    sellerBanner.innerHTML = bannerHTML;
+
                 } else if (isSeller && sellerBanner) {
                     sellerBanner.className = 'w-full bg-gradient-to-r from-green-800/60 to-blue-800/40 p-5 rounded-[24px] flex items-center justify-between cursor-pointer hover:scale-[1.01] transition border border-green-500/30 mb-5';
                     sellerBanner.onclick = () => window.location.href = 'seller-dashboard.html';
@@ -2084,12 +2326,20 @@
             }
         });
 
+        // Load site config realtime
+        onValue(ref(db, 'admin/config/site'), (snap) => {
+            applySiteConfig(snap.val() || {});
+        });
+
         // Load products realtime
         onValue(ref(db, 'products'), (snapshot) => {
             clearTimeout(loaderTimeout);
             allProducts = [];
             const data = snapshot.val();
-            if (data) Object.keys(data).forEach(key => allProducts.push({ id: key, ...data[key] }));
+            if (data) Object.keys(data).forEach(key => {
+                    // Skip produk yang disembunyikan (seller banned)
+                    if (!data[key].hidden) allProducts.push({ id: key, ...data[key] });
+                });
             applyFilters();
             const urlParams = new URLSearchParams(window.location.search);
             const productId = urlParams.get('id');
@@ -2248,4 +2498,4 @@
     initApp();
 </script>
 </body>
-</html>
+</html> 
